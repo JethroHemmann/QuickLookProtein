@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="3Dmol.js"></script>
+    </head>
+    <body>
+        <div style="height: 100vh; width: 100%; position: relative;" id="3dviewer"></div>
+        <script>
+            $(function() {
+                let element = $('#3dviewer');
+                let config = { };
+                let viewer = $3Dmol.createViewer( element, config );
+                
+                let data = `{PDB_DATA}`;
+                
+                viewer.setBackgroundColor(0x{BG_COLOR}, {BG_ALPHA});
+                viewer.addModel( data, "pdb" );
+                viewer.setStyle({{ATOM_STYLE}: {color: 'spectrum'}});
+                viewer.zoomTo();
+                viewer.render();
+                viewer.spin("y", {ROTATION_SPEED})
+            });
+        </script>
+    </body>
+</html>
+
