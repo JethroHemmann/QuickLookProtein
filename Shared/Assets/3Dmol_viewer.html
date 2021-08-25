@@ -15,7 +15,7 @@
                 let data = `{PDB_DATA}`;
                 
                 viewer.setBackgroundColor(0x{BG_COLOR}, {BG_ALPHA});
-                viewer.addModel( data, "pdb" );
+                viewer.addModel(data, "{DATA_FORMAT}");
                 viewer.setStyle({{ATOM_STYLE}: {color: 'spectrum'}});
                 viewer.zoomTo();
                 viewer.render();

@@ -70,7 +70,10 @@ class PreviewViewController: NSViewController, QLPreviewingController, WKNavigat
         // Quick Look will display a loading spinner while the completion handler is not called.
                 
         let htmlPath = Bundle.main.path(forResource: "3Dmol_viewer", ofType: "html")
-        let html = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: url.path, atomStyle: atomStyle, rotationSpeed: rotationSpeed, bgColor: bgColor)
+        let fileExtension = url.pathExtension
+        
+        let html = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: url.path, dataFormat: fileExtension, atomStyle: atomStyle, rotationSpeed: rotationSpeed, bgColor: bgColor)
+        
         let baseUrl = URL(fileURLWithPath: htmlPath!)
         self.webView?.loadHTMLString(html, baseURL: baseUrl)
         

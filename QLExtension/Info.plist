@@ -29,6 +29,7 @@
 			<key>QLSupportedContentTypes</key>
 			<array>
 				<string>org.libreoffice.pdb-document</string>
+				<string>dyn.ah62d4rv4ge80g4pg</string>
 			</array>
 			<key>QLSupportsSearchableItems</key>
 			<false/>

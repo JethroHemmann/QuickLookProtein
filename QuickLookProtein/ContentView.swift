@@ -26,7 +26,7 @@ struct ContentView: View {
         let htmlPath = Bundle.main.path(forResource: "3Dmol_viewer", ofType: "html")
         let pdbPath = Bundle.main.path(forResource: "6S6Y_1dimer", ofType: "pdb")
         
-        let html = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: pdbPath!, atomStyle: atomStyle, rotationSpeed: rotationSpeed, bgColor: bgColor)
+        let html = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: pdbPath!, dataFormat: "pdb", atomStyle: atomStyle, rotationSpeed: rotationSpeed, bgColor: bgColor)
         let baseUrl = URL(fileURLWithPath: htmlPath!)
         
         HStack {
