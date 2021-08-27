@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4B0FDF9126C9A38000C94DDE"
-               BuildableName = "QLExtension.appex"
-               BlueprintName = "QLExtension"
+               BuildableName = "QuickLookProtein Extension.appex"
+               BlueprintName = "QuickLookProtein Extension"
                ReferencedContainer = "container:QuickLookProtein.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

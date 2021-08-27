@@ -15,7 +15,7 @@
 		4B0FDF9526C9A38000C94DDE /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B0FDF9426C9A38000C94DDE /* Quartz.framework */; };
 		4B0FDF9826C9A38000C94DDE /* PreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B0FDF9726C9A38000C94DDE /* PreviewViewController.swift */; };
 		4B0FDF9B26C9A38000C94DDE /* PreviewViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4B0FDF9926C9A38000C94DDE /* PreviewViewController.xib */; };
-		4B0FDFA026C9A38000C94DDE /* QLExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4B0FDF9226C9A38000C94DDE /* QLExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4B0FDFA026C9A38000C94DDE /* QuickLookProtein Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4B0FDF9226C9A38000C94DDE /* QuickLookProtein Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4B0FDFA926C9A45B00C94DDE /* 3Dmol_viewer.html in Resources */ = {isa = PBXBuildFile; fileRef = 4B0FDFA826C9A45B00C94DDE /* 3Dmol_viewer.html */; };
 		4B20116126D2692200B77CEF /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B20116026D2692200B77CEF /* Settings.swift */; };
 		4B20116226D2692200B77CEF /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B20116026D2692200B77CEF /* Settings.swift */; };
@@ -43,7 +43,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4B0FDFA026C9A38000C94DDE /* QLExtension.appex in Embed App Extensions */,
+				4B0FDFA026C9A38000C94DDE /* QuickLookProtein Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -59,7 +59,7 @@
 		4B0FDF8526C9A32100C94DDE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		4B0FDF8726C9A32100C94DDE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4B0FDF8826C9A32100C94DDE /* QuickLookProtein.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuickLookProtein.entitlements; sourceTree = "<group>"; };
-		4B0FDF9226C9A38000C94DDE /* QLExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QLExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B0FDF9226C9A38000C94DDE /* QuickLookProtein Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "QuickLookProtein Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B0FDF9426C9A38000C94DDE /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		4B0FDF9726C9A38000C94DDE /* PreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewViewController.swift; sourceTree = "<group>"; };
 		4B0FDF9A26C9A38000C94DDE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/PreviewViewController.xib; sourceTree = "<group>"; };
@@ -113,7 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				4B0FDF7B26C9A31F00C94DDE /* QuickLookProtein.app */,
-				4B0FDF9226C9A38000C94DDE /* QLExtension.appex */,
+				4B0FDF9226C9A38000C94DDE /* QuickLookProtein Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -200,9 +200,9 @@
 			productReference = 4B0FDF7B26C9A31F00C94DDE /* QuickLookProtein.app */;
 			productType = "com.apple.product-type.application";
 		};
-		4B0FDF9126C9A38000C94DDE /* QLExtension */ = {
+		4B0FDF9126C9A38000C94DDE /* QuickLookProtein Extension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4B0FDFA126C9A38000C94DDE /* Build configuration list for PBXNativeTarget "QLExtension" */;
+			buildConfigurationList = 4B0FDFA126C9A38000C94DDE /* Build configuration list for PBXNativeTarget "QuickLookProtein Extension" */;
 			buildPhases = (
 				4B0FDF8E26C9A38000C94DDE /* Sources */,
 				4B0FDF8F26C9A38000C94DDE /* Frameworks */,
@@ -212,9 +212,9 @@
 			);
 			dependencies = (
 			);
-			name = QLExtension;
+			name = "QuickLookProtein Extension";
 			productName = QLExtension;
-			productReference = 4B0FDF9226C9A38000C94DDE /* QLExtension.appex */;
+			productReference = 4B0FDF9226C9A38000C94DDE /* QuickLookProtein Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -248,7 +248,7 @@
 			projectRoot = "";
 			targets = (
 				4B0FDF7A26C9A31F00C94DDE /* QuickLookProtein */,
-				4B0FDF9126C9A38000C94DDE /* QLExtension */,
+				4B0FDF9126C9A38000C94DDE /* QuickLookProtein Extension */,
 			);
 		};
 /* End PBXProject section */
@@ -305,7 +305,7 @@
 /* Begin PBXTargetDependency section */
 		4B0FDF9F26C9A38000C94DDE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4B0FDF9126C9A38000C94DDE /* QLExtension */;
+			target = 4B0FDF9126C9A38000C94DDE /* QuickLookProtein Extension */;
 			targetProxy = 4B0FDF9E26C9A38000C94DDE /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -546,7 +546,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4B0FDFA126C9A38000C94DDE /* Build configuration list for PBXNativeTarget "QLExtension" */ = {
+		4B0FDFA126C9A38000C94DDE /* Build configuration list for PBXNativeTarget "QuickLookProtein Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4B0FDFA226C9A38000C94DDE /* Debug */,
