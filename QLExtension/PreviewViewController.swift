@@ -16,7 +16,7 @@ class PreviewViewController: NSViewController, QLPreviewingController, WKNavigat
     
     // Get settings
     @AppStorage("atomStyle", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    var atomStyle: Settings.AtomStyle = .cartoon
+    private var atomStyle: Settings.AtomStyle = .cartoon
     
     @AppStorage("rotationSpeed", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
     private var rotationSpeed: Settings.RotationSpeed = .medium
