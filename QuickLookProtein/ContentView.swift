@@ -87,6 +87,7 @@ struct ContentView: View {
                 // add 3dmol preview
                 WebView(html: html, baseUrl: baseUrl)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea() // https://stackoverflow.com/questions/65333532/wkwebview-shows-white-bar-until-window-moved-resized
                 Group {
                     Text("Formyltransferase/hydrolase complex from ") + Text("Methylorubrum extorquens").italic()
                     Text("PDB ID: 6S6Y")
