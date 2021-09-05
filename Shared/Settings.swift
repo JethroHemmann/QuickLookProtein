@@ -29,7 +29,7 @@ struct Settings {
             return self
         }
         
-        func rotationSpeedNumber() -> Float? {
+        func rotationSpeedNumber() -> Float {
             switch self {
             case .slow: return 0.5
             case .medium: return 1

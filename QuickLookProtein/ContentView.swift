@@ -68,9 +68,31 @@ struct ContentView: View {
                 VStack {
                     Text("About QuickLookProtein")
                         .font(.title)
-                    Text("Developed in 2021 by Jethro Hemmann (j.hemmann@gmail.com).")
-                        .fixedSize(horizontal: false, vertical: true)
-                    Link("http://www.github.com/xxx", destination: URL(string: "github.com")!)
+                    Text("Developed in 2021 by Jethro Hemmann.")
+                    Link("https://github.com/JethroHemmann/QuickLookProtein", destination: URL(string: "https://github.com/JethroHemmann/QuickLookProtein")!)
+                    
+                    if let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                        Text("Installed version: " + appVersion)
+                        let appVersionArr = appVersion.split(separator: ".")
+                        let appMajor = Int(appVersionArr[0])!
+                        let appMinor = Int(appVersionArr[1])!
+
+                        if let mostRecentVersion = getNewestVersion() {
+                            if newerVersion(installedVersion: (major: appMajor, minor: appMinor), mostRecentVersion: mostRecentVersion) {
+                                HStack {
+                                    Text("There is a new version \(mostRecentVersion.major).\(mostRecentVersion.minor) available.")
+                                    Link("Update now", destination: URL(string: "https://github.com/JethroHemmann/QuickLookProtein/releases")!)
+                                }
+                            }
+                            else {
+                                Text("No newer version is currently available online.")
+                            }
+                        }
+                        else {
+                            Text("Error while checking online for most recent version.")
+                        }
+                    }
+                    
                 }
                 .padding()
                 VStack {
@@ -128,4 +150,3 @@ struct WebView: NSViewRepresentable {
     }
     
 }
-

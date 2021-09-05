@@ -34,7 +34,7 @@ func prepare3DmolHTML(htmlPath: String, pdbPath: String, dataFormat: String, ato
     html = html.replacingOccurrences(of: "{ATOM_STYLE}", with: String(describing: atomStyle))
     html = html.replacingOccurrences(of: "{BG_COLOR}", with: convertColorToRGB(color: bgColor).rgbHex)
     html = html.replacingOccurrences(of: "{BG_ALPHA}", with: convertColorToRGB(color: bgColor).alpha)
-    html = html.replacingOccurrences(of: "{ROTATION_SPEED}", with: String(rotationSpeed.rotationSpeedNumber()!))
+    html = html.replacingOccurrences(of: "{ROTATION_SPEED}", with: String(rotationSpeed.rotationSpeedNumber()))
     html = html.replacingOccurrences(of: "{DATA_FORMAT}", with: dataFormat)
     
     return html

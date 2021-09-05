@@ -22,8 +22,9 @@
 		4B20116F26D2D43B00B77CEF /* 3Dmol_viewer.html in Resources */ = {isa = PBXBuildFile; fileRef = 4B0FDFA826C9A45B00C94DDE /* 3Dmol_viewer.html */; };
 		4B450AC026D2D506007F0A39 /* 3Dmol.js in Resources */ = {isa = PBXBuildFile; fileRef = 4B450ABF26D2D506007F0A39 /* 3Dmol.js */; };
 		4B450AC126D2D506007F0A39 /* 3Dmol.js in Resources */ = {isa = PBXBuildFile; fileRef = 4B450ABF26D2D506007F0A39 /* 3Dmol.js */; };
-		4B450AC326D2D6D1007F0A39 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B450AC226D2D6D1007F0A39 /* Functions.swift */; };
-		4B450AC426D2D6D1007F0A39 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B450AC226D2D6D1007F0A39 /* Functions.swift */; };
+		4B450AC326D2D6D1007F0A39 /* SharedFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B450AC226D2D6D1007F0A39 /* SharedFunctions.swift */; };
+		4B450AC426D2D6D1007F0A39 /* SharedFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B450AC226D2D6D1007F0A39 /* SharedFunctions.swift */; };
+		4B99E5C526E4FD7200B44AD9 /* VersionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B99E5C426E4FD7200B44AD9 /* VersionCheck.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,7 +69,8 @@
 		4B0FDFA826C9A45B00C94DDE /* 3Dmol_viewer.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = 3Dmol_viewer.html; sourceTree = "<group>"; };
 		4B20116026D2692200B77CEF /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		4B450ABF26D2D506007F0A39 /* 3Dmol.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = 3Dmol.js; sourceTree = "<group>"; };
-		4B450AC226D2D6D1007F0A39 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
+		4B450AC226D2D6D1007F0A39 /* SharedFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedFunctions.swift; sourceTree = "<group>"; };
+		4B99E5C426E4FD7200B44AD9 /* VersionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionCheck.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,6 +130,7 @@
 				4B0FDF8726C9A32100C94DDE /* Info.plist */,
 				4B0FDF8826C9A32100C94DDE /* QuickLookProtein.entitlements */,
 				4B0FDF8426C9A32100C94DDE /* Preview Content */,
+				4B99E5C426E4FD7200B44AD9 /* VersionCheck.swift */,
 			);
 			path = QuickLookProtein;
 			sourceTree = "<group>";
@@ -173,7 +176,7 @@
 			children = (
 				4B0FDFA726C9A45400C94DDE /* Assets */,
 				4B20116026D2692200B77CEF /* Settings.swift */,
-				4B450AC226D2D6D1007F0A39 /* Functions.swift */,
+				4B450AC226D2D6D1007F0A39 /* SharedFunctions.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -286,7 +289,8 @@
 				4B20116126D2692200B77CEF /* Settings.swift in Sources */,
 				4B0FDF8126C9A31F00C94DDE /* ContentView.swift in Sources */,
 				4B0FDF7F26C9A31F00C94DDE /* QuickLookProteinApp.swift in Sources */,
-				4B450AC326D2D6D1007F0A39 /* Functions.swift in Sources */,
+				4B99E5C526E4FD7200B44AD9 /* VersionCheck.swift in Sources */,
+				4B450AC326D2D6D1007F0A39 /* SharedFunctions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,7 +300,7 @@
 			files = (
 				4B20116226D2692200B77CEF /* Settings.swift in Sources */,
 				4B0FDF9826C9A38000C94DDE /* PreviewViewController.swift in Sources */,
-				4B450AC426D2D6D1007F0A39 /* Functions.swift in Sources */,
+				4B450AC426D2D6D1007F0A39 /* SharedFunctions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
