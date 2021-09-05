@@ -12,7 +12,7 @@ struct QuickLookProteinApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .frame(width: 800, height: 500)
+                .frame(width: 1000, height: 500)
         }
     }
 }
