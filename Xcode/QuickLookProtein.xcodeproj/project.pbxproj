@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4B0888B526D64B4E009492C5 /* 6S6Y_1dimer.pdb in Resources */ = {isa = PBXBuildFile; fileRef = 4B0888B426D64B4E009492C5 /* 6S6Y_1dimer.pdb */; };
 		4B0FDF7F26C9A31F00C94DDE /* QuickLookProteinApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B0FDF7E26C9A31F00C94DDE /* QuickLookProteinApp.swift */; };
 		4B0FDF8126C9A31F00C94DDE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B0FDF8026C9A31F00C94DDE /* ContentView.swift */; };
 		4B0FDF8326C9A32100C94DDE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4B0FDF8226C9A32100C94DDE /* Assets.xcassets */; };
@@ -24,6 +23,7 @@
 		4B450AC126D2D506007F0A39 /* 3Dmol.js in Resources */ = {isa = PBXBuildFile; fileRef = 4B450ABF26D2D506007F0A39 /* 3Dmol.js */; };
 		4B450AC326D2D6D1007F0A39 /* SharedFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B450AC226D2D6D1007F0A39 /* SharedFunctions.swift */; };
 		4B450AC426D2D6D1007F0A39 /* SharedFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B450AC226D2D6D1007F0A39 /* SharedFunctions.swift */; };
+		4B6BF9BF26E514B900FD7A6A /* 6S6Y_1heterotetramer.pdb in Resources */ = {isa = PBXBuildFile; fileRef = 4B6BF9BE26E514B900FD7A6A /* 6S6Y_1heterotetramer.pdb */; };
 		4B99E5C526E4FD7200B44AD9 /* VersionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B99E5C426E4FD7200B44AD9 /* VersionCheck.swift */; };
 /* End PBXBuildFile section */
 
@@ -52,7 +52,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4B0888B426D64B4E009492C5 /* 6S6Y_1dimer.pdb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 6S6Y_1dimer.pdb; sourceTree = "<group>"; };
 		4B0FDF7B26C9A31F00C94DDE /* QuickLookProtein.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuickLookProtein.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B0FDF7E26C9A31F00C94DDE /* QuickLookProteinApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookProteinApp.swift; sourceTree = "<group>"; };
 		4B0FDF8026C9A31F00C94DDE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -70,6 +69,7 @@
 		4B20116026D2692200B77CEF /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		4B450ABF26D2D506007F0A39 /* 3Dmol.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = 3Dmol.js; sourceTree = "<group>"; };
 		4B450AC226D2D6D1007F0A39 /* SharedFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedFunctions.swift; sourceTree = "<group>"; };
+		4B6BF9BE26E514B900FD7A6A /* 6S6Y_1heterotetramer.pdb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 6S6Y_1heterotetramer.pdb; sourceTree = "<group>"; };
 		4B99E5C426E4FD7200B44AD9 /* VersionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionCheck.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -95,7 +95,7 @@
 		4B0888B626D64B54009492C5 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
-				4B0888B426D64B4E009492C5 /* 6S6Y_1dimer.pdb */,
+				4B6BF9BE26E514B900FD7A6A /* 6S6Y_1heterotetramer.pdb */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -261,9 +261,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4B0888B526D64B4E009492C5 /* 6S6Y_1dimer.pdb in Resources */,
 				4B0FDF8626C9A32100C94DDE /* Preview Assets.xcassets in Resources */,
 				4B20116F26D2D43B00B77CEF /* 3Dmol_viewer.html in Resources */,
+				4B6BF9BF26E514B900FD7A6A /* 6S6Y_1heterotetramer.pdb in Resources */,
 				4B450AC026D2D506007F0A39 /* 3Dmol.js in Resources */,
 				4B0FDF8326C9A32100C94DDE /* Assets.xcassets in Resources */,
 			);

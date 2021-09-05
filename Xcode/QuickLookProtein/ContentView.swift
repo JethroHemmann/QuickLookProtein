@@ -19,12 +19,10 @@ struct ContentView: View {
     
     @AppStorage("bgColor", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
     private var bgColor: Color = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0)
-    
-    @State private var customStyle: String = ""
-    
+        
     var body: some View {
         let htmlPath = Bundle.main.path(forResource: "3Dmol_viewer", ofType: "html")
-        let pdbPath = Bundle.main.path(forResource: "6S6Y_1dimer", ofType: "pdb")
+        let pdbPath = Bundle.main.path(forResource: "6S6Y_1heterotetramer", ofType: "pdb")
         
         let html = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: pdbPath!, dataFormat: "pdb", atomStyle: atomStyle, rotationSpeed: rotationSpeed, bgColor: bgColor)
         let baseUrl = URL(fileURLWithPath: htmlPath!)
@@ -35,7 +33,7 @@ struct ContentView: View {
                     .font(.title)
                 
                 Form {
-                    Picker("Atom style:", selection: $atomStyle) {
+                    Picker("Atom display style:", selection: $atomStyle) {
                         ForEach(Settings.AtomStyle.allCases) { style in
                             Text(style.rawValue)
                         }

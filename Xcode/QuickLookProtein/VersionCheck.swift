@@ -1,5 +1,5 @@
 //
-//  Functions.swift
+//  VersionCheck.swift
 //  QuickLookProtein
 //
 //  Created by Jethro Hemmann on 05.09.21.

@@ -1,5 +1,5 @@
 //
-//  Functions.swift
+//  SharedFunctions.swift
 //  QuickLookProtein
 //
 //  Created by Jethro Hemmann on 22.08.21.
