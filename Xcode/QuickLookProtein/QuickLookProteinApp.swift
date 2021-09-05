@@ -13,6 +13,12 @@ struct QuickLookProteinApp: App {
         WindowGroup {
             ContentView()
                 .frame(width: 1000, height: 500)
+                .onAppear {
+                    NSWindow.allowsAutomaticWindowTabbing = false
+                }
+        }
+        .commands {
+            CommandGroup(replacing: .newItem, addition: {}) // remove File -> New Window from menu
         }
     }
 }
