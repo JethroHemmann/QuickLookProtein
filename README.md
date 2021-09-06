@@ -7,7 +7,7 @@ The rendering of the 3D structure is performed using [3Dmol.js](https://3dmol.cs
 
 Hope this app is useful to you! It is my first Mac OS/Swift app, so I am happy for any feedback! Just open an [issue](https://github.com/JethroHemmann/QuickLookProtein/issues). :-)
 
-![Demonstration of the Quick Look extension in Finder](Screenshots/QuickLook.mp4 "Demonstration of the Quick Look extension in Finder")
+![Demonstration of the Quick Look extension in Finder](Screenshots/QuickLook.gif "Demonstration of the Quick Look extension in Finder")
 
 The extension is packaged into a main app, whose purpose is to set a few settings used for the display of the 3D models.
 
