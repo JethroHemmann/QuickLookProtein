@@ -8,7 +8,7 @@
 import Foundation
 
 func getNewestVersion() -> (major: Int, minor: Int)? {
-    let url = URL(string: "https://jethrohemmann.science/QLProtein/VERSION")!
+    let url = URL(string: "https://github.com/JethroHemmann/QuickLookProtein/blob/main/VERSION?raw=true")!
     
     do {
         var data = try String(contentsOf: url)
