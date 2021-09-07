@@ -19,7 +19,11 @@ The extension is packaged into a main app, whose purpose is to set a few setting
 
 **Download:** The current version can be downloaded under [releases](https://github.com/JethroHemmann/QuickLookProtein/releases).
 
-**Installation:** The Quick Look extension should automatically be installed and activated once the main app has been started for the first time. You can check that it is activated in System Preferences -> Extensions -> Quick Look. 
+**Installation:** 
+
+1. After downloading the release, unpack the ZIP file. 
+2. Move the `QuickLookProtein.app` to the `Applications` folder. 
+3. The Quick Look extension should automatically be installed and activated once the main app has been started for the first time. You can check that the extension is activated in `System Preferences` -> `Extensions` -> `Quick Look`. 
 
 
 ![Screenshot of System Preferences -> Extensions -> Quick Look](Screenshots/System_Preferences_Extensions.png "System Preferences -> Extensions -> Quick Look")
