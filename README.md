@@ -15,7 +15,7 @@ I hope this app is useful to you! It is my first Mac OS/Swift app, so I am happy
 
 ## Installation
 
-**Requirements:** QuickLookProtein requires macOS Big Sur (code was built for version 11.0+, but might also require 11.5+, see #2).
+**Requirements:** QuickLookProtein requires macOS Big Sur (code was built for version 11.0+, but might also require 11.5+, see [#2](https://github.com/JethroHemmann/QuickLookProtein/issues/2)).
 
 **Download:** The current version can be downloaded under [releases](https://github.com/JethroHemmann/QuickLookProtein/releases).
 
