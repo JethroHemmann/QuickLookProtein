@@ -15,7 +15,7 @@ I hope this app is useful to you! It is my first Mac OS/Swift app, so I am happy
 
 ## Installation
 
-**Requirements:** QuickLookProtein requires macOS Big Sur (version 11.0+).
+**Requirements:** QuickLookProtein requires macOS Big Sur (code was built for version 11.0+, but might also require 11.5+, see #2).
 
 **Download:** The current version can be downloaded under [releases](https://github.com/JethroHemmann/QuickLookProtein/releases).
 
@@ -38,7 +38,7 @@ The following file types are currently supported:
 - .CIF
 - .SDF
 
-Note, that Quick Look extensions depend on the [Uniform Type Identifier (UTI)](https://en.wikipedia.org/wiki/Uniform_Type_Identifier) for the association with a file type, and not simply on the file extension. The UTI of a file may change, depending on the applications you have installed that are associated with the given file type. I tried to register the Quick Look extension with some of the commonly used UTIs for the above file types. But in case the extension is not working on your machine, please let me know the UTI of the file you are trying to preview by running the following command in `Terminal`:
+Note that Quick Look extensions depend on the [Uniform Type Identifier (UTI)](https://en.wikipedia.org/wiki/Uniform_Type_Identifier) for the association with a file type, and not simply on the file extension. The UTI of a file may change, depending on the applications you have installed that are associated with the given file type. I tried to register the Quick Look extension with some of the commonly used UTIs for the above file types. But in case the extension is not working on your machine, please let me know the UTI of the file you are trying to preview by running the following command in `Terminal`:
 
 ```shell
 mdls -name kMDItemContentType filename.ext
@@ -52,7 +52,7 @@ The main app allows the customization of the rendering of the 3D structure. Curr
 - Rotation speed (no rotation, slow, **medium**, fast)
 - Background color (any color, or **transparent**)
 
-Note, that the *cartoon* style only works for proteins.
+Note that the *cartoon* style only works for proteins.
 
 In future releases and depending on user feedback, I might implement additional customizations.
 
