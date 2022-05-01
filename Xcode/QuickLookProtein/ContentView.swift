@@ -11,108 +11,119 @@ import WebKit
 struct ContentView: View {
     
     // Get/store settings
-    @AppStorage("atomStyle", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var atomStyle: Settings.AtomStyle = .cartoon
+    @AppStorage("atomStyleCIF", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
+    private var atomStyleCIF: Settings.AtomStyle = .stick
+    
+    @AppStorage("atomStylePDB", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
+    private var atomStylePDB: Settings.AtomStyle = .cartoon
+    
+    @AppStorage("atomStyleSDF", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
+    private var atomStyleSDF: Settings.AtomStyle = .stick
     
     @AppStorage("rotationSpeed", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
     private var rotationSpeed: Settings.RotationSpeed = .medium
     
     @AppStorage("bgColor", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
     private var bgColor: Color = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0)
-        
+    
     var body: some View {
         let htmlPath = Bundle.main.path(forResource: "3Dmol_viewer", ofType: "html")
         let pdbPath = Bundle.main.path(forResource: "6S6Y_1heterotetramer", ofType: "pdb")
         
-        let html = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: pdbPath!, dataFormat: "pdb", atomStyle: atomStyle, rotationSpeed: rotationSpeed, bgColor: bgColor)
+        let html = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: pdbPath!, dataFormat: "pdb", atomStyle: atomStylePDB, rotationSpeed: rotationSpeed, bgColor: bgColor)
         let baseUrl = URL(fileURLWithPath: htmlPath!)
         
-        HStack {
-            VStack {
-                Text("Settings")
-                    .font(.title)
-                
-                Form {
-                    Picker("Atom display style:", selection: $atomStyle) {
-                        ForEach(Settings.AtomStyle.allCases) { style in
-                            Text(style.rawValue)
-                        }
-                    }
-                    
-                    Picker("Rotation speed:", selection: $rotationSpeed) {
-                        ForEach(Settings.RotationSpeed.allCases) { speed in
-                            Text(String(speed.rawValue))
-                        }
-                    }
-                    
-                    HStack {
-                        ColorPicker("Background color:", selection: $bgColor, supportsOpacity: true)
-                            .help("#" + convertColorToRGB(color: bgColor).rgbHex + ", alpha: " + convertColorToRGB(color: bgColor).alpha)
-                        Button(action: resetColor) {
-                            Text("Reset color to transparent")
-                        }
-                    }
-                    
-//                    HStack {
-//                        Text("Custom 3Dmol style:")
-//                        TextField("{cartoon: {tubes: true}}", text: $customStyle)
-//                            .disableAutocorrection(true)
-//                    }
-                }
-                .padding()
-                
-                Divider()
-                
+        GeometryReader { geometry in
+            HStack {
                 VStack {
-                    Text("About QuickLookProtein")
-                        .font(.title)
-                    Text("Developed in 2021 by Jethro Hemmann.")
-                    Link("https://github.com/JethroHemmann/QuickLookProtein", destination: URL(string: "https://github.com/JethroHemmann/QuickLookProtein")!)
+                    Text("Settings").font(.title).padding()
+                    Text("Atom display styles (for each file type)").font(.headline)
                     
-                    if let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-                        Text("Installed version: " + appVersion)
-                        let appVersionArr = appVersion.split(separator: ".")
-                        let appMajor = Int(appVersionArr[0])!
-                        let appMinor = Int(appVersionArr[1])!
-
-                        if let mostRecentVersion = getNewestVersion() {
-                            if newerVersion(installedVersion: (major: appMajor, minor: appMinor), mostRecentVersion: mostRecentVersion) {
-                                HStack {
-                                    Text("There is a new version \(mostRecentVersion.major).\(mostRecentVersion.minor) available.")
-                                    Link("Update now", destination: URL(string: "https://github.com/JethroHemmann/QuickLookProtein/releases")!)
+                    Form {
+                        Picker("PDB:", selection: $atomStylePDB) {
+                            ForEach(Settings.AtomStyle.allCases) { style in
+                                Text(style.rawValue)
+                            }
+                        }
+                        Picker("CIF:", selection: $atomStyleCIF) {
+                            ForEach(Settings.AtomStyle.allCases) { style in
+                                Text(style.rawValue)
+                            }
+                        }
+                        Picker("SDF:", selection: $atomStyleSDF) {
+                            ForEach(Settings.AtomStyle.allCases) { style in
+                                Text(style.rawValue)
+                            }
+                        }
+                    }.padding()
+                    
+                    Text("General display settings").font(.headline)
+                    
+                    Form {
+                        Picker("Rotation speed:", selection: $rotationSpeed) {
+                            ForEach(Settings.RotationSpeed.allCases) { speed in
+                                Text(String(speed.rawValue))
+                            }
+                        }
+                        HStack {
+                            ColorPicker("Background color:", selection: $bgColor, supportsOpacity: true)
+                                .help("#" + convertColorToRGB(color: bgColor).rgbHex + ", alpha: " + convertColorToRGB(color: bgColor).alpha)
+                            Button(action: resetColor) {
+                                Text("Reset color to transparent")
+                            }
+                        }
+                    }.padding()
+                    
+                    Divider()
+                    
+                    VStack {
+                        Text("About QuickLookProtein")
+                            .font(.title)
+                        Text("Developed in 2021 by Jethro Hemmann.")
+                        Link("https://github.com/JethroHemmann/QuickLookProtein", destination: URL(string: "https://github.com/JethroHemmann/QuickLookProtein")!)
+                        
+                        if let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                            Text("Installed version: " + appVersion)
+                            let appVersionArr = appVersion.split(separator: ".")
+                            let appMajor = Int(appVersionArr[0])!
+                            let appMinor = Int(appVersionArr[1])!
+                            
+                            if let mostRecentVersion = getNewestVersion() {
+                                if newerVersion(installedVersion: (major: appMajor, minor: appMinor), mostRecentVersion: mostRecentVersion) {
+                                    HStack {
+                                        Text("There is a new version \(mostRecentVersion.major).\(mostRecentVersion.minor) available.")
+                                        Link("Update now", destination: URL(string: "https://github.com/JethroHemmann/QuickLookProtein/releases")!)
+                                    }
+                                }
+                                else {
+                                    Text("No newer version is currently available online.")
                                 }
                             }
                             else {
-                                Text("No newer version is currently available online.")
+                                Text("Error while checking online for most recent version.")
                             }
                         }
-                        else {
-                            Text("Error while checking online for most recent version.")
-                        }
+                        
                     }
-                    
-                }
-                .padding()
+                    .padding()
+                    VStack {
+                        Text("Credits 3Dmol.js").font(.title2)
+                        Text("The rendering of the 3D model is performed using the 3Dmol.js library developed by Nicholas Rego and David Koes.")
+                            .fixedSize(horizontal: false, vertical: true)
+                        Link("https://3dmol.csb.pitt.edu", destination: URL(string: "https://3dmol.csb.pitt.edu")!)
+                    }
+                    .padding()
+                }.frame(width: geometry.size.width*0.4)
+                
                 VStack {
-                    Text("Credits 3Dmol.js")
-                        .font(.title2)
-                    Text("The rendering of the 3D model is performed using the 3Dmol.js library developed by Nicholas Rego and David Koes.")
-                        .fixedSize(horizontal: false, vertical: true)
-                    Link("https://3dmol.csb.pitt.edu", destination: URL(string: "https://3dmol.csb.pitt.edu")!)
-                }
-                .padding()
-            }
-            
-            VStack {
-                // add 3dmol preview
-                WebView(html: html, baseUrl: baseUrl)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .ignoresSafeArea() // https://stackoverflow.com/questions/65333532/wkwebview-shows-white-bar-until-window-moved-resized
-                Group {
-                    Text("Formyltransferase/hydrolase complex from ") + Text("Methylorubrum extorquens").italic()
-                    Text("PDB ID: 6S6Y")
-                }
-                .font(.caption)
+                    // add 3dmol preview
+                    WebView(html: html, baseUrl: baseUrl)
+                        .frame(maxWidth: .infinity, maxHeight: geometry.size.height*0.9)
+                        .ignoresSafeArea() // https://stackoverflow.com/questions/65333532/wkwebview-shows-white-bar-until-window-moved-resized
+                    Group {
+                        Text("Formyltransferase/hydrolase complex from ") + Text("Methylorubrum extorquens").italic() + Text(", PDB ID: 6S6Y")
+                    }.font(.caption)
+                }.frame(width: geometry.size.width*0.6)
             }
         }
     }

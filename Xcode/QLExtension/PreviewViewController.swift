@@ -15,8 +15,14 @@ class PreviewViewController: NSViewController, QLPreviewingController, WKNavigat
     var webView: WKWebView?
     
     // Get settings
-    @AppStorage("atomStyle", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var atomStyle: Settings.AtomStyle = .cartoon
+    @AppStorage("atomStyleCIF", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
+    private var atomStyleCIF: Settings.AtomStyle = .stick
+    
+    @AppStorage("atomStylePDB", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
+    private var atomStylePDB: Settings.AtomStyle = .cartoon
+    
+    @AppStorage("atomStyleSDF", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
+    private var atomStyleSDF: Settings.AtomStyle = .stick
     
     @AppStorage("rotationSpeed", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
     private var rotationSpeed: Settings.RotationSpeed = .medium
@@ -70,7 +76,21 @@ class PreviewViewController: NSViewController, QLPreviewingController, WKNavigat
         // Quick Look will display a loading spinner while the completion handler is not called.
                 
         let htmlPath = Bundle.main.path(forResource: "3Dmol_viewer", ofType: "html")
-        let fileExtension = url.pathExtension
+        let fileExtension = url.pathExtension.lowercased()
+        var atomStyle: Settings.AtomStyle
+        
+        if fileExtension == "pdb" {
+            atomStyle = atomStylePDB
+        }
+        else if fileExtension == "cif" {
+            atomStyle = atomStyleCIF
+        }
+        else if fileExtension == "sdf" {
+            atomStyle = atomStyleSDF
+        }
+        else {
+            atomStyle = atomStylePDB // use PDB style as default
+        }
         
         let html = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: url.path, dataFormat: fileExtension, atomStyle: atomStyle, rotationSpeed: rotationSpeed, bgColor: bgColor)
         
