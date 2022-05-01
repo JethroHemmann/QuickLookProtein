@@ -28,58 +28,62 @@ struct ContentView: View {
     
     var body: some View {
         let htmlPath = Bundle.main.path(forResource: "3Dmol_viewer", ofType: "html")
-        let pdbPath = Bundle.main.path(forResource: "6S6Y_1heterotetramer", ofType: "pdb")
+        let pdbPath = Bundle.main.path(forResource: "6oc6", ofType: "pdb")
+        let cifPath = Bundle.main.path(forResource: "1565673", ofType: "cif")
+        let sdfPath = Bundle.main.path(forResource: "PQQ", ofType: "sdf")
         
-        let html = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: pdbPath!, dataFormat: "pdb", atomStyle: atomStylePDB, rotationSpeed: rotationSpeed, bgColor: bgColor)
+        let htmlPDB = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: pdbPath!, dataFormat: "pdb", atomStyle: atomStylePDB, rotationSpeed: rotationSpeed, bgColor: bgColor)
+        let htmlCIF = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: cifPath!, dataFormat: "cif", atomStyle: atomStyleCIF, rotationSpeed: rotationSpeed, bgColor: bgColor)
+        let htmlSDF = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: sdfPath!, dataFormat: "sdf", atomStyle: atomStyleSDF, rotationSpeed: rotationSpeed, bgColor: bgColor)
+        
         let baseUrl = URL(fileURLWithPath: htmlPath!)
         
         GeometryReader { geometry in
-            HStack {
-                VStack {
-                    Text("Settings").font(.title).padding()
-                    Text("Atom display styles (for each file type)").font(.headline)
-                    
-                    Form {
-                        Picker("PDB:", selection: $atomStylePDB) {
-                            ForEach(Settings.AtomStyle.allCases) { style in
-                                Text(style.rawValue)
+            VStack {
+                HStack {
+                    VStack { // settings VStack
+                        Text("Settings").font(.title).padding()
+                        Text("Atom display styles (for each file type)").font(.headline)
+                        
+                        Form {
+                            Picker("PDB:", selection: $atomStylePDB) {
+                                ForEach(Settings.AtomStyle.allCases) { style in
+                                    Text(style.rawValue)
+                                }
                             }
-                        }
-                        Picker("CIF:", selection: $atomStyleCIF) {
-                            ForEach(Settings.AtomStyle.allCases) { style in
-                                Text(style.rawValue)
+                            Picker("CIF:", selection: $atomStyleCIF) {
+                                ForEach(Settings.AtomStyle.allCases) { style in
+                                    Text(style.rawValue)
+                                }
                             }
-                        }
-                        Picker("SDF:", selection: $atomStyleSDF) {
-                            ForEach(Settings.AtomStyle.allCases) { style in
-                                Text(style.rawValue)
+                            Picker("SDF:", selection: $atomStyleSDF) {
+                                ForEach(Settings.AtomStyle.allCases) { style in
+                                    Text(style.rawValue)
+                                }
                             }
-                        }
-                    }.padding()
-                    
-                    Text("General display settings").font(.headline)
-                    
-                    Form {
-                        Picker("Rotation speed:", selection: $rotationSpeed) {
-                            ForEach(Settings.RotationSpeed.allCases) { speed in
-                                Text(String(speed.rawValue))
+                        }.padding()
+                        
+                        Text("General display settings").font(.headline)
+                        
+                        Form {
+                            Picker("Rotation speed:", selection: $rotationSpeed) {
+                                ForEach(Settings.RotationSpeed.allCases) { speed in
+                                    Text(String(speed.rawValue))
+                                }
                             }
-                        }
-                        HStack {
-                            ColorPicker("Background color:", selection: $bgColor, supportsOpacity: true)
-                                .help("#" + convertColorToRGB(color: bgColor).rgbHex + ", alpha: " + convertColorToRGB(color: bgColor).alpha)
-                            Button(action: resetColor) {
-                                Text("Reset color to transparent")
+                            HStack {
+                                ColorPicker("Background color:", selection: $bgColor, supportsOpacity: true)
+                                    .help("#" + convertColorToRGB(color: bgColor).rgbHex + ", alpha: " + convertColorToRGB(color: bgColor).alpha)
+                                Button(action: resetColor) {
+                                    Text("Reset color to transparent")
+                                }
                             }
-                        }
-                    }.padding()
-                    
-                    Divider()
+                        }.padding()
+                    } // end settings VStack
                     
                     VStack {
-                        Text("About QuickLookProtein")
-                            .font(.title)
-                        Text("Developed in 2021 by Jethro Hemmann.")
+                        Text("About QuickLookProtein").font(.title).padding()
+                        Text("Developed  2021-2022 by Jethro Hemmann.")
                         Link("https://github.com/JethroHemmann/QuickLookProtein", destination: URL(string: "https://github.com/JethroHemmann/QuickLookProtein")!)
                         
                         if let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
@@ -104,26 +108,44 @@ struct ContentView: View {
                             }
                         }
                         
-                    }
-                    .padding()
-                    VStack {
-                        Text("Credits 3Dmol.js").font(.title2)
+                        Text("Credits 3Dmol.js").font(.title2).padding()
                         Text("The rendering of the 3D model is performed using the 3Dmol.js library developed by Nicholas Rego and David Koes.")
                             .fixedSize(horizontal: false, vertical: true)
                         Link("https://3dmol.csb.pitt.edu", destination: URL(string: "https://3dmol.csb.pitt.edu")!)
-                    }
-                    .padding()
-                }.frame(width: geometry.size.width*0.4)
+                        
+                    }.padding() // end VStack About
+                } // end HStack
                 
-                VStack {
+                Divider()
+                
+                HStack {
                     // add 3dmol preview
-                    WebView(html: html, baseUrl: baseUrl)
-                        .frame(maxWidth: .infinity, maxHeight: geometry.size.height*0.9)
-                        .ignoresSafeArea() // https://stackoverflow.com/questions/65333532/wkwebview-shows-white-bar-until-window-moved-resized
-                    Group {
-                        Text("Formyltransferase/hydrolase complex from ") + Text("Methylorubrum extorquens").italic() + Text(", PDB ID: 6S6Y")
-                    }.font(.caption)
-                }.frame(width: geometry.size.width*0.6)
+                    VStack {
+                        WebView(html: htmlPDB, baseUrl: baseUrl)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .ignoresSafeArea() // https://stackoverflow.com/questions/65333532/wkwebview-shows-white-bar-until-window-moved-resized
+                        Text("PDB")
+                        Group {
+                            Text("XoxF from ") + Text("M. extorquens").italic() + Text(" (PDB ID: 6OC6)")
+                        }.font(.caption)
+                    }
+                    
+                    VStack {
+                        WebView(html: htmlCIF, baseUrl: baseUrl)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .ignoresSafeArea()
+                        Text("CIF")
+                        Text("Bioinspired nonheme iron complex (COG ID: 1565673)").font(.caption)
+                    }
+                    
+                    VStack {
+                        WebView(html: htmlSDF, baseUrl: baseUrl)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .ignoresSafeArea()
+                        Text("SDF")
+                        Text("Pyrroloquinoline quinone (PubChem CID: 1024)").font(.caption)
+                    }
+                }
             }
         }
     }

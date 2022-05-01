@@ -24,7 +24,7 @@ struct QuickLookProteinApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .frame(width: 1000, height: 600)
+                .frame(width: 800, height: 600)
                 .onAppear {
                     NSWindow.allowsAutomaticWindowTabbing = false
                 }
