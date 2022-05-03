@@ -1,15 +1,15 @@
 /*!
- * jQuery JavaScript Library v3.5.0
+ * jQuery JavaScript Library v3.6.0
  * https://jquery.com/
  *
  * Includes Sizzle.js
  * https://sizzlejs.com/
  *
- * Copyright JS Foundation and other contributors
+ * Copyright OpenJS Foundation and other contributors
  * Released under the MIT license
  * https://jquery.org/license
  *
- * Date: 2020-04-10T15:07Z
+ * Date: 2021-03-02T17:08Z
  */
 ( function( global, factory ) {
 
@@ -76,12 +76,16 @@ var support = {};
 
 var isFunction = function isFunction( obj ) {
 
-      // Support: Chrome <=57, Firefox <=52
-      // In some browsers, typeof returns "function" for HTML <object> elements
-      // (i.e., `typeof document.createElement( "object" ) === "function"`).
-      // We don't want to classify *any* DOM node as a function.
-      return typeof obj === "function" && typeof obj.nodeType !== "number";
-  };
+		// Support: Chrome <=57, Firefox <=52
+		// In some browsers, typeof returns "function" for HTML <object> elements
+		// (i.e., `typeof document.createElement( "object" ) === "function"`).
+		// We don't want to classify *any* DOM node as a function.
+		// Support: QtWeb <=3.8.5, WebKit <=534.34, wkhtmltopdf tool <=0.12.5
+		// Plus for old WebKit, typeof returns "function" for HTML collections
+		// (e.g., `typeof document.getElementsByTagName("div") === "function"`). (gh-4756)
+		return typeof obj === "function" && typeof obj.nodeType !== "number" &&
+			typeof obj.item !== "function";
+	};
 
 
 var isWindow = function isWindow( obj ) {
@@ -147,7 +151,7 @@ function toType( obj ) {
 
 
 var
-	version = "3.5.0",
+	version = "3.6.0",
 
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {
@@ -401,7 +405,7 @@ jQuery.extend( {
 			if ( isArrayLike( Object( arr ) ) ) {
 				jQuery.merge( ret,
 					typeof arr === "string" ?
-					[ arr ] : arr
+						[ arr ] : arr
 				);
 			} else {
 				push.call( ret, arr );
@@ -496,9 +500,9 @@ if ( typeof Symbol === "function" ) {
 
 // Populate the class2type map
 jQuery.each( "Boolean Number String Function Array Date RegExp Object Error Symbol".split( " " ),
-function( _i, name ) {
-	class2type[ "[object " + name + "]" ] = name.toLowerCase();
-} );
+	function( _i, name ) {
+		class2type[ "[object " + name + "]" ] = name.toLowerCase();
+	} );
 
 function isArrayLike( obj ) {
 
@@ -518,14 +522,14 @@ function isArrayLike( obj ) {
 }
 var Sizzle =
 /*!
- * Sizzle CSS Selector Engine v2.3.5
+ * Sizzle CSS Selector Engine v2.3.6
  * https://sizzlejs.com/
  *
  * Copyright JS Foundation and other contributors
  * Released under the MIT license
  * https://js.foundation/
  *
- * Date: 2020-03-14
+ * Date: 2021-02-16
  */
 ( function( window ) {
 var i,
@@ -1108,8 +1112,8 @@ support = Sizzle.support = {};
  * @returns {Boolean} True iff elem is a non-HTML XML node
  */
 isXML = Sizzle.isXML = function( elem ) {
-	var namespace = elem.namespaceURI,
-		docElem = ( elem.ownerDocument || elem ).documentElement;
+	var namespace = elem && elem.namespaceURI,
+		docElem = elem && ( elem.ownerDocument || elem ).documentElement;
 
 	// Support: IE <=8
 	// Assume HTML when documentElement doesn't yet exist, such as inside loading iframes
@@ -3024,9 +3028,9 @@ var rneedsContext = jQuery.expr.match.needsContext;
 
 function nodeName( elem, name ) {
 
-  return elem.nodeName && elem.nodeName.toLowerCase() === name.toLowerCase();
+	return elem.nodeName && elem.nodeName.toLowerCase() === name.toLowerCase();
 
-};
+}
 var rsingleTag = ( /^<([a-z][^\/\0>:\x20\t\r\n\f]*)[\x20\t\r\n\f]*\/?>(?:<\/\1>|)$/i );
 
 
@@ -3997,8 +4001,8 @@ jQuery.extend( {
 			resolveContexts = Array( i ),
 			resolveValues = slice.call( arguments ),
 
-			// the master Deferred
-			master = jQuery.Deferred(),
+			// the primary Deferred
+			primary = jQuery.Deferred(),
 
 			// subordinate callback factory
 			updateFunc = function( i ) {
@@ -4006,30 +4010,30 @@ jQuery.extend( {
 					resolveContexts[ i ] = this;
 					resolveValues[ i ] = arguments.length > 1 ? slice.call( arguments ) : value;
 					if ( !( --remaining ) ) {
-						master.resolveWith( resolveContexts, resolveValues );
+						primary.resolveWith( resolveContexts, resolveValues );
 					}
 				};
 			};
 
 		// Single- and empty arguments are adopted like Promise.resolve
 		if ( remaining <= 1 ) {
-			adoptValue( singleValue, master.done( updateFunc( i ) ).resolve, master.reject,
+			adoptValue( singleValue, primary.done( updateFunc( i ) ).resolve, primary.reject,
 				!remaining );
 
 			// Use .then() to unwrap secondary thenables (cf. gh-3000)
-			if ( master.state() === "pending" ||
+			if ( primary.state() === "pending" ||
 				isFunction( resolveValues[ i ] && resolveValues[ i ].then ) ) {
 
-				return master.then();
+				return primary.then();
 			}
 		}
 
 		// Multiple arguments are aggregated like Promise.all array elements
 		while ( i-- ) {
-			adoptValue( resolveValues[ i ], updateFunc( i ), master.reject );
+			adoptValue( resolveValues[ i ], updateFunc( i ), primary.reject );
 		}
 
-		return master.promise();
+		return primary.promise();
 	}
 } );
 
@@ -4180,8 +4184,8 @@ var access = function( elems, fn, key, value, chainable, emptyGet, raw ) {
 			for ( ; i < len; i++ ) {
 				fn(
 					elems[ i ], key, raw ?
-					value :
-					value.call( elems[ i ], i, fn( elems[ i ], key ) )
+						value :
+						value.call( elems[ i ], i, fn( elems[ i ], key ) )
 				);
 			}
 		}
@@ -4244,7 +4248,7 @@ Data.prototype = {
 
 		// If not, create one
 		if ( !value ) {
-			value = Object.create( null );
+			value = {};
 
 			// We can accept data for non-element nodes in modern browsers,
 			// but we should not, see #8335.
@@ -5089,10 +5093,7 @@ function buildFragment( elems, context, scripts, selection, ignored ) {
 }
 
 
-var
-	rkeyEvent = /^key/,
-	rmouseEvent = /^(?:mouse|pointer|contextmenu|drag|drop)|click/,
-	rtypenamespace = /^([^.]*)(?:\.(.+)|)/;
+var rtypenamespace = /^([^.]*)(?:\.(.+)|)/;
 
 function returnTrue() {
 	return true;
@@ -5387,8 +5388,8 @@ jQuery.event = {
 			event = jQuery.event.fix( nativeEvent ),
 
 			handlers = (
-					dataPriv.get( this, "events" ) || Object.create( null )
-				)[ event.type ] || [],
+				dataPriv.get( this, "events" ) || Object.create( null )
+			)[ event.type ] || [],
 			special = jQuery.event.special[ event.type ] || {};
 
 		// Use the fix-ed jQuery.Event rather than the (read-only) native event
@@ -5512,12 +5513,12 @@ jQuery.event = {
 			get: isFunction( hook ) ?
 				function() {
 					if ( this.originalEvent ) {
-							return hook( this.originalEvent );
+						return hook( this.originalEvent );
 					}
 				} :
 				function() {
 					if ( this.originalEvent ) {
-							return this.originalEvent[ name ];
+						return this.originalEvent[ name ];
 					}
 				},
 
@@ -5656,7 +5657,13 @@ function leverageNative( el, type, expectSync ) {
 						// Cancel the outer synthetic event
 						event.stopImmediatePropagation();
 						event.preventDefault();
-						return result.value;
+
+						// Support: Chrome 86+
+						// In Chrome, if an element having a focusout handler is blurred by
+						// clicking outside of it, it invokes the handler synchronously. If
+						// that handler calls `.remove()` on the element, the data is cleared,
+						// leaving `result` undefined. We need to guard against this.
+						return result && result.value;
 					}
 
 				// If this is an inner synthetic event for an event with a bubbling surrogate
@@ -5821,34 +5828,7 @@ jQuery.each( {
 	targetTouches: true,
 	toElement: true,
 	touches: true,
-
-	which: function( event ) {
-		var button = event.button;
-
-		// Add which for key events
-		if ( event.which == null && rkeyEvent.test( event.type ) ) {
-			return event.charCode != null ? event.charCode : event.keyCode;
-		}
-
-		// Add which for click: 1 === left; 2 === middle; 3 === right
-		if ( !event.which && button !== undefined && rmouseEvent.test( event.type ) ) {
-			if ( button & 1 ) {
-				return 1;
-			}
-
-			if ( button & 2 ) {
-				return 3;
-			}
-
-			if ( button & 4 ) {
-				return 2;
-			}
-
-			return 0;
-		}
-
-		return event.which;
-	}
+	which: true
 }, jQuery.event.addProp );
 
 jQuery.each( { focus: "focusin", blur: "focusout" }, function( type, delegateType ) {
@@ -5871,6 +5851,12 @@ jQuery.each( { focus: "focusin", blur: "focusout" }, function( type, delegateTyp
 			leverageNative( this, type );
 
 			// Return non-false to allow normal event-path propagation
+			return true;
+		},
+
+		// Suppress native focus or blur as it's already being fired
+		// in leverageNative.
+		_default: function() {
 			return true;
 		},
 
@@ -6541,6 +6527,10 @@ var rboxStyle = new RegExp( cssExpand.join( "|" ), "i" );
 		// set in CSS while `offset*` properties report correct values.
 		// Behavior in IE 9 is more subtle than in newer versions & it passes
 		// some versions of this test; make sure not to make it pass there!
+		//
+		// Support: Firefox 70+
+		// Only Firefox includes border widths
+		// in computed dimensions. (gh-4529)
 		reliableTrDimensions: function() {
 			var table, tr, trChild, trStyle;
 			if ( reliableTrDimensionsVal == null ) {
@@ -6548,9 +6538,22 @@ var rboxStyle = new RegExp( cssExpand.join( "|" ), "i" );
 				tr = document.createElement( "tr" );
 				trChild = document.createElement( "div" );
 
-				table.style.cssText = "position:absolute;left:-11111px";
+				table.style.cssText = "position:absolute;left:-11111px;border-collapse:separate";
+				tr.style.cssText = "border:1px solid";
+
+				// Support: Chrome 86+
+				// Height set through cssText does not get applied.
+				// Computed height then comes back as 0.
 				tr.style.height = "1px";
 				trChild.style.height = "9px";
+
+				// Support: Android 8 Chrome 86+
+				// In our bodyBackground.html iframe,
+				// display for all div elements is set to "inline",
+				// which causes a problem only in Android 8 Chrome 86.
+				// Ensuring the div is display: block
+				// gets around this issue.
+				trChild.style.display = "block";
 
 				documentElement
 					.appendChild( table )
@@ -6558,7 +6561,9 @@ var rboxStyle = new RegExp( cssExpand.join( "|" ), "i" );
 					.appendChild( trChild );
 
 				trStyle = window.getComputedStyle( tr );
-				reliableTrDimensionsVal = parseInt( trStyle.height ) > 3;
+				reliableTrDimensionsVal = ( parseInt( trStyle.height, 10 ) +
+					parseInt( trStyle.borderTopWidth, 10 ) +
+					parseInt( trStyle.borderBottomWidth, 10 ) ) === tr.offsetHeight;
 
 				documentElement.removeChild( table );
 			}
@@ -7022,10 +7027,10 @@ jQuery.each( [ "height", "width" ], function( _i, dimension ) {
 					// Running getBoundingClientRect on a disconnected node
 					// in IE throws an error.
 					( !elem.getClientRects().length || !elem.getBoundingClientRect().width ) ?
-						swap( elem, cssShow, function() {
-							return getWidthOrHeight( elem, dimension, extra );
-						} ) :
-						getWidthOrHeight( elem, dimension, extra );
+					swap( elem, cssShow, function() {
+						return getWidthOrHeight( elem, dimension, extra );
+					} ) :
+					getWidthOrHeight( elem, dimension, extra );
 			}
 		},
 
@@ -7084,7 +7089,7 @@ jQuery.cssHooks.marginLeft = addGetHookIf( support.reliableMarginLeft,
 					swap( elem, { marginLeft: 0 }, function() {
 						return elem.getBoundingClientRect().left;
 					} )
-				) + "px";
+			) + "px";
 		}
 	}
 );
@@ -7223,7 +7228,7 @@ Tween.propHooks = {
 			if ( jQuery.fx.step[ tween.prop ] ) {
 				jQuery.fx.step[ tween.prop ]( tween );
 			} else if ( tween.elem.nodeType === 1 && (
-					jQuery.cssHooks[ tween.prop ] ||
+				jQuery.cssHooks[ tween.prop ] ||
 					tween.elem.style[ finalPropName( tween.prop ) ] != null ) ) {
 				jQuery.style( tween.elem, tween.prop, tween.now + tween.unit );
 			} else {
@@ -7468,7 +7473,7 @@ function defaultPrefilter( elem, props, opts ) {
 
 			anim.done( function() {
 
-			/* eslint-enable no-loop-func */
+				/* eslint-enable no-loop-func */
 
 				// The final step of a "hide" animation is actually hiding the element
 				if ( !hidden ) {
@@ -7588,7 +7593,7 @@ function Animation( elem, properties, options ) {
 			tweens: [],
 			createTween: function( prop, end ) {
 				var tween = jQuery.Tween( elem, animation.opts, prop, end,
-						animation.opts.specialEasing[ prop ] || animation.opts.easing );
+					animation.opts.specialEasing[ prop ] || animation.opts.easing );
 				animation.tweens.push( tween );
 				return tween;
 			},
@@ -7761,7 +7766,8 @@ jQuery.fn.extend( {
 					anim.stop( true );
 				}
 			};
-			doAnimation.finish = doAnimation;
+
+		doAnimation.finish = doAnimation;
 
 		return empty || optall.queue === false ?
 			this.each( doAnimation ) :
@@ -8401,8 +8407,8 @@ jQuery.fn.extend( {
 				if ( this.setAttribute ) {
 					this.setAttribute( "class",
 						className || value === false ?
-						"" :
-						dataPriv.get( this, "__className__" ) || ""
+							"" :
+							dataPriv.get( this, "__className__" ) || ""
 					);
 				}
 			}
@@ -8417,7 +8423,7 @@ jQuery.fn.extend( {
 		while ( ( elem = this[ i++ ] ) ) {
 			if ( elem.nodeType === 1 &&
 				( " " + stripAndCollapse( getClass( elem ) ) + " " ).indexOf( className ) > -1 ) {
-					return true;
+				return true;
 			}
 		}
 
@@ -8707,9 +8713,7 @@ jQuery.extend( jQuery.event, {
 				special.bindType || type;
 
 			// jQuery handler
-			handle = (
-					dataPriv.get( cur, "events" ) || Object.create( null )
-				)[ event.type ] &&
+			handle = ( dataPriv.get( cur, "events" ) || Object.create( null ) )[ event.type ] &&
 				dataPriv.get( cur, "handle" );
 			if ( handle ) {
 				handle.apply( cur, data );
@@ -8856,7 +8860,7 @@ var rquery = ( /\?/ );
 
 // Cross-browser xml parsing
 jQuery.parseXML = function( data ) {
-	var xml;
+	var xml, parserErrorElem;
 	if ( !data || typeof data !== "string" ) {
 		return null;
 	}
@@ -8865,12 +8869,17 @@ jQuery.parseXML = function( data ) {
 	// IE throws on parseFromString with invalid input.
 	try {
 		xml = ( new window.DOMParser() ).parseFromString( data, "text/xml" );
-	} catch ( e ) {
-		xml = undefined;
-	}
+	} catch ( e ) {}
 
-	if ( !xml || xml.getElementsByTagName( "parsererror" ).length ) {
-		jQuery.error( "Invalid XML: " + data );
+	parserErrorElem = xml && xml.getElementsByTagName( "parsererror" )[ 0 ];
+	if ( !xml || parserErrorElem ) {
+		jQuery.error( "Invalid XML: " + (
+			parserErrorElem ?
+				jQuery.map( parserErrorElem.childNodes, function( el ) {
+					return el.textContent;
+				} ).join( "\n" ) :
+				data
+		) );
 	}
 	return xml;
 };
@@ -8971,16 +8980,14 @@ jQuery.fn.extend( {
 			// Can add propHook for "elements" to filter or add form elements
 			var elements = jQuery.prop( this, "elements" );
 			return elements ? jQuery.makeArray( elements ) : this;
-		} )
-		.filter( function() {
+		} ).filter( function() {
 			var type = this.type;
 
 			// Use .is( ":disabled" ) so that fieldset[disabled] works
 			return this.name && !jQuery( this ).is( ":disabled" ) &&
 				rsubmittable.test( this.nodeName ) && !rsubmitterTypes.test( type ) &&
 				( this.checked || !rcheckableType.test( type ) );
-		} )
-		.map( function( _i, elem ) {
+		} ).map( function( _i, elem ) {
 			var val = jQuery( this ).val();
 
 			if ( val == null ) {
@@ -9033,7 +9040,8 @@ var
 
 	// Anchor tag for parsing the document origin
 	originAnchor = document.createElement( "a" );
-	originAnchor.href = location.href;
+
+originAnchor.href = location.href;
 
 // Base "constructor" for jQuery.ajaxPrefilter and jQuery.ajaxTransport
 function addToPrefiltersOrTransports( structure ) {
@@ -9414,8 +9422,8 @@ jQuery.extend( {
 			// Context for global events is callbackContext if it is a DOM node or jQuery collection
 			globalEventContext = s.context &&
 				( callbackContext.nodeType || callbackContext.jquery ) ?
-					jQuery( callbackContext ) :
-					jQuery.event,
+				jQuery( callbackContext ) :
+				jQuery.event,
 
 			// Deferreds
 			deferred = jQuery.Deferred(),
@@ -9727,8 +9735,10 @@ jQuery.extend( {
 				response = ajaxHandleResponses( s, jqXHR, responses );
 			}
 
-			// Use a noop converter for missing script
-			if ( !isSuccess && jQuery.inArray( "script", s.dataTypes ) > -1 ) {
+			// Use a noop converter for missing script but not if jsonp
+			if ( !isSuccess &&
+				jQuery.inArray( "script", s.dataTypes ) > -1 &&
+				jQuery.inArray( "json", s.dataTypes ) < 0 ) {
 				s.converters[ "text script" ] = function() {};
 			}
 
@@ -10466,12 +10476,6 @@ jQuery.offset = {
 			options.using.call( elem, props );
 
 		} else {
-			if ( typeof props.top === "number" ) {
-				props.top += "px";
-			}
-			if ( typeof props.left === "number" ) {
-				props.left += "px";
-			}
 			curElem.css( props );
 		}
 	}
@@ -10640,8 +10644,11 @@ jQuery.each( [ "top", "left" ], function( _i, prop ) {
 
 // Create innerHeight, innerWidth, height, width, outerHeight and outerWidth methods
 jQuery.each( { Height: "height", Width: "width" }, function( name, type ) {
-	jQuery.each( { padding: "inner" + name, content: type, "": "outer" + name },
-		function( defaultExtra, funcName ) {
+	jQuery.each( {
+		padding: "inner" + name,
+		content: type,
+		"": "outer" + name
+	}, function( defaultExtra, funcName ) {
 
 		// Margin is only for outerHeight, outerWidth
 		jQuery.fn[ funcName ] = function( margin, value ) {
@@ -10726,7 +10733,8 @@ jQuery.fn.extend( {
 	}
 } );
 
-jQuery.each( ( "blur focus focusin focusout resize scroll click dblclick " +
+jQuery.each(
+	( "blur focus focusin focusout resize scroll click dblclick " +
 	"mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " +
 	"change select submit keydown keypress keyup contextmenu" ).split( " " ),
 	function( _i, name ) {
@@ -10737,7 +10745,8 @@ jQuery.each( ( "blur focus focusin focusout resize scroll click dblclick " +
 				this.on( name, null, data, fn ) :
 				this.trigger( name );
 		};
-	} );
+	}
+);
 
 
 
@@ -10871,9 +10880,21 @@ if ( typeof noGlobal === "undefined" ) {
 return jQuery;
 } );
 
+
+if(typeof define !== 'undefined') {
+  // UPNG checks the existence of require, not define, so need to do both
+  var _3dmol_saved_define = define;
+  var _3dmol_saved_require = require;
+  define = null;
+  require = null;
+}
+
 (function (global, factory) {
+  global = global || window;
   (factory((global['MMTF'] = global.MMTF || {})));
+  
 }(this, function (exports) { 'use strict';
+
 
   /**
    * @file utf8-utils
@@ -12767,1484 +12788,5146 @@ return jQuery;
 
 }));
 
-/* pako 1.0.11 nodeca/pako */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pako = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-'use strict';
+
+/*! pako 2.0.4 https://github.com/nodeca/pako @license (MIT AND Zlib) */
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pako = {}));
+}(this, (function (exports) { 'use strict';
+
+  // (C) 1995-2013 Jean-loup Gailly and Mark Adler
+  // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+  //
+  // This software is provided 'as-is', without any express or implied
+  // warranty. In no event will the authors be held liable for any damages
+  // arising from the use of this software.
+  //
+  // Permission is granted to anyone to use this software for any purpose,
+  // including commercial applications, and to alter it and redistribute it
+  // freely, subject to the following restrictions:
+  //
+  // 1. The origin of this software must not be misrepresented; you must not
+  //   claim that you wrote the original software. If you use this software
+  //   in a product, an acknowledgment in the product documentation would be
+  //   appreciated but is not required.
+  // 2. Altered source versions must be plainly marked as such, and must not be
+  //   misrepresented as being the original software.
+  // 3. This notice may not be removed or altered from any source distribution.
+
+  /* eslint-disable space-unary-ops */
+
+  /* Public constants ==========================================================*/
+  /* ===========================================================================*/
 
 
-var TYPED_OK =  (typeof Uint8Array !== 'undefined') &&
-                (typeof Uint16Array !== 'undefined') &&
-                (typeof Int32Array !== 'undefined');
+  //const Z_FILTERED          = 1;
+  //const Z_HUFFMAN_ONLY      = 2;
+  //const Z_RLE               = 3;
+  const Z_FIXED$1               = 4;
+  //const Z_DEFAULT_STRATEGY  = 0;
 
-function _has(obj, key) {
-  return Object.prototype.hasOwnProperty.call(obj, key);
-}
+  /* Possible values of the data_type field (though see inflate()) */
+  const Z_BINARY              = 0;
+  const Z_TEXT                = 1;
+  //const Z_ASCII             = 1; // = Z_TEXT
+  const Z_UNKNOWN$1             = 2;
 
-exports.assign = function (obj /*from1, from2, from3, ...*/) {
-  var sources = Array.prototype.slice.call(arguments, 1);
-  while (sources.length) {
-    var source = sources.shift();
-    if (!source) { continue; }
+  /*============================================================================*/
 
-    if (typeof source !== 'object') {
-      throw new TypeError(source + 'must be non-object');
-    }
 
-    for (var p in source) {
-      if (_has(source, p)) {
-        obj[p] = source[p];
-      }
-    }
+  function zero$1(buf) { let len = buf.length; while (--len >= 0) { buf[len] = 0; } }
+
+  // From zutil.h
+
+  const STORED_BLOCK = 0;
+  const STATIC_TREES = 1;
+  const DYN_TREES    = 2;
+  /* The three kinds of block type */
+
+  const MIN_MATCH$1    = 3;
+  const MAX_MATCH$1    = 258;
+  /* The minimum and maximum match lengths */
+
+  // From deflate.h
+  /* ===========================================================================
+   * Internal compression state.
+   */
+
+  const LENGTH_CODES$1  = 29;
+  /* number of length codes, not counting the special END_BLOCK code */
+
+  const LITERALS$1      = 256;
+  /* number of literal bytes 0..255 */
+
+  const L_CODES$1       = LITERALS$1 + 1 + LENGTH_CODES$1;
+  /* number of Literal or Length codes, including the END_BLOCK code */
+
+  const D_CODES$1       = 30;
+  /* number of distance codes */
+
+  const BL_CODES$1      = 19;
+  /* number of codes used to transfer the bit lengths */
+
+  const HEAP_SIZE$1     = 2 * L_CODES$1 + 1;
+  /* maximum heap size */
+
+  const MAX_BITS$1      = 15;
+  /* All codes must not exceed MAX_BITS bits */
+
+  const Buf_size      = 16;
+  /* size of bit buffer in bi_buf */
+
+
+  /* ===========================================================================
+   * Constants
+   */
+
+  const MAX_BL_BITS = 7;
+  /* Bit length codes must not exceed MAX_BL_BITS bits */
+
+  const END_BLOCK   = 256;
+  /* end of block literal code */
+
+  const REP_3_6     = 16;
+  /* repeat previous bit length 3-6 times (2 bits of repeat count) */
+
+  const REPZ_3_10   = 17;
+  /* repeat a zero length 3-10 times  (3 bits of repeat count) */
+
+  const REPZ_11_138 = 18;
+  /* repeat a zero length 11-138 times  (7 bits of repeat count) */
+
+  /* eslint-disable comma-spacing,array-bracket-spacing */
+  const extra_lbits =   /* extra bits for each length code */
+    new Uint8Array([0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0]);
+
+  const extra_dbits =   /* extra bits for each distance code */
+    new Uint8Array([0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13]);
+
+  const extra_blbits =  /* extra bits for each bit length code */
+    new Uint8Array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,3,7]);
+
+  const bl_order =
+    new Uint8Array([16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15]);
+  /* eslint-enable comma-spacing,array-bracket-spacing */
+
+  /* The lengths of the bit length codes are sent in order of decreasing
+   * probability, to avoid transmitting the lengths for unused bit length codes.
+   */
+
+  /* ===========================================================================
+   * Local data. These are initialized only once.
+   */
+
+  // We pre-fill arrays with 0 to avoid uninitialized gaps
+
+  const DIST_CODE_LEN = 512; /* see definition of array dist_code below */
+
+  // !!!! Use flat array instead of structure, Freq = i*2, Len = i*2+1
+  const static_ltree  = new Array((L_CODES$1 + 2) * 2);
+  zero$1(static_ltree);
+  /* The static literal tree. Since the bit lengths are imposed, there is no
+   * need for the L_CODES extra codes used during heap construction. However
+   * The codes 286 and 287 are needed to build a canonical tree (see _tr_init
+   * below).
+   */
+
+  const static_dtree  = new Array(D_CODES$1 * 2);
+  zero$1(static_dtree);
+  /* The static distance tree. (Actually a trivial tree since all codes use
+   * 5 bits.)
+   */
+
+  const _dist_code    = new Array(DIST_CODE_LEN);
+  zero$1(_dist_code);
+  /* Distance codes. The first 256 values correspond to the distances
+   * 3 .. 258, the last 256 values correspond to the top 8 bits of
+   * the 15 bit distances.
+   */
+
+  const _length_code  = new Array(MAX_MATCH$1 - MIN_MATCH$1 + 1);
+  zero$1(_length_code);
+  /* length code for each normalized match length (0 == MIN_MATCH) */
+
+  const base_length   = new Array(LENGTH_CODES$1);
+  zero$1(base_length);
+  /* First normalized length for each code (0 = MIN_MATCH) */
+
+  const base_dist     = new Array(D_CODES$1);
+  zero$1(base_dist);
+  /* First normalized distance for each code (0 = distance of 1) */
+
+
+  function StaticTreeDesc(static_tree, extra_bits, extra_base, elems, max_length) {
+
+    this.static_tree  = static_tree;  /* static tree or NULL */
+    this.extra_bits   = extra_bits;   /* extra bits for each code or NULL */
+    this.extra_base   = extra_base;   /* base index for extra_bits */
+    this.elems        = elems;        /* max number of elements in the tree */
+    this.max_length   = max_length;   /* max bit length for the codes */
+
+    // show if `static_tree` has data or dummy - needed for monomorphic objects
+    this.has_stree    = static_tree && static_tree.length;
   }
 
-  return obj;
-};
+
+  let static_l_desc;
+  let static_d_desc;
+  let static_bl_desc;
 
 
-// reduce buffer size, avoiding mem copy
-exports.shrinkBuf = function (buf, size) {
-  if (buf.length === size) { return buf; }
-  if (buf.subarray) { return buf.subarray(0, size); }
-  buf.length = size;
-  return buf;
-};
+  function TreeDesc(dyn_tree, stat_desc) {
+    this.dyn_tree = dyn_tree;     /* the dynamic tree */
+    this.max_code = 0;            /* largest code with non zero frequency */
+    this.stat_desc = stat_desc;   /* the corresponding static tree */
+  }
 
 
-var fnTyped = {
-  arraySet: function (dest, src, src_offs, len, dest_offs) {
-    if (src.subarray && dest.subarray) {
-      dest.set(src.subarray(src_offs, src_offs + len), dest_offs);
-      return;
+
+  const d_code = (dist) => {
+
+    return dist < 256 ? _dist_code[dist] : _dist_code[256 + (dist >>> 7)];
+  };
+
+
+  /* ===========================================================================
+   * Output a short LSB first on the stream.
+   * IN assertion: there is enough room in pendingBuf.
+   */
+  const put_short = (s, w) => {
+  //    put_byte(s, (uch)((w) & 0xff));
+  //    put_byte(s, (uch)((ush)(w) >> 8));
+    s.pending_buf[s.pending++] = (w) & 0xff;
+    s.pending_buf[s.pending++] = (w >>> 8) & 0xff;
+  };
+
+
+  /* ===========================================================================
+   * Send a value on a given number of bits.
+   * IN assertion: length <= 16 and value fits in length bits.
+   */
+  const send_bits = (s, value, length) => {
+
+    if (s.bi_valid > (Buf_size - length)) {
+      s.bi_buf |= (value << s.bi_valid) & 0xffff;
+      put_short(s, s.bi_buf);
+      s.bi_buf = value >> (Buf_size - s.bi_valid);
+      s.bi_valid += length - Buf_size;
+    } else {
+      s.bi_buf |= (value << s.bi_valid) & 0xffff;
+      s.bi_valid += length;
     }
-    // Fallback to ordinary array
-    for (var i = 0; i < len; i++) {
-      dest[dest_offs + i] = src[src_offs + i];
+  };
+
+
+  const send_code = (s, c, tree) => {
+
+    send_bits(s, tree[c * 2]/*.Code*/, tree[c * 2 + 1]/*.Len*/);
+  };
+
+
+  /* ===========================================================================
+   * Reverse the first len bits of a code, using straightforward code (a faster
+   * method would use a table)
+   * IN assertion: 1 <= len <= 15
+   */
+  const bi_reverse = (code, len) => {
+
+    let res = 0;
+    do {
+      res |= code & 1;
+      code >>>= 1;
+      res <<= 1;
+    } while (--len > 0);
+    return res >>> 1;
+  };
+
+
+  /* ===========================================================================
+   * Flush the bit buffer, keeping at most 7 bits in it.
+   */
+  const bi_flush = (s) => {
+
+    if (s.bi_valid === 16) {
+      put_short(s, s.bi_buf);
+      s.bi_buf = 0;
+      s.bi_valid = 0;
+
+    } else if (s.bi_valid >= 8) {
+      s.pending_buf[s.pending++] = s.bi_buf & 0xff;
+      s.bi_buf >>= 8;
+      s.bi_valid -= 8;
     }
-  },
+  };
+
+
+  /* ===========================================================================
+   * Compute the optimal bit lengths for a tree and update the total bit length
+   * for the current block.
+   * IN assertion: the fields freq and dad are set, heap[heap_max] and
+   *    above are the tree nodes sorted by increasing frequency.
+   * OUT assertions: the field len is set to the optimal bit length, the
+   *     array bl_count contains the frequencies for each bit length.
+   *     The length opt_len is updated; static_len is also updated if stree is
+   *     not null.
+   */
+  const gen_bitlen = (s, desc) =>
+  //    deflate_state *s;
+  //    tree_desc *desc;    /* the tree descriptor */
+  {
+    const tree            = desc.dyn_tree;
+    const max_code        = desc.max_code;
+    const stree           = desc.stat_desc.static_tree;
+    const has_stree       = desc.stat_desc.has_stree;
+    const extra           = desc.stat_desc.extra_bits;
+    const base            = desc.stat_desc.extra_base;
+    const max_length      = desc.stat_desc.max_length;
+    let h;              /* heap index */
+    let n, m;           /* iterate over the tree elements */
+    let bits;           /* bit length */
+    let xbits;          /* extra bits */
+    let f;              /* frequency */
+    let overflow = 0;   /* number of elements with bit length too large */
+
+    for (bits = 0; bits <= MAX_BITS$1; bits++) {
+      s.bl_count[bits] = 0;
+    }
+
+    /* In a first pass, compute the optimal bit lengths (which may
+     * overflow in the case of the bit length tree).
+     */
+    tree[s.heap[s.heap_max] * 2 + 1]/*.Len*/ = 0; /* root of the heap */
+
+    for (h = s.heap_max + 1; h < HEAP_SIZE$1; h++) {
+      n = s.heap[h];
+      bits = tree[tree[n * 2 + 1]/*.Dad*/ * 2 + 1]/*.Len*/ + 1;
+      if (bits > max_length) {
+        bits = max_length;
+        overflow++;
+      }
+      tree[n * 2 + 1]/*.Len*/ = bits;
+      /* We overwrite tree[n].Dad which is no longer needed */
+
+      if (n > max_code) { continue; } /* not a leaf node */
+
+      s.bl_count[bits]++;
+      xbits = 0;
+      if (n >= base) {
+        xbits = extra[n - base];
+      }
+      f = tree[n * 2]/*.Freq*/;
+      s.opt_len += f * (bits + xbits);
+      if (has_stree) {
+        s.static_len += f * (stree[n * 2 + 1]/*.Len*/ + xbits);
+      }
+    }
+    if (overflow === 0) { return; }
+
+    // Trace((stderr,"\nbit length overflow\n"));
+    /* This happens for example on obj2 and pic of the Calgary corpus */
+
+    /* Find the first bit length which could increase: */
+    do {
+      bits = max_length - 1;
+      while (s.bl_count[bits] === 0) { bits--; }
+      s.bl_count[bits]--;      /* move one leaf down the tree */
+      s.bl_count[bits + 1] += 2; /* move one overflow item as its brother */
+      s.bl_count[max_length]--;
+      /* The brother of the overflow item also moves one step up,
+       * but this does not affect bl_count[max_length]
+       */
+      overflow -= 2;
+    } while (overflow > 0);
+
+    /* Now recompute all bit lengths, scanning in increasing frequency.
+     * h is still equal to HEAP_SIZE. (It is simpler to reconstruct all
+     * lengths instead of fixing only the wrong ones. This idea is taken
+     * from 'ar' written by Haruhiko Okumura.)
+     */
+    for (bits = max_length; bits !== 0; bits--) {
+      n = s.bl_count[bits];
+      while (n !== 0) {
+        m = s.heap[--h];
+        if (m > max_code) { continue; }
+        if (tree[m * 2 + 1]/*.Len*/ !== bits) {
+          // Trace((stderr,"code %d bits %d->%d\n", m, tree[m].Len, bits));
+          s.opt_len += (bits - tree[m * 2 + 1]/*.Len*/) * tree[m * 2]/*.Freq*/;
+          tree[m * 2 + 1]/*.Len*/ = bits;
+        }
+        n--;
+      }
+    }
+  };
+
+
+  /* ===========================================================================
+   * Generate the codes for a given tree and bit counts (which need not be
+   * optimal).
+   * IN assertion: the array bl_count contains the bit length statistics for
+   * the given tree and the field len is set for all tree elements.
+   * OUT assertion: the field code is set for all tree elements of non
+   *     zero code length.
+   */
+  const gen_codes = (tree, max_code, bl_count) =>
+  //    ct_data *tree;             /* the tree to decorate */
+  //    int max_code;              /* largest code with non zero frequency */
+  //    ushf *bl_count;            /* number of codes at each bit length */
+  {
+    const next_code = new Array(MAX_BITS$1 + 1); /* next code value for each bit length */
+    let code = 0;              /* running code value */
+    let bits;                  /* bit index */
+    let n;                     /* code index */
+
+    /* The distribution counts are first used to generate the code values
+     * without bit reversal.
+     */
+    for (bits = 1; bits <= MAX_BITS$1; bits++) {
+      next_code[bits] = code = (code + bl_count[bits - 1]) << 1;
+    }
+    /* Check that the bit counts in bl_count are consistent. The last code
+     * must be all ones.
+     */
+    //Assert (code + bl_count[MAX_BITS]-1 == (1<<MAX_BITS)-1,
+    //        "inconsistent bit counts");
+    //Tracev((stderr,"\ngen_codes: max_code %d ", max_code));
+
+    for (n = 0;  n <= max_code; n++) {
+      let len = tree[n * 2 + 1]/*.Len*/;
+      if (len === 0) { continue; }
+      /* Now reverse the bits */
+      tree[n * 2]/*.Code*/ = bi_reverse(next_code[len]++, len);
+
+      //Tracecv(tree != static_ltree, (stderr,"\nn %3d %c l %2d c %4x (%x) ",
+      //     n, (isgraph(n) ? n : ' '), len, tree[n].Code, next_code[len]-1));
+    }
+  };
+
+
+  /* ===========================================================================
+   * Initialize the various 'constant' tables.
+   */
+  const tr_static_init = () => {
+
+    let n;        /* iterates over tree elements */
+    let bits;     /* bit counter */
+    let length;   /* length value */
+    let code;     /* code value */
+    let dist;     /* distance index */
+    const bl_count = new Array(MAX_BITS$1 + 1);
+    /* number of codes at each bit length for an optimal tree */
+
+    // do check in _tr_init()
+    //if (static_init_done) return;
+
+    /* For some embedded targets, global variables are not initialized: */
+  /*#ifdef NO_INIT_GLOBAL_POINTERS
+    static_l_desc.static_tree = static_ltree;
+    static_l_desc.extra_bits = extra_lbits;
+    static_d_desc.static_tree = static_dtree;
+    static_d_desc.extra_bits = extra_dbits;
+    static_bl_desc.extra_bits = extra_blbits;
+  #endif*/
+
+    /* Initialize the mapping length (0..255) -> length code (0..28) */
+    length = 0;
+    for (code = 0; code < LENGTH_CODES$1 - 1; code++) {
+      base_length[code] = length;
+      for (n = 0; n < (1 << extra_lbits[code]); n++) {
+        _length_code[length++] = code;
+      }
+    }
+    //Assert (length == 256, "tr_static_init: length != 256");
+    /* Note that the length 255 (match length 258) can be represented
+     * in two different ways: code 284 + 5 bits or code 285, so we
+     * overwrite length_code[255] to use the best encoding:
+     */
+    _length_code[length - 1] = code;
+
+    /* Initialize the mapping dist (0..32K) -> dist code (0..29) */
+    dist = 0;
+    for (code = 0; code < 16; code++) {
+      base_dist[code] = dist;
+      for (n = 0; n < (1 << extra_dbits[code]); n++) {
+        _dist_code[dist++] = code;
+      }
+    }
+    //Assert (dist == 256, "tr_static_init: dist != 256");
+    dist >>= 7; /* from now on, all distances are divided by 128 */
+    for (; code < D_CODES$1; code++) {
+      base_dist[code] = dist << 7;
+      for (n = 0; n < (1 << (extra_dbits[code] - 7)); n++) {
+        _dist_code[256 + dist++] = code;
+      }
+    }
+    //Assert (dist == 256, "tr_static_init: 256+dist != 512");
+
+    /* Construct the codes of the static literal tree */
+    for (bits = 0; bits <= MAX_BITS$1; bits++) {
+      bl_count[bits] = 0;
+    }
+
+    n = 0;
+    while (n <= 143) {
+      static_ltree[n * 2 + 1]/*.Len*/ = 8;
+      n++;
+      bl_count[8]++;
+    }
+    while (n <= 255) {
+      static_ltree[n * 2 + 1]/*.Len*/ = 9;
+      n++;
+      bl_count[9]++;
+    }
+    while (n <= 279) {
+      static_ltree[n * 2 + 1]/*.Len*/ = 7;
+      n++;
+      bl_count[7]++;
+    }
+    while (n <= 287) {
+      static_ltree[n * 2 + 1]/*.Len*/ = 8;
+      n++;
+      bl_count[8]++;
+    }
+    /* Codes 286 and 287 do not exist, but we must include them in the
+     * tree construction to get a canonical Huffman tree (longest code
+     * all ones)
+     */
+    gen_codes(static_ltree, L_CODES$1 + 1, bl_count);
+
+    /* The static distance tree is trivial: */
+    for (n = 0; n < D_CODES$1; n++) {
+      static_dtree[n * 2 + 1]/*.Len*/ = 5;
+      static_dtree[n * 2]/*.Code*/ = bi_reverse(n, 5);
+    }
+
+    // Now data ready and we can init static trees
+    static_l_desc = new StaticTreeDesc(static_ltree, extra_lbits, LITERALS$1 + 1, L_CODES$1, MAX_BITS$1);
+    static_d_desc = new StaticTreeDesc(static_dtree, extra_dbits, 0,          D_CODES$1, MAX_BITS$1);
+    static_bl_desc = new StaticTreeDesc(new Array(0), extra_blbits, 0,         BL_CODES$1, MAX_BL_BITS);
+
+    //static_init_done = true;
+  };
+
+
+  /* ===========================================================================
+   * Initialize a new block.
+   */
+  const init_block = (s) => {
+
+    let n; /* iterates over tree elements */
+
+    /* Initialize the trees. */
+    for (n = 0; n < L_CODES$1;  n++) { s.dyn_ltree[n * 2]/*.Freq*/ = 0; }
+    for (n = 0; n < D_CODES$1;  n++) { s.dyn_dtree[n * 2]/*.Freq*/ = 0; }
+    for (n = 0; n < BL_CODES$1; n++) { s.bl_tree[n * 2]/*.Freq*/ = 0; }
+
+    s.dyn_ltree[END_BLOCK * 2]/*.Freq*/ = 1;
+    s.opt_len = s.static_len = 0;
+    s.last_lit = s.matches = 0;
+  };
+
+
+  /* ===========================================================================
+   * Flush the bit buffer and align the output on a byte boundary
+   */
+  const bi_windup = (s) =>
+  {
+    if (s.bi_valid > 8) {
+      put_short(s, s.bi_buf);
+    } else if (s.bi_valid > 0) {
+      //put_byte(s, (Byte)s->bi_buf);
+      s.pending_buf[s.pending++] = s.bi_buf;
+    }
+    s.bi_buf = 0;
+    s.bi_valid = 0;
+  };
+
+  /* ===========================================================================
+   * Copy a stored block, storing first the length and its
+   * one's complement if requested.
+   */
+  const copy_block = (s, buf, len, header) =>
+  //DeflateState *s;
+  //charf    *buf;    /* the input data */
+  //unsigned len;     /* its length */
+  //int      header;  /* true if block header must be written */
+  {
+    bi_windup(s);        /* align on byte boundary */
+
+    if (header) {
+      put_short(s, len);
+      put_short(s, ~len);
+    }
+  //  while (len--) {
+  //    put_byte(s, *buf++);
+  //  }
+    s.pending_buf.set(s.window.subarray(buf, buf + len), s.pending);
+    s.pending += len;
+  };
+
+  /* ===========================================================================
+   * Compares to subtrees, using the tree depth as tie breaker when
+   * the subtrees have equal frequency. This minimizes the worst case length.
+   */
+  const smaller = (tree, n, m, depth) => {
+
+    const _n2 = n * 2;
+    const _m2 = m * 2;
+    return (tree[_n2]/*.Freq*/ < tree[_m2]/*.Freq*/ ||
+           (tree[_n2]/*.Freq*/ === tree[_m2]/*.Freq*/ && depth[n] <= depth[m]));
+  };
+
+  /* ===========================================================================
+   * Restore the heap property by moving down the tree starting at node k,
+   * exchanging a node with the smallest of its two sons if necessary, stopping
+   * when the heap property is re-established (each father smaller than its
+   * two sons).
+   */
+  const pqdownheap = (s, tree, k) =>
+  //    deflate_state *s;
+  //    ct_data *tree;  /* the tree to restore */
+  //    int k;               /* node to move down */
+  {
+    const v = s.heap[k];
+    let j = k << 1;  /* left son of k */
+    while (j <= s.heap_len) {
+      /* Set j to the smallest of the two sons: */
+      if (j < s.heap_len &&
+        smaller(tree, s.heap[j + 1], s.heap[j], s.depth)) {
+        j++;
+      }
+      /* Exit if v is smaller than both sons */
+      if (smaller(tree, v, s.heap[j], s.depth)) { break; }
+
+      /* Exchange v with the smallest son */
+      s.heap[k] = s.heap[j];
+      k = j;
+
+      /* And continue down the tree, setting j to the left son of k */
+      j <<= 1;
+    }
+    s.heap[k] = v;
+  };
+
+
+  // inlined manually
+  // const SMALLEST = 1;
+
+  /* ===========================================================================
+   * Send the block data compressed using the given Huffman trees
+   */
+  const compress_block = (s, ltree, dtree) =>
+  //    deflate_state *s;
+  //    const ct_data *ltree; /* literal tree */
+  //    const ct_data *dtree; /* distance tree */
+  {
+    let dist;           /* distance of matched string */
+    let lc;             /* match length or unmatched char (if dist == 0) */
+    let lx = 0;         /* running index in l_buf */
+    let code;           /* the code to send */
+    let extra;          /* number of extra bits to send */
+
+    if (s.last_lit !== 0) {
+      do {
+        dist = (s.pending_buf[s.d_buf + lx * 2] << 8) | (s.pending_buf[s.d_buf + lx * 2 + 1]);
+        lc = s.pending_buf[s.l_buf + lx];
+        lx++;
+
+        if (dist === 0) {
+          send_code(s, lc, ltree); /* send a literal byte */
+          //Tracecv(isgraph(lc), (stderr," '%c' ", lc));
+        } else {
+          /* Here, lc is the match length - MIN_MATCH */
+          code = _length_code[lc];
+          send_code(s, code + LITERALS$1 + 1, ltree); /* send the length code */
+          extra = extra_lbits[code];
+          if (extra !== 0) {
+            lc -= base_length[code];
+            send_bits(s, lc, extra);       /* send the extra length bits */
+          }
+          dist--; /* dist is now the match distance - 1 */
+          code = d_code(dist);
+          //Assert (code < D_CODES, "bad d_code");
+
+          send_code(s, code, dtree);       /* send the distance code */
+          extra = extra_dbits[code];
+          if (extra !== 0) {
+            dist -= base_dist[code];
+            send_bits(s, dist, extra);   /* send the extra distance bits */
+          }
+        } /* literal or match pair ? */
+
+        /* Check that the overlay between pending_buf and d_buf+l_buf is ok: */
+        //Assert((uInt)(s->pending) < s->lit_bufsize + 2*lx,
+        //       "pendingBuf overflow");
+
+      } while (lx < s.last_lit);
+    }
+
+    send_code(s, END_BLOCK, ltree);
+  };
+
+
+  /* ===========================================================================
+   * Construct one Huffman tree and assigns the code bit strings and lengths.
+   * Update the total bit length for the current block.
+   * IN assertion: the field freq is set for all tree elements.
+   * OUT assertions: the fields len and code are set to the optimal bit length
+   *     and corresponding code. The length opt_len is updated; static_len is
+   *     also updated if stree is not null. The field max_code is set.
+   */
+  const build_tree = (s, desc) =>
+  //    deflate_state *s;
+  //    tree_desc *desc; /* the tree descriptor */
+  {
+    const tree     = desc.dyn_tree;
+    const stree    = desc.stat_desc.static_tree;
+    const has_stree = desc.stat_desc.has_stree;
+    const elems    = desc.stat_desc.elems;
+    let n, m;          /* iterate over heap elements */
+    let max_code = -1; /* largest code with non zero frequency */
+    let node;          /* new node being created */
+
+    /* Construct the initial heap, with least frequent element in
+     * heap[SMALLEST]. The sons of heap[n] are heap[2*n] and heap[2*n+1].
+     * heap[0] is not used.
+     */
+    s.heap_len = 0;
+    s.heap_max = HEAP_SIZE$1;
+
+    for (n = 0; n < elems; n++) {
+      if (tree[n * 2]/*.Freq*/ !== 0) {
+        s.heap[++s.heap_len] = max_code = n;
+        s.depth[n] = 0;
+
+      } else {
+        tree[n * 2 + 1]/*.Len*/ = 0;
+      }
+    }
+
+    /* The pkzip format requires that at least one distance code exists,
+     * and that at least one bit should be sent even if there is only one
+     * possible code. So to avoid special checks later on we force at least
+     * two codes of non zero frequency.
+     */
+    while (s.heap_len < 2) {
+      node = s.heap[++s.heap_len] = (max_code < 2 ? ++max_code : 0);
+      tree[node * 2]/*.Freq*/ = 1;
+      s.depth[node] = 0;
+      s.opt_len--;
+
+      if (has_stree) {
+        s.static_len -= stree[node * 2 + 1]/*.Len*/;
+      }
+      /* node is 0 or 1 so it does not have extra bits */
+    }
+    desc.max_code = max_code;
+
+    /* The elements heap[heap_len/2+1 .. heap_len] are leaves of the tree,
+     * establish sub-heaps of increasing lengths:
+     */
+    for (n = (s.heap_len >> 1/*int /2*/); n >= 1; n--) { pqdownheap(s, tree, n); }
+
+    /* Construct the Huffman tree by repeatedly combining the least two
+     * frequent nodes.
+     */
+    node = elems;              /* next internal node of the tree */
+    do {
+      //pqremove(s, tree, n);  /* n = node of least frequency */
+      /*** pqremove ***/
+      n = s.heap[1/*SMALLEST*/];
+      s.heap[1/*SMALLEST*/] = s.heap[s.heap_len--];
+      pqdownheap(s, tree, 1/*SMALLEST*/);
+      /***/
+
+      m = s.heap[1/*SMALLEST*/]; /* m = node of next least frequency */
+
+      s.heap[--s.heap_max] = n; /* keep the nodes sorted by frequency */
+      s.heap[--s.heap_max] = m;
+
+      /* Create a new node father of n and m */
+      tree[node * 2]/*.Freq*/ = tree[n * 2]/*.Freq*/ + tree[m * 2]/*.Freq*/;
+      s.depth[node] = (s.depth[n] >= s.depth[m] ? s.depth[n] : s.depth[m]) + 1;
+      tree[n * 2 + 1]/*.Dad*/ = tree[m * 2 + 1]/*.Dad*/ = node;
+
+      /* and insert the new node in the heap */
+      s.heap[1/*SMALLEST*/] = node++;
+      pqdownheap(s, tree, 1/*SMALLEST*/);
+
+    } while (s.heap_len >= 2);
+
+    s.heap[--s.heap_max] = s.heap[1/*SMALLEST*/];
+
+    /* At this point, the fields freq and dad are set. We can now
+     * generate the bit lengths.
+     */
+    gen_bitlen(s, desc);
+
+    /* The field len is now set, we can generate the bit codes */
+    gen_codes(tree, max_code, s.bl_count);
+  };
+
+
+  /* ===========================================================================
+   * Scan a literal or distance tree to determine the frequencies of the codes
+   * in the bit length tree.
+   */
+  const scan_tree = (s, tree, max_code) =>
+  //    deflate_state *s;
+  //    ct_data *tree;   /* the tree to be scanned */
+  //    int max_code;    /* and its largest code of non zero frequency */
+  {
+    let n;                     /* iterates over all tree elements */
+    let prevlen = -1;          /* last emitted length */
+    let curlen;                /* length of current code */
+
+    let nextlen = tree[0 * 2 + 1]/*.Len*/; /* length of next code */
+
+    let count = 0;             /* repeat count of the current code */
+    let max_count = 7;         /* max repeat count */
+    let min_count = 4;         /* min repeat count */
+
+    if (nextlen === 0) {
+      max_count = 138;
+      min_count = 3;
+    }
+    tree[(max_code + 1) * 2 + 1]/*.Len*/ = 0xffff; /* guard */
+
+    for (n = 0; n <= max_code; n++) {
+      curlen = nextlen;
+      nextlen = tree[(n + 1) * 2 + 1]/*.Len*/;
+
+      if (++count < max_count && curlen === nextlen) {
+        continue;
+
+      } else if (count < min_count) {
+        s.bl_tree[curlen * 2]/*.Freq*/ += count;
+
+      } else if (curlen !== 0) {
+
+        if (curlen !== prevlen) { s.bl_tree[curlen * 2]/*.Freq*/++; }
+        s.bl_tree[REP_3_6 * 2]/*.Freq*/++;
+
+      } else if (count <= 10) {
+        s.bl_tree[REPZ_3_10 * 2]/*.Freq*/++;
+
+      } else {
+        s.bl_tree[REPZ_11_138 * 2]/*.Freq*/++;
+      }
+
+      count = 0;
+      prevlen = curlen;
+
+      if (nextlen === 0) {
+        max_count = 138;
+        min_count = 3;
+
+      } else if (curlen === nextlen) {
+        max_count = 6;
+        min_count = 3;
+
+      } else {
+        max_count = 7;
+        min_count = 4;
+      }
+    }
+  };
+
+
+  /* ===========================================================================
+   * Send a literal or distance tree in compressed form, using the codes in
+   * bl_tree.
+   */
+  const send_tree = (s, tree, max_code) =>
+  //    deflate_state *s;
+  //    ct_data *tree; /* the tree to be scanned */
+  //    int max_code;       /* and its largest code of non zero frequency */
+  {
+    let n;                     /* iterates over all tree elements */
+    let prevlen = -1;          /* last emitted length */
+    let curlen;                /* length of current code */
+
+    let nextlen = tree[0 * 2 + 1]/*.Len*/; /* length of next code */
+
+    let count = 0;             /* repeat count of the current code */
+    let max_count = 7;         /* max repeat count */
+    let min_count = 4;         /* min repeat count */
+
+    /* tree[max_code+1].Len = -1; */  /* guard already set */
+    if (nextlen === 0) {
+      max_count = 138;
+      min_count = 3;
+    }
+
+    for (n = 0; n <= max_code; n++) {
+      curlen = nextlen;
+      nextlen = tree[(n + 1) * 2 + 1]/*.Len*/;
+
+      if (++count < max_count && curlen === nextlen) {
+        continue;
+
+      } else if (count < min_count) {
+        do { send_code(s, curlen, s.bl_tree); } while (--count !== 0);
+
+      } else if (curlen !== 0) {
+        if (curlen !== prevlen) {
+          send_code(s, curlen, s.bl_tree);
+          count--;
+        }
+        //Assert(count >= 3 && count <= 6, " 3_6?");
+        send_code(s, REP_3_6, s.bl_tree);
+        send_bits(s, count - 3, 2);
+
+      } else if (count <= 10) {
+        send_code(s, REPZ_3_10, s.bl_tree);
+        send_bits(s, count - 3, 3);
+
+      } else {
+        send_code(s, REPZ_11_138, s.bl_tree);
+        send_bits(s, count - 11, 7);
+      }
+
+      count = 0;
+      prevlen = curlen;
+      if (nextlen === 0) {
+        max_count = 138;
+        min_count = 3;
+
+      } else if (curlen === nextlen) {
+        max_count = 6;
+        min_count = 3;
+
+      } else {
+        max_count = 7;
+        min_count = 4;
+      }
+    }
+  };
+
+
+  /* ===========================================================================
+   * Construct the Huffman tree for the bit lengths and return the index in
+   * bl_order of the last bit length code to send.
+   */
+  const build_bl_tree = (s) => {
+
+    let max_blindex;  /* index of last bit length code of non zero freq */
+
+    /* Determine the bit length frequencies for literal and distance trees */
+    scan_tree(s, s.dyn_ltree, s.l_desc.max_code);
+    scan_tree(s, s.dyn_dtree, s.d_desc.max_code);
+
+    /* Build the bit length tree: */
+    build_tree(s, s.bl_desc);
+    /* opt_len now includes the length of the tree representations, except
+     * the lengths of the bit lengths codes and the 5+5+4 bits for the counts.
+     */
+
+    /* Determine the number of bit length codes to send. The pkzip format
+     * requires that at least 4 bit length codes be sent. (appnote.txt says
+     * 3 but the actual value used is 4.)
+     */
+    for (max_blindex = BL_CODES$1 - 1; max_blindex >= 3; max_blindex--) {
+      if (s.bl_tree[bl_order[max_blindex] * 2 + 1]/*.Len*/ !== 0) {
+        break;
+      }
+    }
+    /* Update opt_len to include the bit length tree and counts */
+    s.opt_len += 3 * (max_blindex + 1) + 5 + 5 + 4;
+    //Tracev((stderr, "\ndyn trees: dyn %ld, stat %ld",
+    //        s->opt_len, s->static_len));
+
+    return max_blindex;
+  };
+
+
+  /* ===========================================================================
+   * Send the header for a block using dynamic Huffman trees: the counts, the
+   * lengths of the bit length codes, the literal tree and the distance tree.
+   * IN assertion: lcodes >= 257, dcodes >= 1, blcodes >= 4.
+   */
+  const send_all_trees = (s, lcodes, dcodes, blcodes) =>
+  //    deflate_state *s;
+  //    int lcodes, dcodes, blcodes; /* number of codes for each tree */
+  {
+    let rank;                    /* index in bl_order */
+
+    //Assert (lcodes >= 257 && dcodes >= 1 && blcodes >= 4, "not enough codes");
+    //Assert (lcodes <= L_CODES && dcodes <= D_CODES && blcodes <= BL_CODES,
+    //        "too many codes");
+    //Tracev((stderr, "\nbl counts: "));
+    send_bits(s, lcodes - 257, 5); /* not +255 as stated in appnote.txt */
+    send_bits(s, dcodes - 1,   5);
+    send_bits(s, blcodes - 4,  4); /* not -3 as stated in appnote.txt */
+    for (rank = 0; rank < blcodes; rank++) {
+      //Tracev((stderr, "\nbl code %2d ", bl_order[rank]));
+      send_bits(s, s.bl_tree[bl_order[rank] * 2 + 1]/*.Len*/, 3);
+    }
+    //Tracev((stderr, "\nbl tree: sent %ld", s->bits_sent));
+
+    send_tree(s, s.dyn_ltree, lcodes - 1); /* literal tree */
+    //Tracev((stderr, "\nlit tree: sent %ld", s->bits_sent));
+
+    send_tree(s, s.dyn_dtree, dcodes - 1); /* distance tree */
+    //Tracev((stderr, "\ndist tree: sent %ld", s->bits_sent));
+  };
+
+
+  /* ===========================================================================
+   * Check if the data type is TEXT or BINARY, using the following algorithm:
+   * - TEXT if the two conditions below are satisfied:
+   *    a) There are no non-portable control characters belonging to the
+   *       "black list" (0..6, 14..25, 28..31).
+   *    b) There is at least one printable character belonging to the
+   *       "white list" (9 {TAB}, 10 {LF}, 13 {CR}, 32..255).
+   * - BINARY otherwise.
+   * - The following partially-portable control characters form a
+   *   "gray list" that is ignored in this detection algorithm:
+   *   (7 {BEL}, 8 {BS}, 11 {VT}, 12 {FF}, 26 {SUB}, 27 {ESC}).
+   * IN assertion: the fields Freq of dyn_ltree are set.
+   */
+  const detect_data_type = (s) => {
+    /* black_mask is the bit mask of black-listed bytes
+     * set bits 0..6, 14..25, and 28..31
+     * 0xf3ffc07f = binary 11110011111111111100000001111111
+     */
+    let black_mask = 0xf3ffc07f;
+    let n;
+
+    /* Check for non-textual ("black-listed") bytes. */
+    for (n = 0; n <= 31; n++, black_mask >>>= 1) {
+      if ((black_mask & 1) && (s.dyn_ltree[n * 2]/*.Freq*/ !== 0)) {
+        return Z_BINARY;
+      }
+    }
+
+    /* Check for textual ("white-listed") bytes. */
+    if (s.dyn_ltree[9 * 2]/*.Freq*/ !== 0 || s.dyn_ltree[10 * 2]/*.Freq*/ !== 0 ||
+        s.dyn_ltree[13 * 2]/*.Freq*/ !== 0) {
+      return Z_TEXT;
+    }
+    for (n = 32; n < LITERALS$1; n++) {
+      if (s.dyn_ltree[n * 2]/*.Freq*/ !== 0) {
+        return Z_TEXT;
+      }
+    }
+
+    /* There are no "black-listed" or "white-listed" bytes:
+     * this stream either is empty or has tolerated ("gray-listed") bytes only.
+     */
+    return Z_BINARY;
+  };
+
+
+  let static_init_done = false;
+
+  /* ===========================================================================
+   * Initialize the tree data structures for a new zlib stream.
+   */
+  const _tr_init$1 = (s) =>
+  {
+
+    if (!static_init_done) {
+      tr_static_init();
+      static_init_done = true;
+    }
+
+    s.l_desc  = new TreeDesc(s.dyn_ltree, static_l_desc);
+    s.d_desc  = new TreeDesc(s.dyn_dtree, static_d_desc);
+    s.bl_desc = new TreeDesc(s.bl_tree, static_bl_desc);
+
+    s.bi_buf = 0;
+    s.bi_valid = 0;
+
+    /* Initialize the first block of the first file: */
+    init_block(s);
+  };
+
+
+  /* ===========================================================================
+   * Send a stored block
+   */
+  const _tr_stored_block$1 = (s, buf, stored_len, last) =>
+  //DeflateState *s;
+  //charf *buf;       /* input block */
+  //ulg stored_len;   /* length of input block */
+  //int last;         /* one if this is the last block for a file */
+  {
+    send_bits(s, (STORED_BLOCK << 1) + (last ? 1 : 0), 3);    /* send block type */
+    copy_block(s, buf, stored_len, true); /* with header */
+  };
+
+
+  /* ===========================================================================
+   * Send one empty static block to give enough lookahead for inflate.
+   * This takes 10 bits, of which 7 may remain in the bit buffer.
+   */
+  const _tr_align$1 = (s) => {
+    send_bits(s, STATIC_TREES << 1, 3);
+    send_code(s, END_BLOCK, static_ltree);
+    bi_flush(s);
+  };
+
+
+  /* ===========================================================================
+   * Determine the best encoding for the current block: dynamic trees, static
+   * trees or store, and output the encoded block to the zip file.
+   */
+  const _tr_flush_block$1 = (s, buf, stored_len, last) =>
+  //DeflateState *s;
+  //charf *buf;       /* input block, or NULL if too old */
+  //ulg stored_len;   /* length of input block */
+  //int last;         /* one if this is the last block for a file */
+  {
+    let opt_lenb, static_lenb;  /* opt_len and static_len in bytes */
+    let max_blindex = 0;        /* index of last bit length code of non zero freq */
+
+    /* Build the Huffman trees unless a stored block is forced */
+    if (s.level > 0) {
+
+      /* Check if the file is binary or text */
+      if (s.strm.data_type === Z_UNKNOWN$1) {
+        s.strm.data_type = detect_data_type(s);
+      }
+
+      /* Construct the literal and distance trees */
+      build_tree(s, s.l_desc);
+      // Tracev((stderr, "\nlit data: dyn %ld, stat %ld", s->opt_len,
+      //        s->static_len));
+
+      build_tree(s, s.d_desc);
+      // Tracev((stderr, "\ndist data: dyn %ld, stat %ld", s->opt_len,
+      //        s->static_len));
+      /* At this point, opt_len and static_len are the total bit lengths of
+       * the compressed block data, excluding the tree representations.
+       */
+
+      /* Build the bit length tree for the above two trees, and get the index
+       * in bl_order of the last bit length code to send.
+       */
+      max_blindex = build_bl_tree(s);
+
+      /* Determine the best encoding. Compute the block lengths in bytes. */
+      opt_lenb = (s.opt_len + 3 + 7) >>> 3;
+      static_lenb = (s.static_len + 3 + 7) >>> 3;
+
+      // Tracev((stderr, "\nopt %lu(%lu) stat %lu(%lu) stored %lu lit %u ",
+      //        opt_lenb, s->opt_len, static_lenb, s->static_len, stored_len,
+      //        s->last_lit));
+
+      if (static_lenb <= opt_lenb) { opt_lenb = static_lenb; }
+
+    } else {
+      // Assert(buf != (char*)0, "lost buf");
+      opt_lenb = static_lenb = stored_len + 5; /* force a stored block */
+    }
+
+    if ((stored_len + 4 <= opt_lenb) && (buf !== -1)) {
+      /* 4: two words for the lengths */
+
+      /* The test buf != NULL is only necessary if LIT_BUFSIZE > WSIZE.
+       * Otherwise we can't have processed more than WSIZE input bytes since
+       * the last block flush, because compression would have been
+       * successful. If LIT_BUFSIZE <= WSIZE, it is never too late to
+       * transform a block into a stored block.
+       */
+      _tr_stored_block$1(s, buf, stored_len, last);
+
+    } else if (s.strategy === Z_FIXED$1 || static_lenb === opt_lenb) {
+
+      send_bits(s, (STATIC_TREES << 1) + (last ? 1 : 0), 3);
+      compress_block(s, static_ltree, static_dtree);
+
+    } else {
+      send_bits(s, (DYN_TREES << 1) + (last ? 1 : 0), 3);
+      send_all_trees(s, s.l_desc.max_code + 1, s.d_desc.max_code + 1, max_blindex + 1);
+      compress_block(s, s.dyn_ltree, s.dyn_dtree);
+    }
+    // Assert (s->compressed_len == s->bits_sent, "bad compressed size");
+    /* The above check is made mod 2^32, for files larger than 512 MB
+     * and uLong implemented on 32 bits.
+     */
+    init_block(s);
+
+    if (last) {
+      bi_windup(s);
+    }
+    // Tracev((stderr,"\ncomprlen %lu(%lu) ", s->compressed_len>>3,
+    //       s->compressed_len-7*last));
+  };
+
+  /* ===========================================================================
+   * Save the match info and tally the frequency counts. Return true if
+   * the current block must be flushed.
+   */
+  const _tr_tally$1 = (s, dist, lc) =>
+  //    deflate_state *s;
+  //    unsigned dist;  /* distance of matched string */
+  //    unsigned lc;    /* match length-MIN_MATCH or unmatched char (if dist==0) */
+  {
+    //let out_length, in_length, dcode;
+
+    s.pending_buf[s.d_buf + s.last_lit * 2]     = (dist >>> 8) & 0xff;
+    s.pending_buf[s.d_buf + s.last_lit * 2 + 1] = dist & 0xff;
+
+    s.pending_buf[s.l_buf + s.last_lit] = lc & 0xff;
+    s.last_lit++;
+
+    if (dist === 0) {
+      /* lc is the unmatched char */
+      s.dyn_ltree[lc * 2]/*.Freq*/++;
+    } else {
+      s.matches++;
+      /* Here, lc is the match length - MIN_MATCH */
+      dist--;             /* dist = match distance - 1 */
+      //Assert((ush)dist < (ush)MAX_DIST(s) &&
+      //       (ush)lc <= (ush)(MAX_MATCH-MIN_MATCH) &&
+      //       (ush)d_code(dist) < (ush)D_CODES,  "_tr_tally: bad match");
+
+      s.dyn_ltree[(_length_code[lc] + LITERALS$1 + 1) * 2]/*.Freq*/++;
+      s.dyn_dtree[d_code(dist) * 2]/*.Freq*/++;
+    }
+
+  // (!) This block is disabled in zlib defaults,
+  // don't enable it for binary compatibility
+
+  //#ifdef TRUNCATE_BLOCK
+  //  /* Try to guess if it is profitable to stop the current block here */
+  //  if ((s.last_lit & 0x1fff) === 0 && s.level > 2) {
+  //    /* Compute an upper bound for the compressed length */
+  //    out_length = s.last_lit*8;
+  //    in_length = s.strstart - s.block_start;
+  //
+  //    for (dcode = 0; dcode < D_CODES; dcode++) {
+  //      out_length += s.dyn_dtree[dcode*2]/*.Freq*/ * (5 + extra_dbits[dcode]);
+  //    }
+  //    out_length >>>= 3;
+  //    //Tracev((stderr,"\nlast_lit %u, in %ld, out ~%ld(%ld%%) ",
+  //    //       s->last_lit, in_length, out_length,
+  //    //       100L - out_length*100L/in_length));
+  //    if (s.matches < (s.last_lit>>1)/*int /2*/ && out_length < (in_length>>1)/*int /2*/) {
+  //      return true;
+  //    }
+  //  }
+  //#endif
+
+    return (s.last_lit === s.lit_bufsize - 1);
+    /* We avoid equality with lit_bufsize because of wraparound at 64K
+     * on 16 bit machines and because stored blocks are restricted to
+     * 64K-1 bytes.
+     */
+  };
+
+  var _tr_init_1  = _tr_init$1;
+  var _tr_stored_block_1 = _tr_stored_block$1;
+  var _tr_flush_block_1  = _tr_flush_block$1;
+  var _tr_tally_1 = _tr_tally$1;
+  var _tr_align_1 = _tr_align$1;
+
+  var trees = {
+  	_tr_init: _tr_init_1,
+  	_tr_stored_block: _tr_stored_block_1,
+  	_tr_flush_block: _tr_flush_block_1,
+  	_tr_tally: _tr_tally_1,
+  	_tr_align: _tr_align_1
+  };
+
+  // Note: adler32 takes 12% for level 0 and 2% for level 6.
+  // It isn't worth it to make additional optimizations as in original.
+  // Small size is preferable.
+
+  // (C) 1995-2013 Jean-loup Gailly and Mark Adler
+  // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+  //
+  // This software is provided 'as-is', without any express or implied
+  // warranty. In no event will the authors be held liable for any damages
+  // arising from the use of this software.
+  //
+  // Permission is granted to anyone to use this software for any purpose,
+  // including commercial applications, and to alter it and redistribute it
+  // freely, subject to the following restrictions:
+  //
+  // 1. The origin of this software must not be misrepresented; you must not
+  //   claim that you wrote the original software. If you use this software
+  //   in a product, an acknowledgment in the product documentation would be
+  //   appreciated but is not required.
+  // 2. Altered source versions must be plainly marked as such, and must not be
+  //   misrepresented as being the original software.
+  // 3. This notice may not be removed or altered from any source distribution.
+
+  const adler32 = (adler, buf, len, pos) => {
+    let s1 = (adler & 0xffff) |0,
+        s2 = ((adler >>> 16) & 0xffff) |0,
+        n = 0;
+
+    while (len !== 0) {
+      // Set limit ~ twice less than 5552, to keep
+      // s2 in 31-bits, because we force signed ints.
+      // in other case %= will fail.
+      n = len > 2000 ? 2000 : len;
+      len -= n;
+
+      do {
+        s1 = (s1 + buf[pos++]) |0;
+        s2 = (s2 + s1) |0;
+      } while (--n);
+
+      s1 %= 65521;
+      s2 %= 65521;
+    }
+
+    return (s1 | (s2 << 16)) |0;
+  };
+
+
+  var adler32_1 = adler32;
+
+  // Note: we can't get significant speed boost here.
+  // So write code to minimize size - no pregenerated tables
+  // and array tools dependencies.
+
+  // (C) 1995-2013 Jean-loup Gailly and Mark Adler
+  // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+  //
+  // This software is provided 'as-is', without any express or implied
+  // warranty. In no event will the authors be held liable for any damages
+  // arising from the use of this software.
+  //
+  // Permission is granted to anyone to use this software for any purpose,
+  // including commercial applications, and to alter it and redistribute it
+  // freely, subject to the following restrictions:
+  //
+  // 1. The origin of this software must not be misrepresented; you must not
+  //   claim that you wrote the original software. If you use this software
+  //   in a product, an acknowledgment in the product documentation would be
+  //   appreciated but is not required.
+  // 2. Altered source versions must be plainly marked as such, and must not be
+  //   misrepresented as being the original software.
+  // 3. This notice may not be removed or altered from any source distribution.
+
+  // Use ordinary array, since untyped makes no boost here
+  const makeTable = () => {
+    let c, table = [];
+
+    for (var n = 0; n < 256; n++) {
+      c = n;
+      for (var k = 0; k < 8; k++) {
+        c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
+      }
+      table[n] = c;
+    }
+
+    return table;
+  };
+
+  // Create table on load. Just 255 signed longs. Not a problem.
+  const crcTable = new Uint32Array(makeTable());
+
+
+  const crc32 = (crc, buf, len, pos) => {
+    const t = crcTable;
+    const end = pos + len;
+
+    crc ^= -1;
+
+    for (let i = pos; i < end; i++) {
+      crc = (crc >>> 8) ^ t[(crc ^ buf[i]) & 0xFF];
+    }
+
+    return (crc ^ (-1)); // >>> 0;
+  };
+
+
+  var crc32_1 = crc32;
+
+  // (C) 1995-2013 Jean-loup Gailly and Mark Adler
+  // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+  //
+  // This software is provided 'as-is', without any express or implied
+  // warranty. In no event will the authors be held liable for any damages
+  // arising from the use of this software.
+  //
+  // Permission is granted to anyone to use this software for any purpose,
+  // including commercial applications, and to alter it and redistribute it
+  // freely, subject to the following restrictions:
+  //
+  // 1. The origin of this software must not be misrepresented; you must not
+  //   claim that you wrote the original software. If you use this software
+  //   in a product, an acknowledgment in the product documentation would be
+  //   appreciated but is not required.
+  // 2. Altered source versions must be plainly marked as such, and must not be
+  //   misrepresented as being the original software.
+  // 3. This notice may not be removed or altered from any source distribution.
+
+  var messages = {
+    2:      'need dictionary',     /* Z_NEED_DICT       2  */
+    1:      'stream end',          /* Z_STREAM_END      1  */
+    0:      '',                    /* Z_OK              0  */
+    '-1':   'file error',          /* Z_ERRNO         (-1) */
+    '-2':   'stream error',        /* Z_STREAM_ERROR  (-2) */
+    '-3':   'data error',          /* Z_DATA_ERROR    (-3) */
+    '-4':   'insufficient memory', /* Z_MEM_ERROR     (-4) */
+    '-5':   'buffer error',        /* Z_BUF_ERROR     (-5) */
+    '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
+  };
+
+  // (C) 1995-2013 Jean-loup Gailly and Mark Adler
+  // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+  //
+  // This software is provided 'as-is', without any express or implied
+  // warranty. In no event will the authors be held liable for any damages
+  // arising from the use of this software.
+  //
+  // Permission is granted to anyone to use this software for any purpose,
+  // including commercial applications, and to alter it and redistribute it
+  // freely, subject to the following restrictions:
+  //
+  // 1. The origin of this software must not be misrepresented; you must not
+  //   claim that you wrote the original software. If you use this software
+  //   in a product, an acknowledgment in the product documentation would be
+  //   appreciated but is not required.
+  // 2. Altered source versions must be plainly marked as such, and must not be
+  //   misrepresented as being the original software.
+  // 3. This notice may not be removed or altered from any source distribution.
+
+  var constants$2 = {
+
+    /* Allowed flush values; see deflate() and inflate() below for details */
+    Z_NO_FLUSH:         0,
+    Z_PARTIAL_FLUSH:    1,
+    Z_SYNC_FLUSH:       2,
+    Z_FULL_FLUSH:       3,
+    Z_FINISH:           4,
+    Z_BLOCK:            5,
+    Z_TREES:            6,
+
+    /* Return codes for the compression/decompression functions. Negative values
+    * are errors, positive values are used for special but normal events.
+    */
+    Z_OK:               0,
+    Z_STREAM_END:       1,
+    Z_NEED_DICT:        2,
+    Z_ERRNO:           -1,
+    Z_STREAM_ERROR:    -2,
+    Z_DATA_ERROR:      -3,
+    Z_MEM_ERROR:       -4,
+    Z_BUF_ERROR:       -5,
+    //Z_VERSION_ERROR: -6,
+
+    /* compression levels */
+    Z_NO_COMPRESSION:         0,
+    Z_BEST_SPEED:             1,
+    Z_BEST_COMPRESSION:       9,
+    Z_DEFAULT_COMPRESSION:   -1,
+
+
+    Z_FILTERED:               1,
+    Z_HUFFMAN_ONLY:           2,
+    Z_RLE:                    3,
+    Z_FIXED:                  4,
+    Z_DEFAULT_STRATEGY:       0,
+
+    /* Possible values of the data_type field (though see inflate()) */
+    Z_BINARY:                 0,
+    Z_TEXT:                   1,
+    //Z_ASCII:                1, // = Z_TEXT (deprecated)
+    Z_UNKNOWN:                2,
+
+    /* The deflate compression method */
+    Z_DEFLATED:               8
+    //Z_NULL:                 null // Use -1 or null inline, depending on var type
+  };
+
+  // (C) 1995-2013 Jean-loup Gailly and Mark Adler
+  // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+  //
+  // This software is provided 'as-is', without any express or implied
+  // warranty. In no event will the authors be held liable for any damages
+  // arising from the use of this software.
+  //
+  // Permission is granted to anyone to use this software for any purpose,
+  // including commercial applications, and to alter it and redistribute it
+  // freely, subject to the following restrictions:
+  //
+  // 1. The origin of this software must not be misrepresented; you must not
+  //   claim that you wrote the original software. If you use this software
+  //   in a product, an acknowledgment in the product documentation would be
+  //   appreciated but is not required.
+  // 2. Altered source versions must be plainly marked as such, and must not be
+  //   misrepresented as being the original software.
+  // 3. This notice may not be removed or altered from any source distribution.
+
+  const { _tr_init, _tr_stored_block, _tr_flush_block, _tr_tally, _tr_align } = trees;
+
+
+
+
+  /* Public constants ==========================================================*/
+  /* ===========================================================================*/
+
+  const {
+    Z_NO_FLUSH: Z_NO_FLUSH$2, Z_PARTIAL_FLUSH, Z_FULL_FLUSH: Z_FULL_FLUSH$1, Z_FINISH: Z_FINISH$3, Z_BLOCK: Z_BLOCK$1,
+    Z_OK: Z_OK$3, Z_STREAM_END: Z_STREAM_END$3, Z_STREAM_ERROR: Z_STREAM_ERROR$2, Z_DATA_ERROR: Z_DATA_ERROR$2, Z_BUF_ERROR: Z_BUF_ERROR$1,
+    Z_DEFAULT_COMPRESSION: Z_DEFAULT_COMPRESSION$1,
+    Z_FILTERED, Z_HUFFMAN_ONLY, Z_RLE, Z_FIXED, Z_DEFAULT_STRATEGY: Z_DEFAULT_STRATEGY$1,
+    Z_UNKNOWN,
+    Z_DEFLATED: Z_DEFLATED$2
+  } = constants$2;
+
+  /*============================================================================*/
+
+
+  const MAX_MEM_LEVEL = 9;
+  /* Maximum value for memLevel in deflateInit2 */
+  const MAX_WBITS$1 = 15;
+  /* 32K LZ77 window */
+  const DEF_MEM_LEVEL = 8;
+
+
+  const LENGTH_CODES  = 29;
+  /* number of length codes, not counting the special END_BLOCK code */
+  const LITERALS      = 256;
+  /* number of literal bytes 0..255 */
+  const L_CODES       = LITERALS + 1 + LENGTH_CODES;
+  /* number of Literal or Length codes, including the END_BLOCK code */
+  const D_CODES       = 30;
+  /* number of distance codes */
+  const BL_CODES      = 19;
+  /* number of codes used to transfer the bit lengths */
+  const HEAP_SIZE     = 2 * L_CODES + 1;
+  /* maximum heap size */
+  const MAX_BITS  = 15;
+  /* All codes must not exceed MAX_BITS bits */
+
+  const MIN_MATCH = 3;
+  const MAX_MATCH = 258;
+  const MIN_LOOKAHEAD = (MAX_MATCH + MIN_MATCH + 1);
+
+  const PRESET_DICT = 0x20;
+
+  const INIT_STATE = 42;
+  const EXTRA_STATE = 69;
+  const NAME_STATE = 73;
+  const COMMENT_STATE = 91;
+  const HCRC_STATE = 103;
+  const BUSY_STATE = 113;
+  const FINISH_STATE = 666;
+
+  const BS_NEED_MORE      = 1; /* block not completed, need more input or more output */
+  const BS_BLOCK_DONE     = 2; /* block flush performed */
+  const BS_FINISH_STARTED = 3; /* finish started, need only more output at next deflate */
+  const BS_FINISH_DONE    = 4; /* finish done, accept no more input or output */
+
+  const OS_CODE = 0x03; // Unix :) . Don't detect, use this default.
+
+  const err = (strm, errorCode) => {
+    strm.msg = messages[errorCode];
+    return errorCode;
+  };
+
+  const rank = (f) => {
+    return ((f) << 1) - ((f) > 4 ? 9 : 0);
+  };
+
+  const zero = (buf) => {
+    let len = buf.length; while (--len >= 0) { buf[len] = 0; }
+  };
+
+
+  /* eslint-disable new-cap */
+  let HASH_ZLIB = (s, prev, data) => ((prev << s.hash_shift) ^ data) & s.hash_mask;
+  // This hash causes less collisions, https://github.com/nodeca/pako/issues/135
+  // But breaks binary compatibility
+  //let HASH_FAST = (s, prev, data) => ((prev << 8) + (prev >> 8) + (data << 4)) & s.hash_mask;
+  let HASH = HASH_ZLIB;
+
+  /* =========================================================================
+   * Flush as much pending output as possible. All deflate() output goes
+   * through this function so some applications may wish to modify it
+   * to avoid allocating a large strm->output buffer and copying into it.
+   * (See also read_buf()).
+   */
+  const flush_pending = (strm) => {
+    const s = strm.state;
+
+    //_tr_flush_bits(s);
+    let len = s.pending;
+    if (len > strm.avail_out) {
+      len = strm.avail_out;
+    }
+    if (len === 0) { return; }
+
+    strm.output.set(s.pending_buf.subarray(s.pending_out, s.pending_out + len), strm.next_out);
+    strm.next_out += len;
+    s.pending_out += len;
+    strm.total_out += len;
+    strm.avail_out -= len;
+    s.pending -= len;
+    if (s.pending === 0) {
+      s.pending_out = 0;
+    }
+  };
+
+
+  const flush_block_only = (s, last) => {
+    _tr_flush_block(s, (s.block_start >= 0 ? s.block_start : -1), s.strstart - s.block_start, last);
+    s.block_start = s.strstart;
+    flush_pending(s.strm);
+  };
+
+
+  const put_byte = (s, b) => {
+    s.pending_buf[s.pending++] = b;
+  };
+
+
+  /* =========================================================================
+   * Put a short in the pending buffer. The 16-bit value is put in MSB order.
+   * IN assertion: the stream state is correct and there is enough room in
+   * pending_buf.
+   */
+  const putShortMSB = (s, b) => {
+
+    //  put_byte(s, (Byte)(b >> 8));
+  //  put_byte(s, (Byte)(b & 0xff));
+    s.pending_buf[s.pending++] = (b >>> 8) & 0xff;
+    s.pending_buf[s.pending++] = b & 0xff;
+  };
+
+
+  /* ===========================================================================
+   * Read a new buffer from the current input stream, update the adler32
+   * and total number of bytes read.  All deflate() input goes through
+   * this function so some applications may wish to modify it to avoid
+   * allocating a large strm->input buffer and copying from it.
+   * (See also flush_pending()).
+   */
+  const read_buf = (strm, buf, start, size) => {
+
+    let len = strm.avail_in;
+
+    if (len > size) { len = size; }
+    if (len === 0) { return 0; }
+
+    strm.avail_in -= len;
+
+    // zmemcpy(buf, strm->next_in, len);
+    buf.set(strm.input.subarray(strm.next_in, strm.next_in + len), start);
+    if (strm.state.wrap === 1) {
+      strm.adler = adler32_1(strm.adler, buf, len, start);
+    }
+
+    else if (strm.state.wrap === 2) {
+      strm.adler = crc32_1(strm.adler, buf, len, start);
+    }
+
+    strm.next_in += len;
+    strm.total_in += len;
+
+    return len;
+  };
+
+
+  /* ===========================================================================
+   * Set match_start to the longest match starting at the given string and
+   * return its length. Matches shorter or equal to prev_length are discarded,
+   * in which case the result is equal to prev_length and match_start is
+   * garbage.
+   * IN assertions: cur_match is the head of the hash chain for the current
+   *   string (strstart) and its distance is <= MAX_DIST, and prev_length >= 1
+   * OUT assertion: the match length is not greater than s->lookahead.
+   */
+  const longest_match = (s, cur_match) => {
+
+    let chain_length = s.max_chain_length;      /* max hash chain length */
+    let scan = s.strstart; /* current string */
+    let match;                       /* matched string */
+    let len;                           /* length of current match */
+    let best_len = s.prev_length;              /* best match length so far */
+    let nice_match = s.nice_match;             /* stop if match long enough */
+    const limit = (s.strstart > (s.w_size - MIN_LOOKAHEAD)) ?
+        s.strstart - (s.w_size - MIN_LOOKAHEAD) : 0/*NIL*/;
+
+    const _win = s.window; // shortcut
+
+    const wmask = s.w_mask;
+    const prev  = s.prev;
+
+    /* Stop when cur_match becomes <= limit. To simplify the code,
+     * we prevent matches with the string of window index 0.
+     */
+
+    const strend = s.strstart + MAX_MATCH;
+    let scan_end1  = _win[scan + best_len - 1];
+    let scan_end   = _win[scan + best_len];
+
+    /* The code is optimized for HASH_BITS >= 8 and MAX_MATCH-2 multiple of 16.
+     * It is easy to get rid of this optimization if necessary.
+     */
+    // Assert(s->hash_bits >= 8 && MAX_MATCH == 258, "Code too clever");
+
+    /* Do not waste too much time if we already have a good match: */
+    if (s.prev_length >= s.good_match) {
+      chain_length >>= 2;
+    }
+    /* Do not look for matches beyond the end of the input. This is necessary
+     * to make deflate deterministic.
+     */
+    if (nice_match > s.lookahead) { nice_match = s.lookahead; }
+
+    // Assert((ulg)s->strstart <= s->window_size-MIN_LOOKAHEAD, "need lookahead");
+
+    do {
+      // Assert(cur_match < s->strstart, "no future");
+      match = cur_match;
+
+      /* Skip to next match if the match length cannot increase
+       * or if the match length is less than 2.  Note that the checks below
+       * for insufficient lookahead only occur occasionally for performance
+       * reasons.  Therefore uninitialized memory will be accessed, and
+       * conditional jumps will be made that depend on those values.
+       * However the length of the match is limited to the lookahead, so
+       * the output of deflate is not affected by the uninitialized values.
+       */
+
+      if (_win[match + best_len]     !== scan_end  ||
+          _win[match + best_len - 1] !== scan_end1 ||
+          _win[match]                !== _win[scan] ||
+          _win[++match]              !== _win[scan + 1]) {
+        continue;
+      }
+
+      /* The check at best_len-1 can be removed because it will be made
+       * again later. (This heuristic is not always a win.)
+       * It is not necessary to compare scan[2] and match[2] since they
+       * are always equal when the other bytes match, given that
+       * the hash keys are equal and that HASH_BITS >= 8.
+       */
+      scan += 2;
+      match++;
+      // Assert(*scan == *match, "match[2]?");
+
+      /* We check for insufficient lookahead only every 8th comparison;
+       * the 256th check will be made at strstart+258.
+       */
+      do {
+        /*jshint noempty:false*/
+      } while (_win[++scan] === _win[++match] && _win[++scan] === _win[++match] &&
+               _win[++scan] === _win[++match] && _win[++scan] === _win[++match] &&
+               _win[++scan] === _win[++match] && _win[++scan] === _win[++match] &&
+               _win[++scan] === _win[++match] && _win[++scan] === _win[++match] &&
+               scan < strend);
+
+      // Assert(scan <= s->window+(unsigned)(s->window_size-1), "wild scan");
+
+      len = MAX_MATCH - (strend - scan);
+      scan = strend - MAX_MATCH;
+
+      if (len > best_len) {
+        s.match_start = cur_match;
+        best_len = len;
+        if (len >= nice_match) {
+          break;
+        }
+        scan_end1  = _win[scan + best_len - 1];
+        scan_end   = _win[scan + best_len];
+      }
+    } while ((cur_match = prev[cur_match & wmask]) > limit && --chain_length !== 0);
+
+    if (best_len <= s.lookahead) {
+      return best_len;
+    }
+    return s.lookahead;
+  };
+
+
+  /* ===========================================================================
+   * Fill the window when the lookahead becomes insufficient.
+   * Updates strstart and lookahead.
+   *
+   * IN assertion: lookahead < MIN_LOOKAHEAD
+   * OUT assertions: strstart <= window_size-MIN_LOOKAHEAD
+   *    At least one byte has been read, or avail_in == 0; reads are
+   *    performed for at least two bytes (required for the zip translate_eol
+   *    option -- not supported here).
+   */
+  const fill_window = (s) => {
+
+    const _w_size = s.w_size;
+    let p, n, m, more, str;
+
+    //Assert(s->lookahead < MIN_LOOKAHEAD, "already enough lookahead");
+
+    do {
+      more = s.window_size - s.lookahead - s.strstart;
+
+      // JS ints have 32 bit, block below not needed
+      /* Deal with !@#$% 64K limit: */
+      //if (sizeof(int) <= 2) {
+      //    if (more == 0 && s->strstart == 0 && s->lookahead == 0) {
+      //        more = wsize;
+      //
+      //  } else if (more == (unsigned)(-1)) {
+      //        /* Very unlikely, but possible on 16 bit machine if
+      //         * strstart == 0 && lookahead == 1 (input done a byte at time)
+      //         */
+      //        more--;
+      //    }
+      //}
+
+
+      /* If the window is almost full and there is insufficient lookahead,
+       * move the upper half to the lower one to make room in the upper half.
+       */
+      if (s.strstart >= _w_size + (_w_size - MIN_LOOKAHEAD)) {
+
+        s.window.set(s.window.subarray(_w_size, _w_size + _w_size), 0);
+        s.match_start -= _w_size;
+        s.strstart -= _w_size;
+        /* we now have strstart >= MAX_DIST */
+        s.block_start -= _w_size;
+
+        /* Slide the hash table (could be avoided with 32 bit values
+         at the expense of memory usage). We slide even when level == 0
+         to keep the hash table consistent if we switch back to level > 0
+         later. (Using level 0 permanently is not an optimal usage of
+         zlib, so we don't care about this pathological case.)
+         */
+
+        n = s.hash_size;
+        p = n;
+
+        do {
+          m = s.head[--p];
+          s.head[p] = (m >= _w_size ? m - _w_size : 0);
+        } while (--n);
+
+        n = _w_size;
+        p = n;
+
+        do {
+          m = s.prev[--p];
+          s.prev[p] = (m >= _w_size ? m - _w_size : 0);
+          /* If n is not on any hash chain, prev[n] is garbage but
+           * its value will never be used.
+           */
+        } while (--n);
+
+        more += _w_size;
+      }
+      if (s.strm.avail_in === 0) {
+        break;
+      }
+
+      /* If there was no sliding:
+       *    strstart <= WSIZE+MAX_DIST-1 && lookahead <= MIN_LOOKAHEAD - 1 &&
+       *    more == window_size - lookahead - strstart
+       * => more >= window_size - (MIN_LOOKAHEAD-1 + WSIZE + MAX_DIST-1)
+       * => more >= window_size - 2*WSIZE + 2
+       * In the BIG_MEM or MMAP case (not yet supported),
+       *   window_size == input_size + MIN_LOOKAHEAD  &&
+       *   strstart + s->lookahead <= input_size => more >= MIN_LOOKAHEAD.
+       * Otherwise, window_size == 2*WSIZE so more >= 2.
+       * If there was sliding, more >= WSIZE. So in all cases, more >= 2.
+       */
+      //Assert(more >= 2, "more < 2");
+      n = read_buf(s.strm, s.window, s.strstart + s.lookahead, more);
+      s.lookahead += n;
+
+      /* Initialize the hash value now that we have some input: */
+      if (s.lookahead + s.insert >= MIN_MATCH) {
+        str = s.strstart - s.insert;
+        s.ins_h = s.window[str];
+
+        /* UPDATE_HASH(s, s->ins_h, s->window[str + 1]); */
+        s.ins_h = HASH(s, s.ins_h, s.window[str + 1]);
+  //#if MIN_MATCH != 3
+  //        Call update_hash() MIN_MATCH-3 more times
+  //#endif
+        while (s.insert) {
+          /* UPDATE_HASH(s, s->ins_h, s->window[str + MIN_MATCH-1]); */
+          s.ins_h = HASH(s, s.ins_h, s.window[str + MIN_MATCH - 1]);
+
+          s.prev[str & s.w_mask] = s.head[s.ins_h];
+          s.head[s.ins_h] = str;
+          str++;
+          s.insert--;
+          if (s.lookahead + s.insert < MIN_MATCH) {
+            break;
+          }
+        }
+      }
+      /* If the whole input has less than MIN_MATCH bytes, ins_h is garbage,
+       * but this is not important since only literal bytes will be emitted.
+       */
+
+    } while (s.lookahead < MIN_LOOKAHEAD && s.strm.avail_in !== 0);
+
+    /* If the WIN_INIT bytes after the end of the current data have never been
+     * written, then zero those bytes in order to avoid memory check reports of
+     * the use of uninitialized (or uninitialised as Julian writes) bytes by
+     * the longest match routines.  Update the high water mark for the next
+     * time through here.  WIN_INIT is set to MAX_MATCH since the longest match
+     * routines allow scanning to strstart + MAX_MATCH, ignoring lookahead.
+     */
+  //  if (s.high_water < s.window_size) {
+  //    const curr = s.strstart + s.lookahead;
+  //    let init = 0;
+  //
+  //    if (s.high_water < curr) {
+  //      /* Previous high water mark below current data -- zero WIN_INIT
+  //       * bytes or up to end of window, whichever is less.
+  //       */
+  //      init = s.window_size - curr;
+  //      if (init > WIN_INIT)
+  //        init = WIN_INIT;
+  //      zmemzero(s->window + curr, (unsigned)init);
+  //      s->high_water = curr + init;
+  //    }
+  //    else if (s->high_water < (ulg)curr + WIN_INIT) {
+  //      /* High water mark at or above current data, but below current data
+  //       * plus WIN_INIT -- zero out to current data plus WIN_INIT, or up
+  //       * to end of window, whichever is less.
+  //       */
+  //      init = (ulg)curr + WIN_INIT - s->high_water;
+  //      if (init > s->window_size - s->high_water)
+  //        init = s->window_size - s->high_water;
+  //      zmemzero(s->window + s->high_water, (unsigned)init);
+  //      s->high_water += init;
+  //    }
+  //  }
+  //
+  //  Assert((ulg)s->strstart <= s->window_size - MIN_LOOKAHEAD,
+  //    "not enough room for search");
+  };
+
+  /* ===========================================================================
+   * Copy without compression as much as possible from the input stream, return
+   * the current block state.
+   * This function does not insert new strings in the dictionary since
+   * uncompressible data is probably not useful. This function is used
+   * only for the level=0 compression option.
+   * NOTE: this function should be optimized to avoid extra copying from
+   * window to pending_buf.
+   */
+  const deflate_stored = (s, flush) => {
+
+    /* Stored blocks are limited to 0xffff bytes, pending_buf is limited
+     * to pending_buf_size, and each stored block has a 5 byte header:
+     */
+    let max_block_size = 0xffff;
+
+    if (max_block_size > s.pending_buf_size - 5) {
+      max_block_size = s.pending_buf_size - 5;
+    }
+
+    /* Copy as much as possible from input to output: */
+    for (;;) {
+      /* Fill the window as much as possible: */
+      if (s.lookahead <= 1) {
+
+        //Assert(s->strstart < s->w_size+MAX_DIST(s) ||
+        //  s->block_start >= (long)s->w_size, "slide too late");
+  //      if (!(s.strstart < s.w_size + (s.w_size - MIN_LOOKAHEAD) ||
+  //        s.block_start >= s.w_size)) {
+  //        throw  new Error("slide too late");
+  //      }
+
+        fill_window(s);
+        if (s.lookahead === 0 && flush === Z_NO_FLUSH$2) {
+          return BS_NEED_MORE;
+        }
+
+        if (s.lookahead === 0) {
+          break;
+        }
+        /* flush the current block */
+      }
+      //Assert(s->block_start >= 0L, "block gone");
+  //    if (s.block_start < 0) throw new Error("block gone");
+
+      s.strstart += s.lookahead;
+      s.lookahead = 0;
+
+      /* Emit a stored block if pending_buf will be full: */
+      const max_start = s.block_start + max_block_size;
+
+      if (s.strstart === 0 || s.strstart >= max_start) {
+        /* strstart == 0 is possible when wraparound on 16-bit machine */
+        s.lookahead = s.strstart - max_start;
+        s.strstart = max_start;
+        /*** FLUSH_BLOCK(s, 0); ***/
+        flush_block_only(s, false);
+        if (s.strm.avail_out === 0) {
+          return BS_NEED_MORE;
+        }
+        /***/
+
+
+      }
+      /* Flush if we may have to slide, otherwise block_start may become
+       * negative and the data will be gone:
+       */
+      if (s.strstart - s.block_start >= (s.w_size - MIN_LOOKAHEAD)) {
+        /*** FLUSH_BLOCK(s, 0); ***/
+        flush_block_only(s, false);
+        if (s.strm.avail_out === 0) {
+          return BS_NEED_MORE;
+        }
+        /***/
+      }
+    }
+
+    s.insert = 0;
+
+    if (flush === Z_FINISH$3) {
+      /*** FLUSH_BLOCK(s, 1); ***/
+      flush_block_only(s, true);
+      if (s.strm.avail_out === 0) {
+        return BS_FINISH_STARTED;
+      }
+      /***/
+      return BS_FINISH_DONE;
+    }
+
+    if (s.strstart > s.block_start) {
+      /*** FLUSH_BLOCK(s, 0); ***/
+      flush_block_only(s, false);
+      if (s.strm.avail_out === 0) {
+        return BS_NEED_MORE;
+      }
+      /***/
+    }
+
+    return BS_NEED_MORE;
+  };
+
+  /* ===========================================================================
+   * Compress as much as possible from the input stream, return the current
+   * block state.
+   * This function does not perform lazy evaluation of matches and inserts
+   * new strings in the dictionary only for unmatched strings or for short
+   * matches. It is used only for the fast compression options.
+   */
+  const deflate_fast = (s, flush) => {
+
+    let hash_head;        /* head of the hash chain */
+    let bflush;           /* set if current block must be flushed */
+
+    for (;;) {
+      /* Make sure that we always have enough lookahead, except
+       * at the end of the input file. We need MAX_MATCH bytes
+       * for the next match, plus MIN_MATCH bytes to insert the
+       * string following the next match.
+       */
+      if (s.lookahead < MIN_LOOKAHEAD) {
+        fill_window(s);
+        if (s.lookahead < MIN_LOOKAHEAD && flush === Z_NO_FLUSH$2) {
+          return BS_NEED_MORE;
+        }
+        if (s.lookahead === 0) {
+          break; /* flush the current block */
+        }
+      }
+
+      /* Insert the string window[strstart .. strstart+2] in the
+       * dictionary, and set hash_head to the head of the hash chain:
+       */
+      hash_head = 0/*NIL*/;
+      if (s.lookahead >= MIN_MATCH) {
+        /*** INSERT_STRING(s, s.strstart, hash_head); ***/
+        s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
+        hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
+        s.head[s.ins_h] = s.strstart;
+        /***/
+      }
+
+      /* Find the longest match, discarding those <= prev_length.
+       * At this point we have always match_length < MIN_MATCH
+       */
+      if (hash_head !== 0/*NIL*/ && ((s.strstart - hash_head) <= (s.w_size - MIN_LOOKAHEAD))) {
+        /* To simplify the code, we prevent matches with the string
+         * of window index 0 (in particular we have to avoid a match
+         * of the string with itself at the start of the input file).
+         */
+        s.match_length = longest_match(s, hash_head);
+        /* longest_match() sets match_start */
+      }
+      if (s.match_length >= MIN_MATCH) {
+        // check_match(s, s.strstart, s.match_start, s.match_length); // for debug only
+
+        /*** _tr_tally_dist(s, s.strstart - s.match_start,
+                       s.match_length - MIN_MATCH, bflush); ***/
+        bflush = _tr_tally(s, s.strstart - s.match_start, s.match_length - MIN_MATCH);
+
+        s.lookahead -= s.match_length;
+
+        /* Insert new strings in the hash table only if the match length
+         * is not too large. This saves time but degrades compression.
+         */
+        if (s.match_length <= s.max_lazy_match/*max_insert_length*/ && s.lookahead >= MIN_MATCH) {
+          s.match_length--; /* string at strstart already in table */
+          do {
+            s.strstart++;
+            /*** INSERT_STRING(s, s.strstart, hash_head); ***/
+            s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
+            hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
+            s.head[s.ins_h] = s.strstart;
+            /***/
+            /* strstart never exceeds WSIZE-MAX_MATCH, so there are
+             * always MIN_MATCH bytes ahead.
+             */
+          } while (--s.match_length !== 0);
+          s.strstart++;
+        } else
+        {
+          s.strstart += s.match_length;
+          s.match_length = 0;
+          s.ins_h = s.window[s.strstart];
+          /* UPDATE_HASH(s, s.ins_h, s.window[s.strstart+1]); */
+          s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + 1]);
+
+  //#if MIN_MATCH != 3
+  //                Call UPDATE_HASH() MIN_MATCH-3 more times
+  //#endif
+          /* If lookahead < MIN_MATCH, ins_h is garbage, but it does not
+           * matter since it will be recomputed at next deflate call.
+           */
+        }
+      } else {
+        /* No match, output a literal byte */
+        //Tracevv((stderr,"%c", s.window[s.strstart]));
+        /*** _tr_tally_lit(s, s.window[s.strstart], bflush); ***/
+        bflush = _tr_tally(s, 0, s.window[s.strstart]);
+
+        s.lookahead--;
+        s.strstart++;
+      }
+      if (bflush) {
+        /*** FLUSH_BLOCK(s, 0); ***/
+        flush_block_only(s, false);
+        if (s.strm.avail_out === 0) {
+          return BS_NEED_MORE;
+        }
+        /***/
+      }
+    }
+    s.insert = ((s.strstart < (MIN_MATCH - 1)) ? s.strstart : MIN_MATCH - 1);
+    if (flush === Z_FINISH$3) {
+      /*** FLUSH_BLOCK(s, 1); ***/
+      flush_block_only(s, true);
+      if (s.strm.avail_out === 0) {
+        return BS_FINISH_STARTED;
+      }
+      /***/
+      return BS_FINISH_DONE;
+    }
+    if (s.last_lit) {
+      /*** FLUSH_BLOCK(s, 0); ***/
+      flush_block_only(s, false);
+      if (s.strm.avail_out === 0) {
+        return BS_NEED_MORE;
+      }
+      /***/
+    }
+    return BS_BLOCK_DONE;
+  };
+
+  /* ===========================================================================
+   * Same as above, but achieves better compression. We use a lazy
+   * evaluation for matches: a match is finally adopted only if there is
+   * no better match at the next window position.
+   */
+  const deflate_slow = (s, flush) => {
+
+    let hash_head;          /* head of hash chain */
+    let bflush;              /* set if current block must be flushed */
+
+    let max_insert;
+
+    /* Process the input block. */
+    for (;;) {
+      /* Make sure that we always have enough lookahead, except
+       * at the end of the input file. We need MAX_MATCH bytes
+       * for the next match, plus MIN_MATCH bytes to insert the
+       * string following the next match.
+       */
+      if (s.lookahead < MIN_LOOKAHEAD) {
+        fill_window(s);
+        if (s.lookahead < MIN_LOOKAHEAD && flush === Z_NO_FLUSH$2) {
+          return BS_NEED_MORE;
+        }
+        if (s.lookahead === 0) { break; } /* flush the current block */
+      }
+
+      /* Insert the string window[strstart .. strstart+2] in the
+       * dictionary, and set hash_head to the head of the hash chain:
+       */
+      hash_head = 0/*NIL*/;
+      if (s.lookahead >= MIN_MATCH) {
+        /*** INSERT_STRING(s, s.strstart, hash_head); ***/
+        s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
+        hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
+        s.head[s.ins_h] = s.strstart;
+        /***/
+      }
+
+      /* Find the longest match, discarding those <= prev_length.
+       */
+      s.prev_length = s.match_length;
+      s.prev_match = s.match_start;
+      s.match_length = MIN_MATCH - 1;
+
+      if (hash_head !== 0/*NIL*/ && s.prev_length < s.max_lazy_match &&
+          s.strstart - hash_head <= (s.w_size - MIN_LOOKAHEAD)/*MAX_DIST(s)*/) {
+        /* To simplify the code, we prevent matches with the string
+         * of window index 0 (in particular we have to avoid a match
+         * of the string with itself at the start of the input file).
+         */
+        s.match_length = longest_match(s, hash_head);
+        /* longest_match() sets match_start */
+
+        if (s.match_length <= 5 &&
+           (s.strategy === Z_FILTERED || (s.match_length === MIN_MATCH && s.strstart - s.match_start > 4096/*TOO_FAR*/))) {
+
+          /* If prev_match is also MIN_MATCH, match_start is garbage
+           * but we will ignore the current match anyway.
+           */
+          s.match_length = MIN_MATCH - 1;
+        }
+      }
+      /* If there was a match at the previous step and the current
+       * match is not better, output the previous match:
+       */
+      if (s.prev_length >= MIN_MATCH && s.match_length <= s.prev_length) {
+        max_insert = s.strstart + s.lookahead - MIN_MATCH;
+        /* Do not insert strings in hash table beyond this. */
+
+        //check_match(s, s.strstart-1, s.prev_match, s.prev_length);
+
+        /***_tr_tally_dist(s, s.strstart - 1 - s.prev_match,
+                       s.prev_length - MIN_MATCH, bflush);***/
+        bflush = _tr_tally(s, s.strstart - 1 - s.prev_match, s.prev_length - MIN_MATCH);
+        /* Insert in hash table all strings up to the end of the match.
+         * strstart-1 and strstart are already inserted. If there is not
+         * enough lookahead, the last two strings are not inserted in
+         * the hash table.
+         */
+        s.lookahead -= s.prev_length - 1;
+        s.prev_length -= 2;
+        do {
+          if (++s.strstart <= max_insert) {
+            /*** INSERT_STRING(s, s.strstart, hash_head); ***/
+            s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
+            hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
+            s.head[s.ins_h] = s.strstart;
+            /***/
+          }
+        } while (--s.prev_length !== 0);
+        s.match_available = 0;
+        s.match_length = MIN_MATCH - 1;
+        s.strstart++;
+
+        if (bflush) {
+          /*** FLUSH_BLOCK(s, 0); ***/
+          flush_block_only(s, false);
+          if (s.strm.avail_out === 0) {
+            return BS_NEED_MORE;
+          }
+          /***/
+        }
+
+      } else if (s.match_available) {
+        /* If there was no match at the previous position, output a
+         * single literal. If there was a match but the current match
+         * is longer, truncate the previous match to a single literal.
+         */
+        //Tracevv((stderr,"%c", s->window[s->strstart-1]));
+        /*** _tr_tally_lit(s, s.window[s.strstart-1], bflush); ***/
+        bflush = _tr_tally(s, 0, s.window[s.strstart - 1]);
+
+        if (bflush) {
+          /*** FLUSH_BLOCK_ONLY(s, 0) ***/
+          flush_block_only(s, false);
+          /***/
+        }
+        s.strstart++;
+        s.lookahead--;
+        if (s.strm.avail_out === 0) {
+          return BS_NEED_MORE;
+        }
+      } else {
+        /* There is no previous match to compare with, wait for
+         * the next step to decide.
+         */
+        s.match_available = 1;
+        s.strstart++;
+        s.lookahead--;
+      }
+    }
+    //Assert (flush != Z_NO_FLUSH, "no flush?");
+    if (s.match_available) {
+      //Tracevv((stderr,"%c", s->window[s->strstart-1]));
+      /*** _tr_tally_lit(s, s.window[s.strstart-1], bflush); ***/
+      bflush = _tr_tally(s, 0, s.window[s.strstart - 1]);
+
+      s.match_available = 0;
+    }
+    s.insert = s.strstart < MIN_MATCH - 1 ? s.strstart : MIN_MATCH - 1;
+    if (flush === Z_FINISH$3) {
+      /*** FLUSH_BLOCK(s, 1); ***/
+      flush_block_only(s, true);
+      if (s.strm.avail_out === 0) {
+        return BS_FINISH_STARTED;
+      }
+      /***/
+      return BS_FINISH_DONE;
+    }
+    if (s.last_lit) {
+      /*** FLUSH_BLOCK(s, 0); ***/
+      flush_block_only(s, false);
+      if (s.strm.avail_out === 0) {
+        return BS_NEED_MORE;
+      }
+      /***/
+    }
+
+    return BS_BLOCK_DONE;
+  };
+
+
+  /* ===========================================================================
+   * For Z_RLE, simply look for runs of bytes, generate matches only of distance
+   * one.  Do not maintain a hash table.  (It will be regenerated if this run of
+   * deflate switches away from Z_RLE.)
+   */
+  const deflate_rle = (s, flush) => {
+
+    let bflush;            /* set if current block must be flushed */
+    let prev;              /* byte at distance one to match */
+    let scan, strend;      /* scan goes up to strend for length of run */
+
+    const _win = s.window;
+
+    for (;;) {
+      /* Make sure that we always have enough lookahead, except
+       * at the end of the input file. We need MAX_MATCH bytes
+       * for the longest run, plus one for the unrolled loop.
+       */
+      if (s.lookahead <= MAX_MATCH) {
+        fill_window(s);
+        if (s.lookahead <= MAX_MATCH && flush === Z_NO_FLUSH$2) {
+          return BS_NEED_MORE;
+        }
+        if (s.lookahead === 0) { break; } /* flush the current block */
+      }
+
+      /* See how many times the previous byte repeats */
+      s.match_length = 0;
+      if (s.lookahead >= MIN_MATCH && s.strstart > 0) {
+        scan = s.strstart - 1;
+        prev = _win[scan];
+        if (prev === _win[++scan] && prev === _win[++scan] && prev === _win[++scan]) {
+          strend = s.strstart + MAX_MATCH;
+          do {
+            /*jshint noempty:false*/
+          } while (prev === _win[++scan] && prev === _win[++scan] &&
+                   prev === _win[++scan] && prev === _win[++scan] &&
+                   prev === _win[++scan] && prev === _win[++scan] &&
+                   prev === _win[++scan] && prev === _win[++scan] &&
+                   scan < strend);
+          s.match_length = MAX_MATCH - (strend - scan);
+          if (s.match_length > s.lookahead) {
+            s.match_length = s.lookahead;
+          }
+        }
+        //Assert(scan <= s->window+(uInt)(s->window_size-1), "wild scan");
+      }
+
+      /* Emit match if have run of MIN_MATCH or longer, else emit literal */
+      if (s.match_length >= MIN_MATCH) {
+        //check_match(s, s.strstart, s.strstart - 1, s.match_length);
+
+        /*** _tr_tally_dist(s, 1, s.match_length - MIN_MATCH, bflush); ***/
+        bflush = _tr_tally(s, 1, s.match_length - MIN_MATCH);
+
+        s.lookahead -= s.match_length;
+        s.strstart += s.match_length;
+        s.match_length = 0;
+      } else {
+        /* No match, output a literal byte */
+        //Tracevv((stderr,"%c", s->window[s->strstart]));
+        /*** _tr_tally_lit(s, s.window[s.strstart], bflush); ***/
+        bflush = _tr_tally(s, 0, s.window[s.strstart]);
+
+        s.lookahead--;
+        s.strstart++;
+      }
+      if (bflush) {
+        /*** FLUSH_BLOCK(s, 0); ***/
+        flush_block_only(s, false);
+        if (s.strm.avail_out === 0) {
+          return BS_NEED_MORE;
+        }
+        /***/
+      }
+    }
+    s.insert = 0;
+    if (flush === Z_FINISH$3) {
+      /*** FLUSH_BLOCK(s, 1); ***/
+      flush_block_only(s, true);
+      if (s.strm.avail_out === 0) {
+        return BS_FINISH_STARTED;
+      }
+      /***/
+      return BS_FINISH_DONE;
+    }
+    if (s.last_lit) {
+      /*** FLUSH_BLOCK(s, 0); ***/
+      flush_block_only(s, false);
+      if (s.strm.avail_out === 0) {
+        return BS_NEED_MORE;
+      }
+      /***/
+    }
+    return BS_BLOCK_DONE;
+  };
+
+  /* ===========================================================================
+   * For Z_HUFFMAN_ONLY, do not look for matches.  Do not maintain a hash table.
+   * (It will be regenerated if this run of deflate switches away from Huffman.)
+   */
+  const deflate_huff = (s, flush) => {
+
+    let bflush;             /* set if current block must be flushed */
+
+    for (;;) {
+      /* Make sure that we have a literal to write. */
+      if (s.lookahead === 0) {
+        fill_window(s);
+        if (s.lookahead === 0) {
+          if (flush === Z_NO_FLUSH$2) {
+            return BS_NEED_MORE;
+          }
+          break;      /* flush the current block */
+        }
+      }
+
+      /* Output a literal byte */
+      s.match_length = 0;
+      //Tracevv((stderr,"%c", s->window[s->strstart]));
+      /*** _tr_tally_lit(s, s.window[s.strstart], bflush); ***/
+      bflush = _tr_tally(s, 0, s.window[s.strstart]);
+      s.lookahead--;
+      s.strstart++;
+      if (bflush) {
+        /*** FLUSH_BLOCK(s, 0); ***/
+        flush_block_only(s, false);
+        if (s.strm.avail_out === 0) {
+          return BS_NEED_MORE;
+        }
+        /***/
+      }
+    }
+    s.insert = 0;
+    if (flush === Z_FINISH$3) {
+      /*** FLUSH_BLOCK(s, 1); ***/
+      flush_block_only(s, true);
+      if (s.strm.avail_out === 0) {
+        return BS_FINISH_STARTED;
+      }
+      /***/
+      return BS_FINISH_DONE;
+    }
+    if (s.last_lit) {
+      /*** FLUSH_BLOCK(s, 0); ***/
+      flush_block_only(s, false);
+      if (s.strm.avail_out === 0) {
+        return BS_NEED_MORE;
+      }
+      /***/
+    }
+    return BS_BLOCK_DONE;
+  };
+
+  /* Values for max_lazy_match, good_match and max_chain_length, depending on
+   * the desired pack level (0..9). The values given below have been tuned to
+   * exclude worst case performance for pathological files. Better values may be
+   * found for specific files.
+   */
+  function Config(good_length, max_lazy, nice_length, max_chain, func) {
+
+    this.good_length = good_length;
+    this.max_lazy = max_lazy;
+    this.nice_length = nice_length;
+    this.max_chain = max_chain;
+    this.func = func;
+  }
+
+  const configuration_table = [
+    /*      good lazy nice chain */
+    new Config(0, 0, 0, 0, deflate_stored),          /* 0 store only */
+    new Config(4, 4, 8, 4, deflate_fast),            /* 1 max speed, no lazy matches */
+    new Config(4, 5, 16, 8, deflate_fast),           /* 2 */
+    new Config(4, 6, 32, 32, deflate_fast),          /* 3 */
+
+    new Config(4, 4, 16, 16, deflate_slow),          /* 4 lazy matches */
+    new Config(8, 16, 32, 32, deflate_slow),         /* 5 */
+    new Config(8, 16, 128, 128, deflate_slow),       /* 6 */
+    new Config(8, 32, 128, 256, deflate_slow),       /* 7 */
+    new Config(32, 128, 258, 1024, deflate_slow),    /* 8 */
+    new Config(32, 258, 258, 4096, deflate_slow)     /* 9 max compression */
+  ];
+
+
+  /* ===========================================================================
+   * Initialize the "longest match" routines for a new zlib stream
+   */
+  const lm_init = (s) => {
+
+    s.window_size = 2 * s.w_size;
+
+    /*** CLEAR_HASH(s); ***/
+    zero(s.head); // Fill with NIL (= 0);
+
+    /* Set the default configuration parameters:
+     */
+    s.max_lazy_match = configuration_table[s.level].max_lazy;
+    s.good_match = configuration_table[s.level].good_length;
+    s.nice_match = configuration_table[s.level].nice_length;
+    s.max_chain_length = configuration_table[s.level].max_chain;
+
+    s.strstart = 0;
+    s.block_start = 0;
+    s.lookahead = 0;
+    s.insert = 0;
+    s.match_length = s.prev_length = MIN_MATCH - 1;
+    s.match_available = 0;
+    s.ins_h = 0;
+  };
+
+
+  function DeflateState() {
+    this.strm = null;            /* pointer back to this zlib stream */
+    this.status = 0;            /* as the name implies */
+    this.pending_buf = null;      /* output still pending */
+    this.pending_buf_size = 0;  /* size of pending_buf */
+    this.pending_out = 0;       /* next pending byte to output to the stream */
+    this.pending = 0;           /* nb of bytes in the pending buffer */
+    this.wrap = 0;              /* bit 0 true for zlib, bit 1 true for gzip */
+    this.gzhead = null;         /* gzip header information to write */
+    this.gzindex = 0;           /* where in extra, name, or comment */
+    this.method = Z_DEFLATED$2; /* can only be DEFLATED */
+    this.last_flush = -1;   /* value of flush param for previous deflate call */
+
+    this.w_size = 0;  /* LZ77 window size (32K by default) */
+    this.w_bits = 0;  /* log2(w_size)  (8..16) */
+    this.w_mask = 0;  /* w_size - 1 */
+
+    this.window = null;
+    /* Sliding window. Input bytes are read into the second half of the window,
+     * and move to the first half later to keep a dictionary of at least wSize
+     * bytes. With this organization, matches are limited to a distance of
+     * wSize-MAX_MATCH bytes, but this ensures that IO is always
+     * performed with a length multiple of the block size.
+     */
+
+    this.window_size = 0;
+    /* Actual size of window: 2*wSize, except when the user input buffer
+     * is directly used as sliding window.
+     */
+
+    this.prev = null;
+    /* Link to older string with same hash index. To limit the size of this
+     * array to 64K, this link is maintained only for the last 32K strings.
+     * An index in this array is thus a window index modulo 32K.
+     */
+
+    this.head = null;   /* Heads of the hash chains or NIL. */
+
+    this.ins_h = 0;       /* hash index of string to be inserted */
+    this.hash_size = 0;   /* number of elements in hash table */
+    this.hash_bits = 0;   /* log2(hash_size) */
+    this.hash_mask = 0;   /* hash_size-1 */
+
+    this.hash_shift = 0;
+    /* Number of bits by which ins_h must be shifted at each input
+     * step. It must be such that after MIN_MATCH steps, the oldest
+     * byte no longer takes part in the hash key, that is:
+     *   hash_shift * MIN_MATCH >= hash_bits
+     */
+
+    this.block_start = 0;
+    /* Window position at the beginning of the current output block. Gets
+     * negative when the window is moved backwards.
+     */
+
+    this.match_length = 0;      /* length of best match */
+    this.prev_match = 0;        /* previous match */
+    this.match_available = 0;   /* set if previous match exists */
+    this.strstart = 0;          /* start of string to insert */
+    this.match_start = 0;       /* start of matching string */
+    this.lookahead = 0;         /* number of valid bytes ahead in window */
+
+    this.prev_length = 0;
+    /* Length of the best match at previous step. Matches not greater than this
+     * are discarded. This is used in the lazy match evaluation.
+     */
+
+    this.max_chain_length = 0;
+    /* To speed up deflation, hash chains are never searched beyond this
+     * length.  A higher limit improves compression ratio but degrades the
+     * speed.
+     */
+
+    this.max_lazy_match = 0;
+    /* Attempt to find a better match only when the current match is strictly
+     * smaller than this value. This mechanism is used only for compression
+     * levels >= 4.
+     */
+    // That's alias to max_lazy_match, don't use directly
+    //this.max_insert_length = 0;
+    /* Insert new strings in the hash table only if the match length is not
+     * greater than this length. This saves time but degrades compression.
+     * max_insert_length is used only for compression levels <= 3.
+     */
+
+    this.level = 0;     /* compression level (1..9) */
+    this.strategy = 0;  /* favor or force Huffman coding*/
+
+    this.good_match = 0;
+    /* Use a faster search when the previous match is longer than this */
+
+    this.nice_match = 0; /* Stop searching when current match exceeds this */
+
+                /* used by trees.c: */
+
+    /* Didn't use ct_data typedef below to suppress compiler warning */
+
+    // struct ct_data_s dyn_ltree[HEAP_SIZE];   /* literal and length tree */
+    // struct ct_data_s dyn_dtree[2*D_CODES+1]; /* distance tree */
+    // struct ct_data_s bl_tree[2*BL_CODES+1];  /* Huffman tree for bit lengths */
+
+    // Use flat array of DOUBLE size, with interleaved fata,
+    // because JS does not support effective
+    this.dyn_ltree  = new Uint16Array(HEAP_SIZE * 2);
+    this.dyn_dtree  = new Uint16Array((2 * D_CODES + 1) * 2);
+    this.bl_tree    = new Uint16Array((2 * BL_CODES + 1) * 2);
+    zero(this.dyn_ltree);
+    zero(this.dyn_dtree);
+    zero(this.bl_tree);
+
+    this.l_desc   = null;         /* desc. for literal tree */
+    this.d_desc   = null;         /* desc. for distance tree */
+    this.bl_desc  = null;         /* desc. for bit length tree */
+
+    //ush bl_count[MAX_BITS+1];
+    this.bl_count = new Uint16Array(MAX_BITS + 1);
+    /* number of codes at each bit length for an optimal tree */
+
+    //int heap[2*L_CODES+1];      /* heap used to build the Huffman trees */
+    this.heap = new Uint16Array(2 * L_CODES + 1);  /* heap used to build the Huffman trees */
+    zero(this.heap);
+
+    this.heap_len = 0;               /* number of elements in the heap */
+    this.heap_max = 0;               /* element of largest frequency */
+    /* The sons of heap[n] are heap[2*n] and heap[2*n+1]. heap[0] is not used.
+     * The same heap array is used to build all trees.
+     */
+
+    this.depth = new Uint16Array(2 * L_CODES + 1); //uch depth[2*L_CODES+1];
+    zero(this.depth);
+    /* Depth of each subtree used as tie breaker for trees of equal frequency
+     */
+
+    this.l_buf = 0;          /* buffer index for literals or lengths */
+
+    this.lit_bufsize = 0;
+    /* Size of match buffer for literals/lengths.  There are 4 reasons for
+     * limiting lit_bufsize to 64K:
+     *   - frequencies can be kept in 16 bit counters
+     *   - if compression is not successful for the first block, all input
+     *     data is still in the window so we can still emit a stored block even
+     *     when input comes from standard input.  (This can also be done for
+     *     all blocks if lit_bufsize is not greater than 32K.)
+     *   - if compression is not successful for a file smaller than 64K, we can
+     *     even emit a stored file instead of a stored block (saving 5 bytes).
+     *     This is applicable only for zip (not gzip or zlib).
+     *   - creating new Huffman trees less frequently may not provide fast
+     *     adaptation to changes in the input data statistics. (Take for
+     *     example a binary file with poorly compressible code followed by
+     *     a highly compressible string table.) Smaller buffer sizes give
+     *     fast adaptation but have of course the overhead of transmitting
+     *     trees more frequently.
+     *   - I can't count above 4
+     */
+
+    this.last_lit = 0;      /* running index in l_buf */
+
+    this.d_buf = 0;
+    /* Buffer index for distances. To simplify the code, d_buf and l_buf have
+     * the same number of elements. To use different lengths, an extra flag
+     * array would be necessary.
+     */
+
+    this.opt_len = 0;       /* bit length of current block with optimal trees */
+    this.static_len = 0;    /* bit length of current block with static trees */
+    this.matches = 0;       /* number of string matches in current block */
+    this.insert = 0;        /* bytes at end of window left to insert */
+
+
+    this.bi_buf = 0;
+    /* Output buffer. bits are inserted starting at the bottom (least
+     * significant bits).
+     */
+    this.bi_valid = 0;
+    /* Number of valid bits in bi_buf.  All bits above the last valid bit
+     * are always zero.
+     */
+
+    // Used for window memory init. We safely ignore it for JS. That makes
+    // sense only for pointers and memory check tools.
+    //this.high_water = 0;
+    /* High water mark offset in window for initialized bytes -- bytes above
+     * this are set to zero in order to avoid memory check warnings when
+     * longest match routines access bytes past the input.  This is then
+     * updated to the new high water mark.
+     */
+  }
+
+
+  const deflateResetKeep = (strm) => {
+
+    if (!strm || !strm.state) {
+      return err(strm, Z_STREAM_ERROR$2);
+    }
+
+    strm.total_in = strm.total_out = 0;
+    strm.data_type = Z_UNKNOWN;
+
+    const s = strm.state;
+    s.pending = 0;
+    s.pending_out = 0;
+
+    if (s.wrap < 0) {
+      s.wrap = -s.wrap;
+      /* was made negative by deflate(..., Z_FINISH); */
+    }
+    s.status = (s.wrap ? INIT_STATE : BUSY_STATE);
+    strm.adler = (s.wrap === 2) ?
+      0  // crc32(0, Z_NULL, 0)
+    :
+      1; // adler32(0, Z_NULL, 0)
+    s.last_flush = Z_NO_FLUSH$2;
+    _tr_init(s);
+    return Z_OK$3;
+  };
+
+
+  const deflateReset = (strm) => {
+
+    const ret = deflateResetKeep(strm);
+    if (ret === Z_OK$3) {
+      lm_init(strm.state);
+    }
+    return ret;
+  };
+
+
+  const deflateSetHeader = (strm, head) => {
+
+    if (!strm || !strm.state) { return Z_STREAM_ERROR$2; }
+    if (strm.state.wrap !== 2) { return Z_STREAM_ERROR$2; }
+    strm.state.gzhead = head;
+    return Z_OK$3;
+  };
+
+
+  const deflateInit2 = (strm, level, method, windowBits, memLevel, strategy) => {
+
+    if (!strm) { // === Z_NULL
+      return Z_STREAM_ERROR$2;
+    }
+    let wrap = 1;
+
+    if (level === Z_DEFAULT_COMPRESSION$1) {
+      level = 6;
+    }
+
+    if (windowBits < 0) { /* suppress zlib wrapper */
+      wrap = 0;
+      windowBits = -windowBits;
+    }
+
+    else if (windowBits > 15) {
+      wrap = 2;           /* write gzip wrapper instead */
+      windowBits -= 16;
+    }
+
+
+    if (memLevel < 1 || memLevel > MAX_MEM_LEVEL || method !== Z_DEFLATED$2 ||
+      windowBits < 8 || windowBits > 15 || level < 0 || level > 9 ||
+      strategy < 0 || strategy > Z_FIXED) {
+      return err(strm, Z_STREAM_ERROR$2);
+    }
+
+
+    if (windowBits === 8) {
+      windowBits = 9;
+    }
+    /* until 256-byte window bug fixed */
+
+    const s = new DeflateState();
+
+    strm.state = s;
+    s.strm = strm;
+
+    s.wrap = wrap;
+    s.gzhead = null;
+    s.w_bits = windowBits;
+    s.w_size = 1 << s.w_bits;
+    s.w_mask = s.w_size - 1;
+
+    s.hash_bits = memLevel + 7;
+    s.hash_size = 1 << s.hash_bits;
+    s.hash_mask = s.hash_size - 1;
+    s.hash_shift = ~~((s.hash_bits + MIN_MATCH - 1) / MIN_MATCH);
+
+    s.window = new Uint8Array(s.w_size * 2);
+    s.head = new Uint16Array(s.hash_size);
+    s.prev = new Uint16Array(s.w_size);
+
+    // Don't need mem init magic for JS.
+    //s.high_water = 0;  /* nothing written to s->window yet */
+
+    s.lit_bufsize = 1 << (memLevel + 6); /* 16K elements by default */
+
+    s.pending_buf_size = s.lit_bufsize * 4;
+
+    //overlay = (ushf *) ZALLOC(strm, s->lit_bufsize, sizeof(ush)+2);
+    //s->pending_buf = (uchf *) overlay;
+    s.pending_buf = new Uint8Array(s.pending_buf_size);
+
+    // It is offset from `s.pending_buf` (size is `s.lit_bufsize * 2`)
+    //s->d_buf = overlay + s->lit_bufsize/sizeof(ush);
+    s.d_buf = 1 * s.lit_bufsize;
+
+    //s->l_buf = s->pending_buf + (1+sizeof(ush))*s->lit_bufsize;
+    s.l_buf = (1 + 2) * s.lit_bufsize;
+
+    s.level = level;
+    s.strategy = strategy;
+    s.method = method;
+
+    return deflateReset(strm);
+  };
+
+  const deflateInit = (strm, level) => {
+
+    return deflateInit2(strm, level, Z_DEFLATED$2, MAX_WBITS$1, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY$1);
+  };
+
+
+  const deflate$2 = (strm, flush) => {
+
+    let beg, val; // for gzip header write only
+
+    if (!strm || !strm.state ||
+      flush > Z_BLOCK$1 || flush < 0) {
+      return strm ? err(strm, Z_STREAM_ERROR$2) : Z_STREAM_ERROR$2;
+    }
+
+    const s = strm.state;
+
+    if (!strm.output ||
+        (!strm.input && strm.avail_in !== 0) ||
+        (s.status === FINISH_STATE && flush !== Z_FINISH$3)) {
+      return err(strm, (strm.avail_out === 0) ? Z_BUF_ERROR$1 : Z_STREAM_ERROR$2);
+    }
+
+    s.strm = strm; /* just in case */
+    const old_flush = s.last_flush;
+    s.last_flush = flush;
+
+    /* Write the header */
+    if (s.status === INIT_STATE) {
+
+      if (s.wrap === 2) { // GZIP header
+        strm.adler = 0;  //crc32(0L, Z_NULL, 0);
+        put_byte(s, 31);
+        put_byte(s, 139);
+        put_byte(s, 8);
+        if (!s.gzhead) { // s->gzhead == Z_NULL
+          put_byte(s, 0);
+          put_byte(s, 0);
+          put_byte(s, 0);
+          put_byte(s, 0);
+          put_byte(s, 0);
+          put_byte(s, s.level === 9 ? 2 :
+                      (s.strategy >= Z_HUFFMAN_ONLY || s.level < 2 ?
+                       4 : 0));
+          put_byte(s, OS_CODE);
+          s.status = BUSY_STATE;
+        }
+        else {
+          put_byte(s, (s.gzhead.text ? 1 : 0) +
+                      (s.gzhead.hcrc ? 2 : 0) +
+                      (!s.gzhead.extra ? 0 : 4) +
+                      (!s.gzhead.name ? 0 : 8) +
+                      (!s.gzhead.comment ? 0 : 16)
+          );
+          put_byte(s, s.gzhead.time & 0xff);
+          put_byte(s, (s.gzhead.time >> 8) & 0xff);
+          put_byte(s, (s.gzhead.time >> 16) & 0xff);
+          put_byte(s, (s.gzhead.time >> 24) & 0xff);
+          put_byte(s, s.level === 9 ? 2 :
+                      (s.strategy >= Z_HUFFMAN_ONLY || s.level < 2 ?
+                       4 : 0));
+          put_byte(s, s.gzhead.os & 0xff);
+          if (s.gzhead.extra && s.gzhead.extra.length) {
+            put_byte(s, s.gzhead.extra.length & 0xff);
+            put_byte(s, (s.gzhead.extra.length >> 8) & 0xff);
+          }
+          if (s.gzhead.hcrc) {
+            strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending, 0);
+          }
+          s.gzindex = 0;
+          s.status = EXTRA_STATE;
+        }
+      }
+      else // DEFLATE header
+      {
+        let header = (Z_DEFLATED$2 + ((s.w_bits - 8) << 4)) << 8;
+        let level_flags = -1;
+
+        if (s.strategy >= Z_HUFFMAN_ONLY || s.level < 2) {
+          level_flags = 0;
+        } else if (s.level < 6) {
+          level_flags = 1;
+        } else if (s.level === 6) {
+          level_flags = 2;
+        } else {
+          level_flags = 3;
+        }
+        header |= (level_flags << 6);
+        if (s.strstart !== 0) { header |= PRESET_DICT; }
+        header += 31 - (header % 31);
+
+        s.status = BUSY_STATE;
+        putShortMSB(s, header);
+
+        /* Save the adler32 of the preset dictionary: */
+        if (s.strstart !== 0) {
+          putShortMSB(s, strm.adler >>> 16);
+          putShortMSB(s, strm.adler & 0xffff);
+        }
+        strm.adler = 1; // adler32(0L, Z_NULL, 0);
+      }
+    }
+
+  //#ifdef GZIP
+    if (s.status === EXTRA_STATE) {
+      if (s.gzhead.extra/* != Z_NULL*/) {
+        beg = s.pending;  /* start of bytes to update crc */
+
+        while (s.gzindex < (s.gzhead.extra.length & 0xffff)) {
+          if (s.pending === s.pending_buf_size) {
+            if (s.gzhead.hcrc && s.pending > beg) {
+              strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+            }
+            flush_pending(strm);
+            beg = s.pending;
+            if (s.pending === s.pending_buf_size) {
+              break;
+            }
+          }
+          put_byte(s, s.gzhead.extra[s.gzindex] & 0xff);
+          s.gzindex++;
+        }
+        if (s.gzhead.hcrc && s.pending > beg) {
+          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        }
+        if (s.gzindex === s.gzhead.extra.length) {
+          s.gzindex = 0;
+          s.status = NAME_STATE;
+        }
+      }
+      else {
+        s.status = NAME_STATE;
+      }
+    }
+    if (s.status === NAME_STATE) {
+      if (s.gzhead.name/* != Z_NULL*/) {
+        beg = s.pending;  /* start of bytes to update crc */
+        //int val;
+
+        do {
+          if (s.pending === s.pending_buf_size) {
+            if (s.gzhead.hcrc && s.pending > beg) {
+              strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+            }
+            flush_pending(strm);
+            beg = s.pending;
+            if (s.pending === s.pending_buf_size) {
+              val = 1;
+              break;
+            }
+          }
+          // JS specific: little magic to add zero terminator to end of string
+          if (s.gzindex < s.gzhead.name.length) {
+            val = s.gzhead.name.charCodeAt(s.gzindex++) & 0xff;
+          } else {
+            val = 0;
+          }
+          put_byte(s, val);
+        } while (val !== 0);
+
+        if (s.gzhead.hcrc && s.pending > beg) {
+          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        }
+        if (val === 0) {
+          s.gzindex = 0;
+          s.status = COMMENT_STATE;
+        }
+      }
+      else {
+        s.status = COMMENT_STATE;
+      }
+    }
+    if (s.status === COMMENT_STATE) {
+      if (s.gzhead.comment/* != Z_NULL*/) {
+        beg = s.pending;  /* start of bytes to update crc */
+        //int val;
+
+        do {
+          if (s.pending === s.pending_buf_size) {
+            if (s.gzhead.hcrc && s.pending > beg) {
+              strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+            }
+            flush_pending(strm);
+            beg = s.pending;
+            if (s.pending === s.pending_buf_size) {
+              val = 1;
+              break;
+            }
+          }
+          // JS specific: little magic to add zero terminator to end of string
+          if (s.gzindex < s.gzhead.comment.length) {
+            val = s.gzhead.comment.charCodeAt(s.gzindex++) & 0xff;
+          } else {
+            val = 0;
+          }
+          put_byte(s, val);
+        } while (val !== 0);
+
+        if (s.gzhead.hcrc && s.pending > beg) {
+          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        }
+        if (val === 0) {
+          s.status = HCRC_STATE;
+        }
+      }
+      else {
+        s.status = HCRC_STATE;
+      }
+    }
+    if (s.status === HCRC_STATE) {
+      if (s.gzhead.hcrc) {
+        if (s.pending + 2 > s.pending_buf_size) {
+          flush_pending(strm);
+        }
+        if (s.pending + 2 <= s.pending_buf_size) {
+          put_byte(s, strm.adler & 0xff);
+          put_byte(s, (strm.adler >> 8) & 0xff);
+          strm.adler = 0; //crc32(0L, Z_NULL, 0);
+          s.status = BUSY_STATE;
+        }
+      }
+      else {
+        s.status = BUSY_STATE;
+      }
+    }
+  //#endif
+
+    /* Flush as much pending output as possible */
+    if (s.pending !== 0) {
+      flush_pending(strm);
+      if (strm.avail_out === 0) {
+        /* Since avail_out is 0, deflate will be called again with
+         * more output space, but possibly with both pending and
+         * avail_in equal to zero. There won't be anything to do,
+         * but this is not an error situation so make sure we
+         * return OK instead of BUF_ERROR at next call of deflate:
+         */
+        s.last_flush = -1;
+        return Z_OK$3;
+      }
+
+      /* Make sure there is something to do and avoid duplicate consecutive
+       * flushes. For repeated and useless calls with Z_FINISH, we keep
+       * returning Z_STREAM_END instead of Z_BUF_ERROR.
+       */
+    } else if (strm.avail_in === 0 && rank(flush) <= rank(old_flush) &&
+      flush !== Z_FINISH$3) {
+      return err(strm, Z_BUF_ERROR$1);
+    }
+
+    /* User must not provide more input after the first FINISH: */
+    if (s.status === FINISH_STATE && strm.avail_in !== 0) {
+      return err(strm, Z_BUF_ERROR$1);
+    }
+
+    /* Start a new block or continue the current one.
+     */
+    if (strm.avail_in !== 0 || s.lookahead !== 0 ||
+      (flush !== Z_NO_FLUSH$2 && s.status !== FINISH_STATE)) {
+      let bstate = (s.strategy === Z_HUFFMAN_ONLY) ? deflate_huff(s, flush) :
+        (s.strategy === Z_RLE ? deflate_rle(s, flush) :
+          configuration_table[s.level].func(s, flush));
+
+      if (bstate === BS_FINISH_STARTED || bstate === BS_FINISH_DONE) {
+        s.status = FINISH_STATE;
+      }
+      if (bstate === BS_NEED_MORE || bstate === BS_FINISH_STARTED) {
+        if (strm.avail_out === 0) {
+          s.last_flush = -1;
+          /* avoid BUF_ERROR next call, see above */
+        }
+        return Z_OK$3;
+        /* If flush != Z_NO_FLUSH && avail_out == 0, the next call
+         * of deflate should use the same flush parameter to make sure
+         * that the flush is complete. So we don't have to output an
+         * empty block here, this will be done at next call. This also
+         * ensures that for a very small output buffer, we emit at most
+         * one empty block.
+         */
+      }
+      if (bstate === BS_BLOCK_DONE) {
+        if (flush === Z_PARTIAL_FLUSH) {
+          _tr_align(s);
+        }
+        else if (flush !== Z_BLOCK$1) { /* FULL_FLUSH or SYNC_FLUSH */
+
+          _tr_stored_block(s, 0, 0, false);
+          /* For a full flush, this empty block will be recognized
+           * as a special marker by inflate_sync().
+           */
+          if (flush === Z_FULL_FLUSH$1) {
+            /*** CLEAR_HASH(s); ***/             /* forget history */
+            zero(s.head); // Fill with NIL (= 0);
+
+            if (s.lookahead === 0) {
+              s.strstart = 0;
+              s.block_start = 0;
+              s.insert = 0;
+            }
+          }
+        }
+        flush_pending(strm);
+        if (strm.avail_out === 0) {
+          s.last_flush = -1; /* avoid BUF_ERROR at next call, see above */
+          return Z_OK$3;
+        }
+      }
+    }
+    //Assert(strm->avail_out > 0, "bug2");
+    //if (strm.avail_out <= 0) { throw new Error("bug2");}
+
+    if (flush !== Z_FINISH$3) { return Z_OK$3; }
+    if (s.wrap <= 0) { return Z_STREAM_END$3; }
+
+    /* Write the trailer */
+    if (s.wrap === 2) {
+      put_byte(s, strm.adler & 0xff);
+      put_byte(s, (strm.adler >> 8) & 0xff);
+      put_byte(s, (strm.adler >> 16) & 0xff);
+      put_byte(s, (strm.adler >> 24) & 0xff);
+      put_byte(s, strm.total_in & 0xff);
+      put_byte(s, (strm.total_in >> 8) & 0xff);
+      put_byte(s, (strm.total_in >> 16) & 0xff);
+      put_byte(s, (strm.total_in >> 24) & 0xff);
+    }
+    else
+    {
+      putShortMSB(s, strm.adler >>> 16);
+      putShortMSB(s, strm.adler & 0xffff);
+    }
+
+    flush_pending(strm);
+    /* If avail_out is zero, the application will call deflate again
+     * to flush the rest.
+     */
+    if (s.wrap > 0) { s.wrap = -s.wrap; }
+    /* write the trailer only once! */
+    return s.pending !== 0 ? Z_OK$3 : Z_STREAM_END$3;
+  };
+
+
+  const deflateEnd = (strm) => {
+
+    if (!strm/*== Z_NULL*/ || !strm.state/*== Z_NULL*/) {
+      return Z_STREAM_ERROR$2;
+    }
+
+    const status = strm.state.status;
+    if (status !== INIT_STATE &&
+      status !== EXTRA_STATE &&
+      status !== NAME_STATE &&
+      status !== COMMENT_STATE &&
+      status !== HCRC_STATE &&
+      status !== BUSY_STATE &&
+      status !== FINISH_STATE
+    ) {
+      return err(strm, Z_STREAM_ERROR$2);
+    }
+
+    strm.state = null;
+
+    return status === BUSY_STATE ? err(strm, Z_DATA_ERROR$2) : Z_OK$3;
+  };
+
+
+  /* =========================================================================
+   * Initializes the compression dictionary from the given byte
+   * sequence without producing any compressed output.
+   */
+  const deflateSetDictionary = (strm, dictionary) => {
+
+    let dictLength = dictionary.length;
+
+    if (!strm/*== Z_NULL*/ || !strm.state/*== Z_NULL*/) {
+      return Z_STREAM_ERROR$2;
+    }
+
+    const s = strm.state;
+    const wrap = s.wrap;
+
+    if (wrap === 2 || (wrap === 1 && s.status !== INIT_STATE) || s.lookahead) {
+      return Z_STREAM_ERROR$2;
+    }
+
+    /* when using zlib wrappers, compute Adler-32 for provided dictionary */
+    if (wrap === 1) {
+      /* adler32(strm->adler, dictionary, dictLength); */
+      strm.adler = adler32_1(strm.adler, dictionary, dictLength, 0);
+    }
+
+    s.wrap = 0;   /* avoid computing Adler-32 in read_buf */
+
+    /* if dictionary would fill window, just replace the history */
+    if (dictLength >= s.w_size) {
+      if (wrap === 0) {            /* already empty otherwise */
+        /*** CLEAR_HASH(s); ***/
+        zero(s.head); // Fill with NIL (= 0);
+        s.strstart = 0;
+        s.block_start = 0;
+        s.insert = 0;
+      }
+      /* use the tail */
+      // dictionary = dictionary.slice(dictLength - s.w_size);
+      let tmpDict = new Uint8Array(s.w_size);
+      tmpDict.set(dictionary.subarray(dictLength - s.w_size, dictLength), 0);
+      dictionary = tmpDict;
+      dictLength = s.w_size;
+    }
+    /* insert dictionary into window and hash */
+    const avail = strm.avail_in;
+    const next = strm.next_in;
+    const input = strm.input;
+    strm.avail_in = dictLength;
+    strm.next_in = 0;
+    strm.input = dictionary;
+    fill_window(s);
+    while (s.lookahead >= MIN_MATCH) {
+      let str = s.strstart;
+      let n = s.lookahead - (MIN_MATCH - 1);
+      do {
+        /* UPDATE_HASH(s, s->ins_h, s->window[str + MIN_MATCH-1]); */
+        s.ins_h = HASH(s, s.ins_h, s.window[str + MIN_MATCH - 1]);
+
+        s.prev[str & s.w_mask] = s.head[s.ins_h];
+
+        s.head[s.ins_h] = str;
+        str++;
+      } while (--n);
+      s.strstart = str;
+      s.lookahead = MIN_MATCH - 1;
+      fill_window(s);
+    }
+    s.strstart += s.lookahead;
+    s.block_start = s.strstart;
+    s.insert = s.lookahead;
+    s.lookahead = 0;
+    s.match_length = s.prev_length = MIN_MATCH - 1;
+    s.match_available = 0;
+    strm.next_in = next;
+    strm.input = input;
+    strm.avail_in = avail;
+    s.wrap = wrap;
+    return Z_OK$3;
+  };
+
+
+  var deflateInit_1 = deflateInit;
+  var deflateInit2_1 = deflateInit2;
+  var deflateReset_1 = deflateReset;
+  var deflateResetKeep_1 = deflateResetKeep;
+  var deflateSetHeader_1 = deflateSetHeader;
+  var deflate_2$1 = deflate$2;
+  var deflateEnd_1 = deflateEnd;
+  var deflateSetDictionary_1 = deflateSetDictionary;
+  var deflateInfo = 'pako deflate (from Nodeca project)';
+
+  /* Not implemented
+  module.exports.deflateBound = deflateBound;
+  module.exports.deflateCopy = deflateCopy;
+  module.exports.deflateParams = deflateParams;
+  module.exports.deflatePending = deflatePending;
+  module.exports.deflatePrime = deflatePrime;
+  module.exports.deflateTune = deflateTune;
+  */
+
+  var deflate_1$2 = {
+  	deflateInit: deflateInit_1,
+  	deflateInit2: deflateInit2_1,
+  	deflateReset: deflateReset_1,
+  	deflateResetKeep: deflateResetKeep_1,
+  	deflateSetHeader: deflateSetHeader_1,
+  	deflate: deflate_2$1,
+  	deflateEnd: deflateEnd_1,
+  	deflateSetDictionary: deflateSetDictionary_1,
+  	deflateInfo: deflateInfo
+  };
+
+  const _has = (obj, key) => {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+  };
+
+  var assign = function (obj /*from1, from2, from3, ...*/) {
+    const sources = Array.prototype.slice.call(arguments, 1);
+    while (sources.length) {
+      const source = sources.shift();
+      if (!source) { continue; }
+
+      if (typeof source !== 'object') {
+        throw new TypeError(source + 'must be non-object');
+      }
+
+      for (const p in source) {
+        if (_has(source, p)) {
+          obj[p] = source[p];
+        }
+      }
+    }
+
+    return obj;
+  };
+
+
   // Join array of chunks to single array.
-  flattenChunks: function (chunks) {
-    var i, l, len, pos, chunk, result;
-
+  var flattenChunks = (chunks) => {
     // calculate data length
-    len = 0;
-    for (i = 0, l = chunks.length; i < l; i++) {
+    let len = 0;
+
+    for (let i = 0, l = chunks.length; i < l; i++) {
       len += chunks[i].length;
     }
 
     // join chunks
-    result = new Uint8Array(len);
-    pos = 0;
-    for (i = 0, l = chunks.length; i < l; i++) {
-      chunk = chunks[i];
+    const result = new Uint8Array(len);
+
+    for (let i = 0, pos = 0, l = chunks.length; i < l; i++) {
+      let chunk = chunks[i];
       result.set(chunk, pos);
       pos += chunk.length;
     }
 
     return result;
-  }
-};
+  };
 
-var fnUntyped = {
-  arraySet: function (dest, src, src_offs, len, dest_offs) {
-    for (var i = 0; i < len; i++) {
-      dest[dest_offs + i] = src[src_offs + i];
+  var common = {
+  	assign: assign,
+  	flattenChunks: flattenChunks
+  };
+
+  // String encode/decode helpers
+
+
+  // Quick check if we can use fast array to bin string conversion
+  //
+  // - apply(Array) can fail on Android 2.2
+  // - apply(Uint8Array) can fail on iOS 5.1 Safari
+  //
+  let STR_APPLY_UIA_OK = true;
+
+  try { String.fromCharCode.apply(null, new Uint8Array(1)); } catch (__) { STR_APPLY_UIA_OK = false; }
+
+
+  // Table with utf8 lengths (calculated by first byte of sequence)
+  // Note, that 5 & 6-byte values and some 4-byte values can not be represented in JS,
+  // because max possible codepoint is 0x10ffff
+  const _utf8len = new Uint8Array(256);
+  for (let q = 0; q < 256; q++) {
+    _utf8len[q] = (q >= 252 ? 6 : q >= 248 ? 5 : q >= 240 ? 4 : q >= 224 ? 3 : q >= 192 ? 2 : 1);
+  }
+  _utf8len[254] = _utf8len[254] = 1; // Invalid sequence start
+
+
+  // convert string to array (typed, when possible)
+  var string2buf = (str) => {
+    if (typeof TextEncoder === 'function' && TextEncoder.prototype.encode) {
+      return new TextEncoder().encode(str);
     }
-  },
-  // Join array of chunks to single array.
-  flattenChunks: function (chunks) {
-    return [].concat.apply([], chunks);
-  }
-};
 
+    let buf, c, c2, m_pos, i, str_len = str.length, buf_len = 0;
 
-// Enable/Disable typed arrays use, for testing
-//
-exports.setTyped = function (on) {
-  if (on) {
-    exports.Buf8  = Uint8Array;
-    exports.Buf16 = Uint16Array;
-    exports.Buf32 = Int32Array;
-    exports.assign(exports, fnTyped);
-  } else {
-    exports.Buf8  = Array;
-    exports.Buf16 = Array;
-    exports.Buf32 = Array;
-    exports.assign(exports, fnUntyped);
-  }
-};
+    // count binary size
+    for (m_pos = 0; m_pos < str_len; m_pos++) {
+      c = str.charCodeAt(m_pos);
+      if ((c & 0xfc00) === 0xd800 && (m_pos + 1 < str_len)) {
+        c2 = str.charCodeAt(m_pos + 1);
+        if ((c2 & 0xfc00) === 0xdc00) {
+          c = 0x10000 + ((c - 0xd800) << 10) + (c2 - 0xdc00);
+          m_pos++;
+        }
+      }
+      buf_len += c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4;
+    }
 
-exports.setTyped(TYPED_OK);
+    // allocate buffer
+    buf = new Uint8Array(buf_len);
 
-},{}],2:[function(require,module,exports){
-// String encode/decode helpers
-'use strict';
-
-
-var utils = require('./common');
-
-
-// Quick check if we can use fast array to bin string conversion
-//
-// - apply(Array) can fail on Android 2.2
-// - apply(Uint8Array) can fail on iOS 5.1 Safari
-//
-var STR_APPLY_OK = true;
-var STR_APPLY_UIA_OK = true;
-
-try { String.fromCharCode.apply(null, [ 0 ]); } catch (__) { STR_APPLY_OK = false; }
-try { String.fromCharCode.apply(null, new Uint8Array(1)); } catch (__) { STR_APPLY_UIA_OK = false; }
-
-
-// Table with utf8 lengths (calculated by first byte of sequence)
-// Note, that 5 & 6-byte values and some 4-byte values can not be represented in JS,
-// because max possible codepoint is 0x10ffff
-var _utf8len = new utils.Buf8(256);
-for (var q = 0; q < 256; q++) {
-  _utf8len[q] = (q >= 252 ? 6 : q >= 248 ? 5 : q >= 240 ? 4 : q >= 224 ? 3 : q >= 192 ? 2 : 1);
-}
-_utf8len[254] = _utf8len[254] = 1; // Invalid sequence start
-
-
-// convert string to array (typed, when possible)
-exports.string2buf = function (str) {
-  var buf, c, c2, m_pos, i, str_len = str.length, buf_len = 0;
-
-  // count binary size
-  for (m_pos = 0; m_pos < str_len; m_pos++) {
-    c = str.charCodeAt(m_pos);
-    if ((c & 0xfc00) === 0xd800 && (m_pos + 1 < str_len)) {
-      c2 = str.charCodeAt(m_pos + 1);
-      if ((c2 & 0xfc00) === 0xdc00) {
-        c = 0x10000 + ((c - 0xd800) << 10) + (c2 - 0xdc00);
-        m_pos++;
+    // convert
+    for (i = 0, m_pos = 0; i < buf_len; m_pos++) {
+      c = str.charCodeAt(m_pos);
+      if ((c & 0xfc00) === 0xd800 && (m_pos + 1 < str_len)) {
+        c2 = str.charCodeAt(m_pos + 1);
+        if ((c2 & 0xfc00) === 0xdc00) {
+          c = 0x10000 + ((c - 0xd800) << 10) + (c2 - 0xdc00);
+          m_pos++;
+        }
+      }
+      if (c < 0x80) {
+        /* one byte */
+        buf[i++] = c;
+      } else if (c < 0x800) {
+        /* two bytes */
+        buf[i++] = 0xC0 | (c >>> 6);
+        buf[i++] = 0x80 | (c & 0x3f);
+      } else if (c < 0x10000) {
+        /* three bytes */
+        buf[i++] = 0xE0 | (c >>> 12);
+        buf[i++] = 0x80 | (c >>> 6 & 0x3f);
+        buf[i++] = 0x80 | (c & 0x3f);
+      } else {
+        /* four bytes */
+        buf[i++] = 0xf0 | (c >>> 18);
+        buf[i++] = 0x80 | (c >>> 12 & 0x3f);
+        buf[i++] = 0x80 | (c >>> 6 & 0x3f);
+        buf[i++] = 0x80 | (c & 0x3f);
       }
     }
-    buf_len += c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4;
-  }
 
-  // allocate buffer
-  buf = new utils.Buf8(buf_len);
+    return buf;
+  };
 
-  // convert
-  for (i = 0, m_pos = 0; i < buf_len; m_pos++) {
-    c = str.charCodeAt(m_pos);
-    if ((c & 0xfc00) === 0xd800 && (m_pos + 1 < str_len)) {
-      c2 = str.charCodeAt(m_pos + 1);
-      if ((c2 & 0xfc00) === 0xdc00) {
-        c = 0x10000 + ((c - 0xd800) << 10) + (c2 - 0xdc00);
-        m_pos++;
+  // Helper
+  const buf2binstring = (buf, len) => {
+    // On Chrome, the arguments in a function call that are allowed is `65534`.
+    // If the length of the buffer is smaller than that, we can use this optimization,
+    // otherwise we will take a slower path.
+    if (len < 65534) {
+      if (buf.subarray && STR_APPLY_UIA_OK) {
+        return String.fromCharCode.apply(null, buf.length === len ? buf : buf.subarray(0, len));
       }
     }
-    if (c < 0x80) {
-      /* one byte */
-      buf[i++] = c;
-    } else if (c < 0x800) {
-      /* two bytes */
-      buf[i++] = 0xC0 | (c >>> 6);
-      buf[i++] = 0x80 | (c & 0x3f);
-    } else if (c < 0x10000) {
-      /* three bytes */
-      buf[i++] = 0xE0 | (c >>> 12);
-      buf[i++] = 0x80 | (c >>> 6 & 0x3f);
-      buf[i++] = 0x80 | (c & 0x3f);
+
+    let result = '';
+    for (let i = 0; i < len; i++) {
+      result += String.fromCharCode(buf[i]);
+    }
+    return result;
+  };
+
+
+  // convert array to string
+  var buf2string = (buf, max) => {
+    const len = max || buf.length;
+
+    if (typeof TextDecoder === 'function' && TextDecoder.prototype.decode) {
+      return new TextDecoder().decode(buf.subarray(0, max));
+    }
+
+    let i, out;
+
+    // Reserve max possible length (2 words per char)
+    // NB: by unknown reasons, Array is significantly faster for
+    //     String.fromCharCode.apply than Uint16Array.
+    const utf16buf = new Array(len * 2);
+
+    for (out = 0, i = 0; i < len;) {
+      let c = buf[i++];
+      // quick process ascii
+      if (c < 0x80) { utf16buf[out++] = c; continue; }
+
+      let c_len = _utf8len[c];
+      // skip 5 & 6 byte codes
+      if (c_len > 4) { utf16buf[out++] = 0xfffd; i += c_len - 1; continue; }
+
+      // apply mask on first byte
+      c &= c_len === 2 ? 0x1f : c_len === 3 ? 0x0f : 0x07;
+      // join the rest
+      while (c_len > 1 && i < len) {
+        c = (c << 6) | (buf[i++] & 0x3f);
+        c_len--;
+      }
+
+      // terminated by end of string?
+      if (c_len > 1) { utf16buf[out++] = 0xfffd; continue; }
+
+      if (c < 0x10000) {
+        utf16buf[out++] = c;
+      } else {
+        c -= 0x10000;
+        utf16buf[out++] = 0xd800 | ((c >> 10) & 0x3ff);
+        utf16buf[out++] = 0xdc00 | (c & 0x3ff);
+      }
+    }
+
+    return buf2binstring(utf16buf, out);
+  };
+
+
+  // Calculate max possible position in utf8 buffer,
+  // that will not break sequence. If that's not possible
+  // - (very small limits) return max size as is.
+  //
+  // buf[] - utf8 bytes array
+  // max   - length limit (mandatory);
+  var utf8border = (buf, max) => {
+
+    max = max || buf.length;
+    if (max > buf.length) { max = buf.length; }
+
+    // go back from last position, until start of sequence found
+    let pos = max - 1;
+    while (pos >= 0 && (buf[pos] & 0xC0) === 0x80) { pos--; }
+
+    // Very small and broken sequence,
+    // return max, because we should return something anyway.
+    if (pos < 0) { return max; }
+
+    // If we came to start of buffer - that means buffer is too small,
+    // return max too.
+    if (pos === 0) { return max; }
+
+    return (pos + _utf8len[buf[pos]] > max) ? pos : max;
+  };
+
+  var strings = {
+  	string2buf: string2buf,
+  	buf2string: buf2string,
+  	utf8border: utf8border
+  };
+
+  // (C) 1995-2013 Jean-loup Gailly and Mark Adler
+  // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+  //
+  // This software is provided 'as-is', without any express or implied
+  // warranty. In no event will the authors be held liable for any damages
+  // arising from the use of this software.
+  //
+  // Permission is granted to anyone to use this software for any purpose,
+  // including commercial applications, and to alter it and redistribute it
+  // freely, subject to the following restrictions:
+  //
+  // 1. The origin of this software must not be misrepresented; you must not
+  //   claim that you wrote the original software. If you use this software
+  //   in a product, an acknowledgment in the product documentation would be
+  //   appreciated but is not required.
+  // 2. Altered source versions must be plainly marked as such, and must not be
+  //   misrepresented as being the original software.
+  // 3. This notice may not be removed or altered from any source distribution.
+
+  function ZStream() {
+    /* next input byte */
+    this.input = null; // JS specific, because we have no pointers
+    this.next_in = 0;
+    /* number of bytes available at input */
+    this.avail_in = 0;
+    /* total number of input bytes read so far */
+    this.total_in = 0;
+    /* next output byte should be put there */
+    this.output = null; // JS specific, because we have no pointers
+    this.next_out = 0;
+    /* remaining free space at output */
+    this.avail_out = 0;
+    /* total number of bytes output so far */
+    this.total_out = 0;
+    /* last error message, NULL if no error */
+    this.msg = ''/*Z_NULL*/;
+    /* not visible by applications */
+    this.state = null;
+    /* best guess about the data type: binary or text */
+    this.data_type = 2/*Z_UNKNOWN*/;
+    /* adler32 value of the uncompressed data */
+    this.adler = 0;
+  }
+
+  var zstream = ZStream;
+
+  const toString$1 = Object.prototype.toString;
+
+  /* Public constants ==========================================================*/
+  /* ===========================================================================*/
+
+  const {
+    Z_NO_FLUSH: Z_NO_FLUSH$1, Z_SYNC_FLUSH, Z_FULL_FLUSH, Z_FINISH: Z_FINISH$2,
+    Z_OK: Z_OK$2, Z_STREAM_END: Z_STREAM_END$2,
+    Z_DEFAULT_COMPRESSION,
+    Z_DEFAULT_STRATEGY,
+    Z_DEFLATED: Z_DEFLATED$1
+  } = constants$2;
+
+  /* ===========================================================================*/
+
+
+  /**
+   * class Deflate
+   *
+   * Generic JS-style wrapper for zlib calls. If you don't need
+   * streaming behaviour - use more simple functions: [[deflate]],
+   * [[deflateRaw]] and [[gzip]].
+   **/
+
+  /* internal
+   * Deflate.chunks -> Array
+   *
+   * Chunks of output data, if [[Deflate#onData]] not overridden.
+   **/
+
+  /**
+   * Deflate.result -> Uint8Array
+   *
+   * Compressed result, generated by default [[Deflate#onData]]
+   * and [[Deflate#onEnd]] handlers. Filled after you push last chunk
+   * (call [[Deflate#push]] with `Z_FINISH` / `true` param).
+   **/
+
+  /**
+   * Deflate.err -> Number
+   *
+   * Error code after deflate finished. 0 (Z_OK) on success.
+   * You will not need it in real life, because deflate errors
+   * are possible only on wrong options or bad `onData` / `onEnd`
+   * custom handlers.
+   **/
+
+  /**
+   * Deflate.msg -> String
+   *
+   * Error message, if [[Deflate.err]] != 0
+   **/
+
+
+  /**
+   * new Deflate(options)
+   * - options (Object): zlib deflate options.
+   *
+   * Creates new deflator instance with specified params. Throws exception
+   * on bad params. Supported options:
+   *
+   * - `level`
+   * - `windowBits`
+   * - `memLevel`
+   * - `strategy`
+   * - `dictionary`
+   *
+   * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
+   * for more information on these.
+   *
+   * Additional options, for internal needs:
+   *
+   * - `chunkSize` - size of generated data chunks (16K by default)
+   * - `raw` (Boolean) - do raw deflate
+   * - `gzip` (Boolean) - create gzip wrapper
+   * - `header` (Object) - custom header for gzip
+   *   - `text` (Boolean) - true if compressed data believed to be text
+   *   - `time` (Number) - modification time, unix timestamp
+   *   - `os` (Number) - operation system code
+   *   - `extra` (Array) - array of bytes with extra data (max 65536)
+   *   - `name` (String) - file name (binary string)
+   *   - `comment` (String) - comment (binary string)
+   *   - `hcrc` (Boolean) - true if header crc should be added
+   *
+   * ##### Example:
+   *
+   * ```javascript
+   * const pako = require('pako')
+   *   , chunk1 = new Uint8Array([1,2,3,4,5,6,7,8,9])
+   *   , chunk2 = new Uint8Array([10,11,12,13,14,15,16,17,18,19]);
+   *
+   * const deflate = new pako.Deflate({ level: 3});
+   *
+   * deflate.push(chunk1, false);
+   * deflate.push(chunk2, true);  // true -> last chunk
+   *
+   * if (deflate.err) { throw new Error(deflate.err); }
+   *
+   * console.log(deflate.result);
+   * ```
+   **/
+  function Deflate$1(options) {
+    this.options = common.assign({
+      level: Z_DEFAULT_COMPRESSION,
+      method: Z_DEFLATED$1,
+      chunkSize: 16384,
+      windowBits: 15,
+      memLevel: 8,
+      strategy: Z_DEFAULT_STRATEGY
+    }, options || {});
+
+    let opt = this.options;
+
+    if (opt.raw && (opt.windowBits > 0)) {
+      opt.windowBits = -opt.windowBits;
+    }
+
+    else if (opt.gzip && (opt.windowBits > 0) && (opt.windowBits < 16)) {
+      opt.windowBits += 16;
+    }
+
+    this.err    = 0;      // error code, if happens (0 = Z_OK)
+    this.msg    = '';     // error message
+    this.ended  = false;  // used to avoid multiple onEnd() calls
+    this.chunks = [];     // chunks of compressed data
+
+    this.strm = new zstream();
+    this.strm.avail_out = 0;
+
+    let status = deflate_1$2.deflateInit2(
+      this.strm,
+      opt.level,
+      opt.method,
+      opt.windowBits,
+      opt.memLevel,
+      opt.strategy
+    );
+
+    if (status !== Z_OK$2) {
+      throw new Error(messages[status]);
+    }
+
+    if (opt.header) {
+      deflate_1$2.deflateSetHeader(this.strm, opt.header);
+    }
+
+    if (opt.dictionary) {
+      let dict;
+      // Convert data if needed
+      if (typeof opt.dictionary === 'string') {
+        // If we need to compress text, change encoding to utf8.
+        dict = strings.string2buf(opt.dictionary);
+      } else if (toString$1.call(opt.dictionary) === '[object ArrayBuffer]') {
+        dict = new Uint8Array(opt.dictionary);
+      } else {
+        dict = opt.dictionary;
+      }
+
+      status = deflate_1$2.deflateSetDictionary(this.strm, dict);
+
+      if (status !== Z_OK$2) {
+        throw new Error(messages[status]);
+      }
+
+      this._dict_set = true;
+    }
+  }
+
+  /**
+   * Deflate#push(data[, flush_mode]) -> Boolean
+   * - data (Uint8Array|ArrayBuffer|String): input data. Strings will be
+   *   converted to utf8 byte sequence.
+   * - flush_mode (Number|Boolean): 0..6 for corresponding Z_NO_FLUSH..Z_TREE modes.
+   *   See constants. Skipped or `false` means Z_NO_FLUSH, `true` means Z_FINISH.
+   *
+   * Sends input data to deflate pipe, generating [[Deflate#onData]] calls with
+   * new compressed chunks. Returns `true` on success. The last data block must
+   * have `flush_mode` Z_FINISH (or `true`). That will flush internal pending
+   * buffers and call [[Deflate#onEnd]].
+   *
+   * On fail call [[Deflate#onEnd]] with error code and return false.
+   *
+   * ##### Example
+   *
+   * ```javascript
+   * push(chunk, false); // push one of data chunks
+   * ...
+   * push(chunk, true);  // push last chunk
+   * ```
+   **/
+  Deflate$1.prototype.push = function (data, flush_mode) {
+    const strm = this.strm;
+    const chunkSize = this.options.chunkSize;
+    let status, _flush_mode;
+
+    if (this.ended) { return false; }
+
+    if (flush_mode === ~~flush_mode) _flush_mode = flush_mode;
+    else _flush_mode = flush_mode === true ? Z_FINISH$2 : Z_NO_FLUSH$1;
+
+    // Convert data if needed
+    if (typeof data === 'string') {
+      // If we need to compress text, change encoding to utf8.
+      strm.input = strings.string2buf(data);
+    } else if (toString$1.call(data) === '[object ArrayBuffer]') {
+      strm.input = new Uint8Array(data);
     } else {
-      /* four bytes */
-      buf[i++] = 0xf0 | (c >>> 18);
-      buf[i++] = 0x80 | (c >>> 12 & 0x3f);
-      buf[i++] = 0x80 | (c >>> 6 & 0x3f);
-      buf[i++] = 0x80 | (c & 0x3f);
-    }
-  }
-
-  return buf;
-};
-
-// Helper (used in 2 places)
-function buf2binstring(buf, len) {
-  // On Chrome, the arguments in a function call that are allowed is `65534`.
-  // If the length of the buffer is smaller than that, we can use this optimization,
-  // otherwise we will take a slower path.
-  if (len < 65534) {
-    if ((buf.subarray && STR_APPLY_UIA_OK) || (!buf.subarray && STR_APPLY_OK)) {
-      return String.fromCharCode.apply(null, utils.shrinkBuf(buf, len));
-    }
-  }
-
-  var result = '';
-  for (var i = 0; i < len; i++) {
-    result += String.fromCharCode(buf[i]);
-  }
-  return result;
-}
-
-
-// Convert byte array to binary string
-exports.buf2binstring = function (buf) {
-  return buf2binstring(buf, buf.length);
-};
-
-
-// Convert binary string (typed, when possible)
-exports.binstring2buf = function (str) {
-  var buf = new utils.Buf8(str.length);
-  for (var i = 0, len = buf.length; i < len; i++) {
-    buf[i] = str.charCodeAt(i);
-  }
-  return buf;
-};
-
-
-// convert array to string
-exports.buf2string = function (buf, max) {
-  var i, out, c, c_len;
-  var len = max || buf.length;
-
-  // Reserve max possible length (2 words per char)
-  // NB: by unknown reasons, Array is significantly faster for
-  //     String.fromCharCode.apply than Uint16Array.
-  var utf16buf = new Array(len * 2);
-
-  for (out = 0, i = 0; i < len;) {
-    c = buf[i++];
-    // quick process ascii
-    if (c < 0x80) { utf16buf[out++] = c; continue; }
-
-    c_len = _utf8len[c];
-    // skip 5 & 6 byte codes
-    if (c_len > 4) { utf16buf[out++] = 0xfffd; i += c_len - 1; continue; }
-
-    // apply mask on first byte
-    c &= c_len === 2 ? 0x1f : c_len === 3 ? 0x0f : 0x07;
-    // join the rest
-    while (c_len > 1 && i < len) {
-      c = (c << 6) | (buf[i++] & 0x3f);
-      c_len--;
+      strm.input = data;
     }
 
-    // terminated by end of string?
-    if (c_len > 1) { utf16buf[out++] = 0xfffd; continue; }
+    strm.next_in = 0;
+    strm.avail_in = strm.input.length;
 
-    if (c < 0x10000) {
-      utf16buf[out++] = c;
-    } else {
-      c -= 0x10000;
-      utf16buf[out++] = 0xd800 | ((c >> 10) & 0x3ff);
-      utf16buf[out++] = 0xdc00 | (c & 0x3ff);
+    for (;;) {
+      if (strm.avail_out === 0) {
+        strm.output = new Uint8Array(chunkSize);
+        strm.next_out = 0;
+        strm.avail_out = chunkSize;
+      }
+
+      // Make sure avail_out > 6 to avoid repeating markers
+      if ((_flush_mode === Z_SYNC_FLUSH || _flush_mode === Z_FULL_FLUSH) && strm.avail_out <= 6) {
+        this.onData(strm.output.subarray(0, strm.next_out));
+        strm.avail_out = 0;
+        continue;
+      }
+
+      status = deflate_1$2.deflate(strm, _flush_mode);
+
+      // Ended => flush and finish
+      if (status === Z_STREAM_END$2) {
+        if (strm.next_out > 0) {
+          this.onData(strm.output.subarray(0, strm.next_out));
+        }
+        status = deflate_1$2.deflateEnd(this.strm);
+        this.onEnd(status);
+        this.ended = true;
+        return status === Z_OK$2;
+      }
+
+      // Flush if out buffer full
+      if (strm.avail_out === 0) {
+        this.onData(strm.output);
+        continue;
+      }
+
+      // Flush if requested and has data
+      if (_flush_mode > 0 && strm.next_out > 0) {
+        this.onData(strm.output.subarray(0, strm.next_out));
+        strm.avail_out = 0;
+        continue;
+      }
+
+      if (strm.avail_in === 0) break;
     }
+
+    return true;
+  };
+
+
+  /**
+   * Deflate#onData(chunk) -> Void
+   * - chunk (Uint8Array): output data.
+   *
+   * By default, stores data blocks in `chunks[]` property and glue
+   * those in `onEnd`. Override this handler, if you need another behaviour.
+   **/
+  Deflate$1.prototype.onData = function (chunk) {
+    this.chunks.push(chunk);
+  };
+
+
+  /**
+   * Deflate#onEnd(status) -> Void
+   * - status (Number): deflate status. 0 (Z_OK) on success,
+   *   other if not.
+   *
+   * Called once after you tell deflate that the input stream is
+   * complete (Z_FINISH). By default - join collected chunks,
+   * free memory and fill `results` / `err` properties.
+   **/
+  Deflate$1.prototype.onEnd = function (status) {
+    // On success - join
+    if (status === Z_OK$2) {
+      this.result = common.flattenChunks(this.chunks);
+    }
+    this.chunks = [];
+    this.err = status;
+    this.msg = this.strm.msg;
+  };
+
+
+  /**
+   * deflate(data[, options]) -> Uint8Array
+   * - data (Uint8Array|String): input data to compress.
+   * - options (Object): zlib deflate options.
+   *
+   * Compress `data` with deflate algorithm and `options`.
+   *
+   * Supported options are:
+   *
+   * - level
+   * - windowBits
+   * - memLevel
+   * - strategy
+   * - dictionary
+   *
+   * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
+   * for more information on these.
+   *
+   * Sugar (options):
+   *
+   * - `raw` (Boolean) - say that we work with raw stream, if you don't wish to specify
+   *   negative windowBits implicitly.
+   *
+   * ##### Example:
+   *
+   * ```javascript
+   * const pako = require('pako')
+   * const data = new Uint8Array([1,2,3,4,5,6,7,8,9]);
+   *
+   * console.log(pako.deflate(data));
+   * ```
+   **/
+  function deflate$1(input, options) {
+    const deflator = new Deflate$1(options);
+
+    deflator.push(input, true);
+
+    // That will never happens, if you don't cheat with options :)
+    if (deflator.err) { throw deflator.msg || messages[deflator.err]; }
+
+    return deflator.result;
   }
 
-  return buf2binstring(utf16buf, out);
-};
+
+  /**
+   * deflateRaw(data[, options]) -> Uint8Array
+   * - data (Uint8Array|String): input data to compress.
+   * - options (Object): zlib deflate options.
+   *
+   * The same as [[deflate]], but creates raw data, without wrapper
+   * (header and adler32 crc).
+   **/
+  function deflateRaw$1(input, options) {
+    options = options || {};
+    options.raw = true;
+    return deflate$1(input, options);
+  }
 
 
-// Calculate max possible position in utf8 buffer,
-// that will not break sequence. If that's not possible
-// - (very small limits) return max size as is.
-//
-// buf[] - utf8 bytes array
-// max   - length limit (mandatory);
-exports.utf8border = function (buf, max) {
-  var pos;
+  /**
+   * gzip(data[, options]) -> Uint8Array
+   * - data (Uint8Array|String): input data to compress.
+   * - options (Object): zlib deflate options.
+   *
+   * The same as [[deflate]], but create gzip wrapper instead of
+   * deflate one.
+   **/
+  function gzip$1(input, options) {
+    options = options || {};
+    options.gzip = true;
+    return deflate$1(input, options);
+  }
 
-  max = max || buf.length;
-  if (max > buf.length) { max = buf.length; }
 
-  // go back from last position, until start of sequence found
-  pos = max - 1;
-  while (pos >= 0 && (buf[pos] & 0xC0) === 0x80) { pos--; }
+  var Deflate_1$1 = Deflate$1;
+  var deflate_2 = deflate$1;
+  var deflateRaw_1$1 = deflateRaw$1;
+  var gzip_1$1 = gzip$1;
+  var constants$1 = constants$2;
 
-  // Very small and broken sequence,
-  // return max, because we should return something anyway.
-  if (pos < 0) { return max; }
+  var deflate_1$1 = {
+  	Deflate: Deflate_1$1,
+  	deflate: deflate_2,
+  	deflateRaw: deflateRaw_1$1,
+  	gzip: gzip_1$1,
+  	constants: constants$1
+  };
 
-  // If we came to start of buffer - that means buffer is too small,
-  // return max too.
-  if (pos === 0) { return max; }
+  // (C) 1995-2013 Jean-loup Gailly and Mark Adler
+  // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+  //
+  // This software is provided 'as-is', without any express or implied
+  // warranty. In no event will the authors be held liable for any damages
+  // arising from the use of this software.
+  //
+  // Permission is granted to anyone to use this software for any purpose,
+  // including commercial applications, and to alter it and redistribute it
+  // freely, subject to the following restrictions:
+  //
+  // 1. The origin of this software must not be misrepresented; you must not
+  //   claim that you wrote the original software. If you use this software
+  //   in a product, an acknowledgment in the product documentation would be
+  //   appreciated but is not required.
+  // 2. Altered source versions must be plainly marked as such, and must not be
+  //   misrepresented as being the original software.
+  // 3. This notice may not be removed or altered from any source distribution.
 
-  return (pos + _utf8len[buf[pos]] > max) ? pos : max;
-};
+  // See state defs from inflate.js
+  const BAD$1 = 30;       /* got a data error -- remain here until reset */
+  const TYPE$1 = 12;      /* i: waiting for type bits, including last-flag bit */
 
-},{"./common":1}],3:[function(require,module,exports){
-'use strict';
+  /*
+     Decode literal, length, and distance codes and write out the resulting
+     literal and match bytes until either not enough input or output is
+     available, an end-of-block is encountered, or a data error is encountered.
+     When large enough input and output buffers are supplied to inflate(), for
+     example, a 16K input buffer and a 64K output buffer, more than 95% of the
+     inflate execution time is spent in this routine.
 
-// Note: adler32 takes 12% for level 0 and 2% for level 6.
-// It isn't worth it to make additional optimizations as in original.
-// Small size is preferable.
+     Entry assumptions:
 
-// (C) 1995-2013 Jean-loup Gailly and Mark Adler
-// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//   claim that you wrote the original software. If you use this software
-//   in a product, an acknowledgment in the product documentation would be
-//   appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-//   misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
+          state.mode === LEN
+          strm.avail_in >= 6
+          strm.avail_out >= 258
+          start >= strm.avail_out
+          state.bits < 8
 
-function adler32(adler, buf, len, pos) {
-  var s1 = (adler & 0xffff) |0,
-      s2 = ((adler >>> 16) & 0xffff) |0,
-      n = 0;
+     On return, state.mode is one of:
 
-  while (len !== 0) {
-    // Set limit ~ twice less than 5552, to keep
-    // s2 in 31-bits, because we force signed ints.
-    // in other case %= will fail.
-    n = len > 2000 ? 2000 : len;
-    len -= n;
+          LEN -- ran out of enough output space or enough available input
+          TYPE -- reached end of block code, inflate() to interpret next block
+          BAD -- error in block data
 
+     Notes:
+
+      - The maximum input bits used by a length/distance pair is 15 bits for the
+        length code, 5 bits for the length extra, 15 bits for the distance code,
+        and 13 bits for the distance extra.  This totals 48 bits, or six bytes.
+        Therefore if strm.avail_in >= 6, then there is enough input to avoid
+        checking for available input while decoding.
+
+      - The maximum bytes that a single length/distance pair can output is 258
+        bytes, which is the maximum length that can be coded.  inflate_fast()
+        requires strm.avail_out >= 258 for each loop to avoid checking for
+        output space.
+   */
+  var inffast = function inflate_fast(strm, start) {
+    let _in;                    /* local strm.input */
+    let last;                   /* have enough input while in < last */
+    let _out;                   /* local strm.output */
+    let beg;                    /* inflate()'s initial strm.output */
+    let end;                    /* while out < end, enough space available */
+  //#ifdef INFLATE_STRICT
+    let dmax;                   /* maximum distance from zlib header */
+  //#endif
+    let wsize;                  /* window size or zero if not using window */
+    let whave;                  /* valid bytes in the window */
+    let wnext;                  /* window write index */
+    // Use `s_window` instead `window`, avoid conflict with instrumentation tools
+    let s_window;               /* allocated sliding window, if wsize != 0 */
+    let hold;                   /* local strm.hold */
+    let bits;                   /* local strm.bits */
+    let lcode;                  /* local strm.lencode */
+    let dcode;                  /* local strm.distcode */
+    let lmask;                  /* mask for first level of length codes */
+    let dmask;                  /* mask for first level of distance codes */
+    let here;                   /* retrieved table entry */
+    let op;                     /* code bits, operation, extra bits, or */
+                                /*  window position, window bytes to copy */
+    let len;                    /* match length, unused bytes */
+    let dist;                   /* match distance */
+    let from;                   /* where to copy match from */
+    let from_source;
+
+
+    let input, output; // JS specific, because we have no pointers
+
+    /* copy state to local variables */
+    const state = strm.state;
+    //here = state.here;
+    _in = strm.next_in;
+    input = strm.input;
+    last = _in + (strm.avail_in - 5);
+    _out = strm.next_out;
+    output = strm.output;
+    beg = _out - (start - strm.avail_out);
+    end = _out + (strm.avail_out - 257);
+  //#ifdef INFLATE_STRICT
+    dmax = state.dmax;
+  //#endif
+    wsize = state.wsize;
+    whave = state.whave;
+    wnext = state.wnext;
+    s_window = state.window;
+    hold = state.hold;
+    bits = state.bits;
+    lcode = state.lencode;
+    dcode = state.distcode;
+    lmask = (1 << state.lenbits) - 1;
+    dmask = (1 << state.distbits) - 1;
+
+
+    /* decode literals and length/distances until end-of-block or not enough
+       input data or output space */
+
+    top:
     do {
-      s1 = (s1 + buf[pos++]) |0;
-      s2 = (s2 + s1) |0;
-    } while (--n);
-
-    s1 %= 65521;
-    s2 %= 65521;
-  }
-
-  return (s1 | (s2 << 16)) |0;
-}
-
-
-module.exports = adler32;
-
-},{}],4:[function(require,module,exports){
-'use strict';
-
-// (C) 1995-2013 Jean-loup Gailly and Mark Adler
-// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//   claim that you wrote the original software. If you use this software
-//   in a product, an acknowledgment in the product documentation would be
-//   appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-//   misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
-
-module.exports = {
-
-  /* Allowed flush values; see deflate() and inflate() below for details */
-  Z_NO_FLUSH:         0,
-  Z_PARTIAL_FLUSH:    1,
-  Z_SYNC_FLUSH:       2,
-  Z_FULL_FLUSH:       3,
-  Z_FINISH:           4,
-  Z_BLOCK:            5,
-  Z_TREES:            6,
-
-  /* Return codes for the compression/decompression functions. Negative values
-  * are errors, positive values are used for special but normal events.
-  */
-  Z_OK:               0,
-  Z_STREAM_END:       1,
-  Z_NEED_DICT:        2,
-  Z_ERRNO:           -1,
-  Z_STREAM_ERROR:    -2,
-  Z_DATA_ERROR:      -3,
-  //Z_MEM_ERROR:     -4,
-  Z_BUF_ERROR:       -5,
-  //Z_VERSION_ERROR: -6,
-
-  /* compression levels */
-  Z_NO_COMPRESSION:         0,
-  Z_BEST_SPEED:             1,
-  Z_BEST_COMPRESSION:       9,
-  Z_DEFAULT_COMPRESSION:   -1,
-
-
-  Z_FILTERED:               1,
-  Z_HUFFMAN_ONLY:           2,
-  Z_RLE:                    3,
-  Z_FIXED:                  4,
-  Z_DEFAULT_STRATEGY:       0,
-
-  /* Possible values of the data_type field (though see inflate()) */
-  Z_BINARY:                 0,
-  Z_TEXT:                   1,
-  //Z_ASCII:                1, // = Z_TEXT (deprecated)
-  Z_UNKNOWN:                2,
-
-  /* The deflate compression method */
-  Z_DEFLATED:               8
-  //Z_NULL:                 null // Use -1 or null inline, depending on var type
-};
-
-},{}],5:[function(require,module,exports){
-'use strict';
-
-// Note: we can't get significant speed boost here.
-// So write code to minimize size - no pregenerated tables
-// and array tools dependencies.
-
-// (C) 1995-2013 Jean-loup Gailly and Mark Adler
-// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//   claim that you wrote the original software. If you use this software
-//   in a product, an acknowledgment in the product documentation would be
-//   appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-//   misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
-
-// Use ordinary array, since untyped makes no boost here
-function makeTable() {
-  var c, table = [];
-
-  for (var n = 0; n < 256; n++) {
-    c = n;
-    for (var k = 0; k < 8; k++) {
-      c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
-    }
-    table[n] = c;
-  }
-
-  return table;
-}
-
-// Create table on load. Just 255 signed longs. Not a problem.
-var crcTable = makeTable();
-
-
-function crc32(crc, buf, len, pos) {
-  var t = crcTable,
-      end = pos + len;
-
-  crc ^= -1;
-
-  for (var i = pos; i < end; i++) {
-    crc = (crc >>> 8) ^ t[(crc ^ buf[i]) & 0xFF];
-  }
-
-  return (crc ^ (-1)); // >>> 0;
-}
-
-
-module.exports = crc32;
-
-},{}],6:[function(require,module,exports){
-'use strict';
-
-// (C) 1995-2013 Jean-loup Gailly and Mark Adler
-// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//   claim that you wrote the original software. If you use this software
-//   in a product, an acknowledgment in the product documentation would be
-//   appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-//   misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
-
-function GZheader() {
-  /* true if compressed data believed to be text */
-  this.text       = 0;
-  /* modification time */
-  this.time       = 0;
-  /* extra flags (not used when writing a gzip file) */
-  this.xflags     = 0;
-  /* operating system */
-  this.os         = 0;
-  /* pointer to extra field or Z_NULL if none */
-  this.extra      = null;
-  /* extra field length (valid if extra != Z_NULL) */
-  this.extra_len  = 0; // Actually, we don't need it in JS,
-                       // but leave for few code modifications
-
-  //
-  // Setup limits is not necessary because in js we should not preallocate memory
-  // for inflate use constant limit in 65536 bytes
-  //
-
-  /* space at extra (only when reading header) */
-  // this.extra_max  = 0;
-  /* pointer to zero-terminated file name or Z_NULL */
-  this.name       = '';
-  /* space at name (only when reading header) */
-  // this.name_max   = 0;
-  /* pointer to zero-terminated comment or Z_NULL */
-  this.comment    = '';
-  /* space at comment (only when reading header) */
-  // this.comm_max   = 0;
-  /* true if there was or will be a header crc */
-  this.hcrc       = 0;
-  /* true when done reading gzip header (not used when writing a gzip file) */
-  this.done       = false;
-}
-
-module.exports = GZheader;
-
-},{}],7:[function(require,module,exports){
-'use strict';
-
-// (C) 1995-2013 Jean-loup Gailly and Mark Adler
-// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//   claim that you wrote the original software. If you use this software
-//   in a product, an acknowledgment in the product documentation would be
-//   appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-//   misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
-
-// See state defs from inflate.js
-var BAD = 30;       /* got a data error -- remain here until reset */
-var TYPE = 12;      /* i: waiting for type bits, including last-flag bit */
-
-/*
-   Decode literal, length, and distance codes and write out the resulting
-   literal and match bytes until either not enough input or output is
-   available, an end-of-block is encountered, or a data error is encountered.
-   When large enough input and output buffers are supplied to inflate(), for
-   example, a 16K input buffer and a 64K output buffer, more than 95% of the
-   inflate execution time is spent in this routine.
-
-   Entry assumptions:
-
-        state.mode === LEN
-        strm.avail_in >= 6
-        strm.avail_out >= 258
-        start >= strm.avail_out
-        state.bits < 8
-
-   On return, state.mode is one of:
-
-        LEN -- ran out of enough output space or enough available input
-        TYPE -- reached end of block code, inflate() to interpret next block
-        BAD -- error in block data
-
-   Notes:
-
-    - The maximum input bits used by a length/distance pair is 15 bits for the
-      length code, 5 bits for the length extra, 15 bits for the distance code,
-      and 13 bits for the distance extra.  This totals 48 bits, or six bytes.
-      Therefore if strm.avail_in >= 6, then there is enough input to avoid
-      checking for available input while decoding.
-
-    - The maximum bytes that a single length/distance pair can output is 258
-      bytes, which is the maximum length that can be coded.  inflate_fast()
-      requires strm.avail_out >= 258 for each loop to avoid checking for
-      output space.
- */
-module.exports = function inflate_fast(strm, start) {
-  var state;
-  var _in;                    /* local strm.input */
-  var last;                   /* have enough input while in < last */
-  var _out;                   /* local strm.output */
-  var beg;                    /* inflate()'s initial strm.output */
-  var end;                    /* while out < end, enough space available */
-//#ifdef INFLATE_STRICT
-  var dmax;                   /* maximum distance from zlib header */
-//#endif
-  var wsize;                  /* window size or zero if not using window */
-  var whave;                  /* valid bytes in the window */
-  var wnext;                  /* window write index */
-  // Use `s_window` instead `window`, avoid conflict with instrumentation tools
-  var s_window;               /* allocated sliding window, if wsize != 0 */
-  var hold;                   /* local strm.hold */
-  var bits;                   /* local strm.bits */
-  var lcode;                  /* local strm.lencode */
-  var dcode;                  /* local strm.distcode */
-  var lmask;                  /* mask for first level of length codes */
-  var dmask;                  /* mask for first level of distance codes */
-  var here;                   /* retrieved table entry */
-  var op;                     /* code bits, operation, extra bits, or */
-                              /*  window position, window bytes to copy */
-  var len;                    /* match length, unused bytes */
-  var dist;                   /* match distance */
-  var from;                   /* where to copy match from */
-  var from_source;
-
-
-  var input, output; // JS specific, because we have no pointers
-
-  /* copy state to local variables */
-  state = strm.state;
-  //here = state.here;
-  _in = strm.next_in;
-  input = strm.input;
-  last = _in + (strm.avail_in - 5);
-  _out = strm.next_out;
-  output = strm.output;
-  beg = _out - (start - strm.avail_out);
-  end = _out + (strm.avail_out - 257);
-//#ifdef INFLATE_STRICT
-  dmax = state.dmax;
-//#endif
-  wsize = state.wsize;
-  whave = state.whave;
-  wnext = state.wnext;
-  s_window = state.window;
-  hold = state.hold;
-  bits = state.bits;
-  lcode = state.lencode;
-  dcode = state.distcode;
-  lmask = (1 << state.lenbits) - 1;
-  dmask = (1 << state.distbits) - 1;
-
-
-  /* decode literals and length/distances until end-of-block or not enough
-     input data or output space */
-
-  top:
-  do {
-    if (bits < 15) {
-      hold += input[_in++] << bits;
-      bits += 8;
-      hold += input[_in++] << bits;
-      bits += 8;
-    }
-
-    here = lcode[hold & lmask];
-
-    dolen:
-    for (;;) { // Goto emulation
-      op = here >>> 24/*here.bits*/;
-      hold >>>= op;
-      bits -= op;
-      op = (here >>> 16) & 0xff/*here.op*/;
-      if (op === 0) {                          /* literal */
-        //Tracevv((stderr, here.val >= 0x20 && here.val < 0x7f ?
-        //        "inflate:         literal '%c'\n" :
-        //        "inflate:         literal 0x%02x\n", here.val));
-        output[_out++] = here & 0xffff/*here.val*/;
+      if (bits < 15) {
+        hold += input[_in++] << bits;
+        bits += 8;
+        hold += input[_in++] << bits;
+        bits += 8;
       }
-      else if (op & 16) {                     /* length base */
-        len = here & 0xffff/*here.val*/;
-        op &= 15;                           /* number of extra bits */
-        if (op) {
-          if (bits < op) {
-            hold += input[_in++] << bits;
-            bits += 8;
-          }
-          len += hold & ((1 << op) - 1);
-          hold >>>= op;
-          bits -= op;
-        }
-        //Tracevv((stderr, "inflate:         length %u\n", len));
-        if (bits < 15) {
-          hold += input[_in++] << bits;
-          bits += 8;
-          hold += input[_in++] << bits;
-          bits += 8;
-        }
-        here = dcode[hold & dmask];
 
-        dodist:
-        for (;;) { // goto emulation
-          op = here >>> 24/*here.bits*/;
-          hold >>>= op;
-          bits -= op;
-          op = (here >>> 16) & 0xff/*here.op*/;
+      here = lcode[hold & lmask];
 
-          if (op & 16) {                      /* distance base */
-            dist = here & 0xffff/*here.val*/;
-            op &= 15;                       /* number of extra bits */
+      dolen:
+      for (;;) { // Goto emulation
+        op = here >>> 24/*here.bits*/;
+        hold >>>= op;
+        bits -= op;
+        op = (here >>> 16) & 0xff/*here.op*/;
+        if (op === 0) {                          /* literal */
+          //Tracevv((stderr, here.val >= 0x20 && here.val < 0x7f ?
+          //        "inflate:         literal '%c'\n" :
+          //        "inflate:         literal 0x%02x\n", here.val));
+          output[_out++] = here & 0xffff/*here.val*/;
+        }
+        else if (op & 16) {                     /* length base */
+          len = here & 0xffff/*here.val*/;
+          op &= 15;                           /* number of extra bits */
+          if (op) {
             if (bits < op) {
               hold += input[_in++] << bits;
               bits += 8;
+            }
+            len += hold & ((1 << op) - 1);
+            hold >>>= op;
+            bits -= op;
+          }
+          //Tracevv((stderr, "inflate:         length %u\n", len));
+          if (bits < 15) {
+            hold += input[_in++] << bits;
+            bits += 8;
+            hold += input[_in++] << bits;
+            bits += 8;
+          }
+          here = dcode[hold & dmask];
+
+          dodist:
+          for (;;) { // goto emulation
+            op = here >>> 24/*here.bits*/;
+            hold >>>= op;
+            bits -= op;
+            op = (here >>> 16) & 0xff/*here.op*/;
+
+            if (op & 16) {                      /* distance base */
+              dist = here & 0xffff/*here.val*/;
+              op &= 15;                       /* number of extra bits */
               if (bits < op) {
                 hold += input[_in++] << bits;
                 bits += 8;
-              }
-            }
-            dist += hold & ((1 << op) - 1);
-//#ifdef INFLATE_STRICT
-            if (dist > dmax) {
-              strm.msg = 'invalid distance too far back';
-              state.mode = BAD;
-              break top;
-            }
-//#endif
-            hold >>>= op;
-            bits -= op;
-            //Tracevv((stderr, "inflate:         distance %u\n", dist));
-            op = _out - beg;                /* max distance in output */
-            if (dist > op) {                /* see if copy from window */
-              op = dist - op;               /* distance back in window */
-              if (op > whave) {
-                if (state.sane) {
-                  strm.msg = 'invalid distance too far back';
-                  state.mode = BAD;
-                  break top;
+                if (bits < op) {
+                  hold += input[_in++] << bits;
+                  bits += 8;
                 }
+              }
+              dist += hold & ((1 << op) - 1);
+  //#ifdef INFLATE_STRICT
+              if (dist > dmax) {
+                strm.msg = 'invalid distance too far back';
+                state.mode = BAD$1;
+                break top;
+              }
+  //#endif
+              hold >>>= op;
+              bits -= op;
+              //Tracevv((stderr, "inflate:         distance %u\n", dist));
+              op = _out - beg;                /* max distance in output */
+              if (dist > op) {                /* see if copy from window */
+                op = dist - op;               /* distance back in window */
+                if (op > whave) {
+                  if (state.sane) {
+                    strm.msg = 'invalid distance too far back';
+                    state.mode = BAD$1;
+                    break top;
+                  }
 
-// (!) This block is disabled in zlib defaults,
-// don't enable it for binary compatibility
-//#ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR
-//                if (len <= op - whave) {
-//                  do {
-//                    output[_out++] = 0;
-//                  } while (--len);
-//                  continue top;
-//                }
-//                len -= op - whave;
-//                do {
-//                  output[_out++] = 0;
-//                } while (--op > whave);
-//                if (op === 0) {
-//                  from = _out - dist;
-//                  do {
-//                    output[_out++] = output[from++];
-//                  } while (--len);
-//                  continue top;
-//                }
-//#endif
-              }
-              from = 0; // window index
-              from_source = s_window;
-              if (wnext === 0) {           /* very common case */
-                from += wsize - op;
-                if (op < len) {         /* some from window */
-                  len -= op;
-                  do {
-                    output[_out++] = s_window[from++];
-                  } while (--op);
-                  from = _out - dist;  /* rest from output */
-                  from_source = output;
+  // (!) This block is disabled in zlib defaults,
+  // don't enable it for binary compatibility
+  //#ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR
+  //                if (len <= op - whave) {
+  //                  do {
+  //                    output[_out++] = 0;
+  //                  } while (--len);
+  //                  continue top;
+  //                }
+  //                len -= op - whave;
+  //                do {
+  //                  output[_out++] = 0;
+  //                } while (--op > whave);
+  //                if (op === 0) {
+  //                  from = _out - dist;
+  //                  do {
+  //                    output[_out++] = output[from++];
+  //                  } while (--len);
+  //                  continue top;
+  //                }
+  //#endif
                 }
-              }
-              else if (wnext < op) {      /* wrap around window */
-                from += wsize + wnext - op;
-                op -= wnext;
-                if (op < len) {         /* some from end of window */
-                  len -= op;
-                  do {
-                    output[_out++] = s_window[from++];
-                  } while (--op);
-                  from = 0;
-                  if (wnext < len) {  /* some from start of window */
-                    op = wnext;
+                from = 0; // window index
+                from_source = s_window;
+                if (wnext === 0) {           /* very common case */
+                  from += wsize - op;
+                  if (op < len) {         /* some from window */
                     len -= op;
                     do {
                       output[_out++] = s_window[from++];
                     } while (--op);
-                    from = _out - dist;      /* rest from output */
+                    from = _out - dist;  /* rest from output */
                     from_source = output;
                   }
                 }
-              }
-              else {                      /* contiguous in window */
-                from += wnext - op;
-                if (op < len) {         /* some from window */
-                  len -= op;
-                  do {
-                    output[_out++] = s_window[from++];
-                  } while (--op);
-                  from = _out - dist;  /* rest from output */
-                  from_source = output;
+                else if (wnext < op) {      /* wrap around window */
+                  from += wsize + wnext - op;
+                  op -= wnext;
+                  if (op < len) {         /* some from end of window */
+                    len -= op;
+                    do {
+                      output[_out++] = s_window[from++];
+                    } while (--op);
+                    from = 0;
+                    if (wnext < len) {  /* some from start of window */
+                      op = wnext;
+                      len -= op;
+                      do {
+                        output[_out++] = s_window[from++];
+                      } while (--op);
+                      from = _out - dist;      /* rest from output */
+                      from_source = output;
+                    }
+                  }
                 }
-              }
-              while (len > 2) {
-                output[_out++] = from_source[from++];
-                output[_out++] = from_source[from++];
-                output[_out++] = from_source[from++];
-                len -= 3;
-              }
-              if (len) {
-                output[_out++] = from_source[from++];
-                if (len > 1) {
+                else {                      /* contiguous in window */
+                  from += wnext - op;
+                  if (op < len) {         /* some from window */
+                    len -= op;
+                    do {
+                      output[_out++] = s_window[from++];
+                    } while (--op);
+                    from = _out - dist;  /* rest from output */
+                    from_source = output;
+                  }
+                }
+                while (len > 2) {
                   output[_out++] = from_source[from++];
+                  output[_out++] = from_source[from++];
+                  output[_out++] = from_source[from++];
+                  len -= 3;
+                }
+                if (len) {
+                  output[_out++] = from_source[from++];
+                  if (len > 1) {
+                    output[_out++] = from_source[from++];
+                  }
                 }
               }
+              else {
+                from = _out - dist;          /* copy direct from output */
+                do {                        /* minimum length is three */
+                  output[_out++] = output[from++];
+                  output[_out++] = output[from++];
+                  output[_out++] = output[from++];
+                  len -= 3;
+                } while (len > 2);
+                if (len) {
+                  output[_out++] = output[from++];
+                  if (len > 1) {
+                    output[_out++] = output[from++];
+                  }
+                }
+              }
+            }
+            else if ((op & 64) === 0) {          /* 2nd level distance code */
+              here = dcode[(here & 0xffff)/*here.val*/ + (hold & ((1 << op) - 1))];
+              continue dodist;
             }
             else {
-              from = _out - dist;          /* copy direct from output */
-              do {                        /* minimum length is three */
-                output[_out++] = output[from++];
-                output[_out++] = output[from++];
-                output[_out++] = output[from++];
-                len -= 3;
-              } while (len > 2);
-              if (len) {
-                output[_out++] = output[from++];
-                if (len > 1) {
-                  output[_out++] = output[from++];
-                }
-              }
+              strm.msg = 'invalid distance code';
+              state.mode = BAD$1;
+              break top;
             }
-          }
-          else if ((op & 64) === 0) {          /* 2nd level distance code */
-            here = dcode[(here & 0xffff)/*here.val*/ + (hold & ((1 << op) - 1))];
-            continue dodist;
-          }
-          else {
-            strm.msg = 'invalid distance code';
-            state.mode = BAD;
-            break top;
-          }
 
-          break; // need to emulate goto via "continue"
+            break; // need to emulate goto via "continue"
+          }
         }
+        else if ((op & 64) === 0) {              /* 2nd level length code */
+          here = lcode[(here & 0xffff)/*here.val*/ + (hold & ((1 << op) - 1))];
+          continue dolen;
+        }
+        else if (op & 32) {                     /* end-of-block */
+          //Tracevv((stderr, "inflate:         end of block\n"));
+          state.mode = TYPE$1;
+          break top;
+        }
+        else {
+          strm.msg = 'invalid literal/length code';
+          state.mode = BAD$1;
+          break top;
+        }
+
+        break; // need to emulate goto via "continue"
       }
-      else if ((op & 64) === 0) {              /* 2nd level length code */
-        here = lcode[(here & 0xffff)/*here.val*/ + (hold & ((1 << op) - 1))];
-        continue dolen;
+    } while (_in < last && _out < end);
+
+    /* return unused bytes (on entry, bits < 8, so in won't go too far back) */
+    len = bits >> 3;
+    _in -= len;
+    bits -= len << 3;
+    hold &= (1 << bits) - 1;
+
+    /* update state and return */
+    strm.next_in = _in;
+    strm.next_out = _out;
+    strm.avail_in = (_in < last ? 5 + (last - _in) : 5 - (_in - last));
+    strm.avail_out = (_out < end ? 257 + (end - _out) : 257 - (_out - end));
+    state.hold = hold;
+    state.bits = bits;
+    return;
+  };
+
+  // (C) 1995-2013 Jean-loup Gailly and Mark Adler
+  // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+  //
+  // This software is provided 'as-is', without any express or implied
+  // warranty. In no event will the authors be held liable for any damages
+  // arising from the use of this software.
+  //
+  // Permission is granted to anyone to use this software for any purpose,
+  // including commercial applications, and to alter it and redistribute it
+  // freely, subject to the following restrictions:
+  //
+  // 1. The origin of this software must not be misrepresented; you must not
+  //   claim that you wrote the original software. If you use this software
+  //   in a product, an acknowledgment in the product documentation would be
+  //   appreciated but is not required.
+  // 2. Altered source versions must be plainly marked as such, and must not be
+  //   misrepresented as being the original software.
+  // 3. This notice may not be removed or altered from any source distribution.
+
+  const MAXBITS = 15;
+  const ENOUGH_LENS$1 = 852;
+  const ENOUGH_DISTS$1 = 592;
+  //const ENOUGH = (ENOUGH_LENS+ENOUGH_DISTS);
+
+  const CODES$1 = 0;
+  const LENS$1 = 1;
+  const DISTS$1 = 2;
+
+  const lbase = new Uint16Array([ /* Length codes 257..285 base */
+    3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31,
+    35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 0, 0
+  ]);
+
+  const lext = new Uint8Array([ /* Length codes 257..285 extra */
+    16, 16, 16, 16, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18,
+    19, 19, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 16, 72, 78
+  ]);
+
+  const dbase = new Uint16Array([ /* Distance codes 0..29 base */
+    1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193,
+    257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145,
+    8193, 12289, 16385, 24577, 0, 0
+  ]);
+
+  const dext = new Uint8Array([ /* Distance codes 0..29 extra */
+    16, 16, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22,
+    23, 23, 24, 24, 25, 25, 26, 26, 27, 27,
+    28, 28, 29, 29, 64, 64
+  ]);
+
+  const inflate_table = (type, lens, lens_index, codes, table, table_index, work, opts) =>
+  {
+    const bits = opts.bits;
+        //here = opts.here; /* table entry for duplication */
+
+    let len = 0;               /* a code's length in bits */
+    let sym = 0;               /* index of code symbols */
+    let min = 0, max = 0;          /* minimum and maximum code lengths */
+    let root = 0;              /* number of index bits for root table */
+    let curr = 0;              /* number of index bits for current table */
+    let drop = 0;              /* code bits to drop for sub-table */
+    let left = 0;                   /* number of prefix codes available */
+    let used = 0;              /* code entries in table used */
+    let huff = 0;              /* Huffman code */
+    let incr;              /* for incrementing code, index */
+    let fill;              /* index for replicating entries */
+    let low;               /* low bits for current root entry */
+    let mask;              /* mask for low root bits */
+    let next;             /* next available space in table */
+    let base = null;     /* base value table to use */
+    let base_index = 0;
+  //  let shoextra;    /* extra bits table to use */
+    let end;                    /* use base and extra for symbol > end */
+    const count = new Uint16Array(MAXBITS + 1); //[MAXBITS+1];    /* number of codes of each length */
+    const offs = new Uint16Array(MAXBITS + 1); //[MAXBITS+1];     /* offsets in table for each length */
+    let extra = null;
+    let extra_index = 0;
+
+    let here_bits, here_op, here_val;
+
+    /*
+     Process a set of code lengths to create a canonical Huffman code.  The
+     code lengths are lens[0..codes-1].  Each length corresponds to the
+     symbols 0..codes-1.  The Huffman code is generated by first sorting the
+     symbols by length from short to long, and retaining the symbol order
+     for codes with equal lengths.  Then the code starts with all zero bits
+     for the first code of the shortest length, and the codes are integer
+     increments for the same length, and zeros are appended as the length
+     increases.  For the deflate format, these bits are stored backwards
+     from their more natural integer increment ordering, and so when the
+     decoding tables are built in the large loop below, the integer codes
+     are incremented backwards.
+
+     This routine assumes, but does not check, that all of the entries in
+     lens[] are in the range 0..MAXBITS.  The caller must assure this.
+     1..MAXBITS is interpreted as that code length.  zero means that that
+     symbol does not occur in this code.
+
+     The codes are sorted by computing a count of codes for each length,
+     creating from that a table of starting indices for each length in the
+     sorted table, and then entering the symbols in order in the sorted
+     table.  The sorted table is work[], with that space being provided by
+     the caller.
+
+     The length counts are used for other purposes as well, i.e. finding
+     the minimum and maximum length codes, determining if there are any
+     codes at all, checking for a valid set of lengths, and looking ahead
+     at length counts to determine sub-table sizes when building the
+     decoding tables.
+     */
+
+    /* accumulate lengths for codes (assumes lens[] all in 0..MAXBITS) */
+    for (len = 0; len <= MAXBITS; len++) {
+      count[len] = 0;
+    }
+    for (sym = 0; sym < codes; sym++) {
+      count[lens[lens_index + sym]]++;
+    }
+
+    /* bound code lengths, force root to be within code lengths */
+    root = bits;
+    for (max = MAXBITS; max >= 1; max--) {
+      if (count[max] !== 0) { break; }
+    }
+    if (root > max) {
+      root = max;
+    }
+    if (max === 0) {                     /* no symbols to code at all */
+      //table.op[opts.table_index] = 64;  //here.op = (var char)64;    /* invalid code marker */
+      //table.bits[opts.table_index] = 1;   //here.bits = (var char)1;
+      //table.val[opts.table_index++] = 0;   //here.val = (var short)0;
+      table[table_index++] = (1 << 24) | (64 << 16) | 0;
+
+
+      //table.op[opts.table_index] = 64;
+      //table.bits[opts.table_index] = 1;
+      //table.val[opts.table_index++] = 0;
+      table[table_index++] = (1 << 24) | (64 << 16) | 0;
+
+      opts.bits = 1;
+      return 0;     /* no symbols, but wait for decoding to report error */
+    }
+    for (min = 1; min < max; min++) {
+      if (count[min] !== 0) { break; }
+    }
+    if (root < min) {
+      root = min;
+    }
+
+    /* check for an over-subscribed or incomplete set of lengths */
+    left = 1;
+    for (len = 1; len <= MAXBITS; len++) {
+      left <<= 1;
+      left -= count[len];
+      if (left < 0) {
+        return -1;
+      }        /* over-subscribed */
+    }
+    if (left > 0 && (type === CODES$1 || max !== 1)) {
+      return -1;                      /* incomplete set */
+    }
+
+    /* generate offsets into symbol table for each length for sorting */
+    offs[1] = 0;
+    for (len = 1; len < MAXBITS; len++) {
+      offs[len + 1] = offs[len] + count[len];
+    }
+
+    /* sort symbols by length, by symbol order within each length */
+    for (sym = 0; sym < codes; sym++) {
+      if (lens[lens_index + sym] !== 0) {
+        work[offs[lens[lens_index + sym]]++] = sym;
       }
-      else if (op & 32) {                     /* end-of-block */
-        //Tracevv((stderr, "inflate:         end of block\n"));
-        state.mode = TYPE;
-        break top;
+    }
+
+    /*
+     Create and fill in decoding tables.  In this loop, the table being
+     filled is at next and has curr index bits.  The code being used is huff
+     with length len.  That code is converted to an index by dropping drop
+     bits off of the bottom.  For codes where len is less than drop + curr,
+     those top drop + curr - len bits are incremented through all values to
+     fill the table with replicated entries.
+
+     root is the number of index bits for the root table.  When len exceeds
+     root, sub-tables are created pointed to by the root entry with an index
+     of the low root bits of huff.  This is saved in low to check for when a
+     new sub-table should be started.  drop is zero when the root table is
+     being filled, and drop is root when sub-tables are being filled.
+
+     When a new sub-table is needed, it is necessary to look ahead in the
+     code lengths to determine what size sub-table is needed.  The length
+     counts are used for this, and so count[] is decremented as codes are
+     entered in the tables.
+
+     used keeps track of how many table entries have been allocated from the
+     provided *table space.  It is checked for LENS and DIST tables against
+     the constants ENOUGH_LENS and ENOUGH_DISTS to guard against changes in
+     the initial root table size constants.  See the comments in inftrees.h
+     for more information.
+
+     sym increments through all symbols, and the loop terminates when
+     all codes of length max, i.e. all codes, have been processed.  This
+     routine permits incomplete codes, so another loop after this one fills
+     in the rest of the decoding tables with invalid code markers.
+     */
+
+    /* set up for code type */
+    // poor man optimization - use if-else instead of switch,
+    // to avoid deopts in old v8
+    if (type === CODES$1) {
+      base = extra = work;    /* dummy value--not used */
+      end = 19;
+
+    } else if (type === LENS$1) {
+      base = lbase;
+      base_index -= 257;
+      extra = lext;
+      extra_index -= 257;
+      end = 256;
+
+    } else {                    /* DISTS */
+      base = dbase;
+      extra = dext;
+      end = -1;
+    }
+
+    /* initialize opts for loop */
+    huff = 0;                   /* starting code */
+    sym = 0;                    /* starting code symbol */
+    len = min;                  /* starting code length */
+    next = table_index;              /* current table to fill in */
+    curr = root;                /* current table index bits */
+    drop = 0;                   /* current bits to drop from code for index */
+    low = -1;                   /* trigger new sub-table when len > root */
+    used = 1 << root;          /* use root table entries */
+    mask = used - 1;            /* mask for comparing low */
+
+    /* check available table space */
+    if ((type === LENS$1 && used > ENOUGH_LENS$1) ||
+      (type === DISTS$1 && used > ENOUGH_DISTS$1)) {
+      return 1;
+    }
+
+    /* process all codes and make table entries */
+    for (;;) {
+      /* create table entry */
+      here_bits = len - drop;
+      if (work[sym] < end) {
+        here_op = 0;
+        here_val = work[sym];
+      }
+      else if (work[sym] > end) {
+        here_op = extra[extra_index + work[sym]];
+        here_val = base[base_index + work[sym]];
       }
       else {
-        strm.msg = 'invalid literal/length code';
-        state.mode = BAD;
-        break top;
+        here_op = 32 + 64;         /* end of block */
+        here_val = 0;
       }
 
-      break; // need to emulate goto via "continue"
+      /* replicate for those indices with low len bits equal to huff */
+      incr = 1 << (len - drop);
+      fill = 1 << curr;
+      min = fill;                 /* save offset to next table */
+      do {
+        fill -= incr;
+        table[next + (huff >> drop) + fill] = (here_bits << 24) | (here_op << 16) | here_val |0;
+      } while (fill !== 0);
+
+      /* backwards increment the len-bit code huff */
+      incr = 1 << (len - 1);
+      while (huff & incr) {
+        incr >>= 1;
+      }
+      if (incr !== 0) {
+        huff &= incr - 1;
+        huff += incr;
+      } else {
+        huff = 0;
+      }
+
+      /* go to next symbol, update count, len */
+      sym++;
+      if (--count[len] === 0) {
+        if (len === max) { break; }
+        len = lens[lens_index + work[sym]];
+      }
+
+      /* create new sub-table if needed */
+      if (len > root && (huff & mask) !== low) {
+        /* if first time, transition to sub-tables */
+        if (drop === 0) {
+          drop = root;
+        }
+
+        /* increment past last table */
+        next += min;            /* here min is 1 << curr */
+
+        /* determine length of next table */
+        curr = len - drop;
+        left = 1 << curr;
+        while (curr + drop < max) {
+          left -= count[curr + drop];
+          if (left <= 0) { break; }
+          curr++;
+          left <<= 1;
+        }
+
+        /* check for enough space */
+        used += 1 << curr;
+        if ((type === LENS$1 && used > ENOUGH_LENS$1) ||
+          (type === DISTS$1 && used > ENOUGH_DISTS$1)) {
+          return 1;
+        }
+
+        /* point entry in root table to sub-table */
+        low = huff & mask;
+        /*table.op[low] = curr;
+        table.bits[low] = root;
+        table.val[low] = next - opts.table_index;*/
+        table[low] = (root << 24) | (curr << 16) | (next - table_index) |0;
+      }
     }
-  } while (_in < last && _out < end);
 
-  /* return unused bytes (on entry, bits < 8, so in won't go too far back) */
-  len = bits >> 3;
-  _in -= len;
-  bits -= len << 3;
-  hold &= (1 << bits) - 1;
+    /* fill in remaining table entry if code is incomplete (guaranteed to have
+     at most one remaining entry, since if the code is incomplete, the
+     maximum code length that was allowed to get this far is one bit) */
+    if (huff !== 0) {
+      //table.op[next + huff] = 64;            /* invalid code marker */
+      //table.bits[next + huff] = len - drop;
+      //table.val[next + huff] = 0;
+      table[next + huff] = ((len - drop) << 24) | (64 << 16) |0;
+    }
 
-  /* update state and return */
-  strm.next_in = _in;
-  strm.next_out = _out;
-  strm.avail_in = (_in < last ? 5 + (last - _in) : 5 - (_in - last));
-  strm.avail_out = (_out < end ? 257 + (end - _out) : 257 - (_out - end));
-  state.hold = hold;
-  state.bits = bits;
-  return;
-};
-
-},{}],8:[function(require,module,exports){
-'use strict';
-
-// (C) 1995-2013 Jean-loup Gailly and Mark Adler
-// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//   claim that you wrote the original software. If you use this software
-//   in a product, an acknowledgment in the product documentation would be
-//   appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-//   misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
-
-var utils         = require('../utils/common');
-var adler32       = require('./adler32');
-var crc32         = require('./crc32');
-var inflate_fast  = require('./inffast');
-var inflate_table = require('./inftrees');
-
-var CODES = 0;
-var LENS = 1;
-var DISTS = 2;
-
-/* Public constants ==========================================================*/
-/* ===========================================================================*/
+    /* set return parameters */
+    //opts.table_index += used;
+    opts.bits = root;
+    return 0;
+  };
 
 
-/* Allowed flush values; see deflate() and inflate() below for details */
-//var Z_NO_FLUSH      = 0;
-//var Z_PARTIAL_FLUSH = 1;
-//var Z_SYNC_FLUSH    = 2;
-//var Z_FULL_FLUSH    = 3;
-var Z_FINISH        = 4;
-var Z_BLOCK         = 5;
-var Z_TREES         = 6;
+  var inftrees = inflate_table;
 
-
-/* Return codes for the compression/decompression functions. Negative values
- * are errors, positive values are used for special but normal events.
- */
-var Z_OK            = 0;
-var Z_STREAM_END    = 1;
-var Z_NEED_DICT     = 2;
-//var Z_ERRNO         = -1;
-var Z_STREAM_ERROR  = -2;
-var Z_DATA_ERROR    = -3;
-var Z_MEM_ERROR     = -4;
-var Z_BUF_ERROR     = -5;
-//var Z_VERSION_ERROR = -6;
-
-/* The deflate compression method */
-var Z_DEFLATED  = 8;
-
-
-/* STATES ====================================================================*/
-/* ===========================================================================*/
-
-
-var    HEAD = 1;       /* i: waiting for magic header */
-var    FLAGS = 2;      /* i: waiting for method and flags (gzip) */
-var    TIME = 3;       /* i: waiting for modification time (gzip) */
-var    OS = 4;         /* i: waiting for extra flags and operating system (gzip) */
-var    EXLEN = 5;      /* i: waiting for extra length (gzip) */
-var    EXTRA = 6;      /* i: waiting for extra bytes (gzip) */
-var    NAME = 7;       /* i: waiting for end of file name (gzip) */
-var    COMMENT = 8;    /* i: waiting for end of comment (gzip) */
-var    HCRC = 9;       /* i: waiting for header crc (gzip) */
-var    DICTID = 10;    /* i: waiting for dictionary check value */
-var    DICT = 11;      /* waiting for inflateSetDictionary() call */
-var        TYPE = 12;      /* i: waiting for type bits, including last-flag bit */
-var        TYPEDO = 13;    /* i: same, but skip check to exit inflate on new block */
-var        STORED = 14;    /* i: waiting for stored size (length and complement) */
-var        COPY_ = 15;     /* i/o: same as COPY below, but only first time in */
-var        COPY = 16;      /* i/o: waiting for input or output to copy stored block */
-var        TABLE = 17;     /* i: waiting for dynamic block table lengths */
-var        LENLENS = 18;   /* i: waiting for code length code lengths */
-var        CODELENS = 19;  /* i: waiting for length/lit and distance code lengths */
-var            LEN_ = 20;      /* i: same as LEN below, but only first time in */
-var            LEN = 21;       /* i: waiting for length/lit/eob code */
-var            LENEXT = 22;    /* i: waiting for length extra bits */
-var            DIST = 23;      /* i: waiting for distance code */
-var            DISTEXT = 24;   /* i: waiting for distance extra bits */
-var            MATCH = 25;     /* o: waiting for output space to copy string */
-var            LIT = 26;       /* o: waiting for output space to write literal */
-var    CHECK = 27;     /* i: waiting for 32-bit check value */
-var    LENGTH = 28;    /* i: waiting for 32-bit length (gzip) */
-var    DONE = 29;      /* finished check, done -- remain here until reset */
-var    BAD = 30;       /* got a data error -- remain here until reset */
-var    MEM = 31;       /* got an inflate() memory error -- remain here until reset */
-var    SYNC = 32;      /* looking for synchronization bytes to restart inflate() */
-
-/* ===========================================================================*/
+  // (C) 1995-2013 Jean-loup Gailly and Mark Adler
+  // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+  //
+  // This software is provided 'as-is', without any express or implied
+  // warranty. In no event will the authors be held liable for any damages
+  // arising from the use of this software.
+  //
+  // Permission is granted to anyone to use this software for any purpose,
+  // including commercial applications, and to alter it and redistribute it
+  // freely, subject to the following restrictions:
+  //
+  // 1. The origin of this software must not be misrepresented; you must not
+  //   claim that you wrote the original software. If you use this software
+  //   in a product, an acknowledgment in the product documentation would be
+  //   appreciated but is not required.
+  // 2. Altered source versions must be plainly marked as such, and must not be
+  //   misrepresented as being the original software.
+  // 3. This notice may not be removed or altered from any source distribution.
 
 
 
-var ENOUGH_LENS = 852;
-var ENOUGH_DISTS = 592;
-//var ENOUGH =  (ENOUGH_LENS+ENOUGH_DISTS);
-
-var MAX_WBITS = 15;
-/* 32K LZ77 window */
-var DEF_WBITS = MAX_WBITS;
 
 
-function zswap32(q) {
-  return  (((q >>> 24) & 0xff) +
-          ((q >>> 8) & 0xff00) +
-          ((q & 0xff00) << 8) +
-          ((q & 0xff) << 24));
-}
+
+  const CODES = 0;
+  const LENS = 1;
+  const DISTS = 2;
+
+  /* Public constants ==========================================================*/
+  /* ===========================================================================*/
+
+  const {
+    Z_FINISH: Z_FINISH$1, Z_BLOCK, Z_TREES,
+    Z_OK: Z_OK$1, Z_STREAM_END: Z_STREAM_END$1, Z_NEED_DICT: Z_NEED_DICT$1, Z_STREAM_ERROR: Z_STREAM_ERROR$1, Z_DATA_ERROR: Z_DATA_ERROR$1, Z_MEM_ERROR: Z_MEM_ERROR$1, Z_BUF_ERROR,
+    Z_DEFLATED
+  } = constants$2;
 
 
-function InflateState() {
-  this.mode = 0;             /* current inflate mode */
-  this.last = false;          /* true if processing last block */
-  this.wrap = 0;              /* bit 0 true for zlib, bit 1 true for gzip */
-  this.havedict = false;      /* true if dictionary provided */
-  this.flags = 0;             /* gzip header method and flags (0 if zlib) */
-  this.dmax = 0;              /* zlib header max distance (INFLATE_STRICT) */
-  this.check = 0;             /* protected copy of check value */
-  this.total = 0;             /* protected copy of output count */
-  // TODO: may be {}
-  this.head = null;           /* where to save gzip header information */
+  /* STATES ====================================================================*/
+  /* ===========================================================================*/
 
-  /* sliding window */
-  this.wbits = 0;             /* log base 2 of requested window size */
-  this.wsize = 0;             /* window size or zero if not using window */
-  this.whave = 0;             /* valid bytes in the window */
-  this.wnext = 0;             /* window write index */
-  this.window = null;         /* allocated sliding window, if needed */
 
-  /* bit accumulator */
-  this.hold = 0;              /* input bit accumulator */
-  this.bits = 0;              /* number of bits in "in" */
+  const    HEAD = 1;       /* i: waiting for magic header */
+  const    FLAGS = 2;      /* i: waiting for method and flags (gzip) */
+  const    TIME = 3;       /* i: waiting for modification time (gzip) */
+  const    OS = 4;         /* i: waiting for extra flags and operating system (gzip) */
+  const    EXLEN = 5;      /* i: waiting for extra length (gzip) */
+  const    EXTRA = 6;      /* i: waiting for extra bytes (gzip) */
+  const    NAME = 7;       /* i: waiting for end of file name (gzip) */
+  const    COMMENT = 8;    /* i: waiting for end of comment (gzip) */
+  const    HCRC = 9;       /* i: waiting for header crc (gzip) */
+  const    DICTID = 10;    /* i: waiting for dictionary check value */
+  const    DICT = 11;      /* waiting for inflateSetDictionary() call */
+  const        TYPE = 12;      /* i: waiting for type bits, including last-flag bit */
+  const        TYPEDO = 13;    /* i: same, but skip check to exit inflate on new block */
+  const        STORED = 14;    /* i: waiting for stored size (length and complement) */
+  const        COPY_ = 15;     /* i/o: same as COPY below, but only first time in */
+  const        COPY = 16;      /* i/o: waiting for input or output to copy stored block */
+  const        TABLE = 17;     /* i: waiting for dynamic block table lengths */
+  const        LENLENS = 18;   /* i: waiting for code length code lengths */
+  const        CODELENS = 19;  /* i: waiting for length/lit and distance code lengths */
+  const            LEN_ = 20;      /* i: same as LEN below, but only first time in */
+  const            LEN = 21;       /* i: waiting for length/lit/eob code */
+  const            LENEXT = 22;    /* i: waiting for length extra bits */
+  const            DIST = 23;      /* i: waiting for distance code */
+  const            DISTEXT = 24;   /* i: waiting for distance extra bits */
+  const            MATCH = 25;     /* o: waiting for output space to copy string */
+  const            LIT = 26;       /* o: waiting for output space to write literal */
+  const    CHECK = 27;     /* i: waiting for 32-bit check value */
+  const    LENGTH = 28;    /* i: waiting for 32-bit length (gzip) */
+  const    DONE = 29;      /* finished check, done -- remain here until reset */
+  const    BAD = 30;       /* got a data error -- remain here until reset */
+  const    MEM = 31;       /* got an inflate() memory error -- remain here until reset */
+  const    SYNC = 32;      /* looking for synchronization bytes to restart inflate() */
 
-  /* for string and stored block copying */
-  this.length = 0;            /* literal or length of data to copy */
-  this.offset = 0;            /* distance back to copy string from */
+  /* ===========================================================================*/
 
-  /* for table and code decoding */
-  this.extra = 0;             /* extra bits needed */
 
-  /* fixed and dynamic code tables */
-  this.lencode = null;          /* starting table for length/literal codes */
-  this.distcode = null;         /* starting table for distance codes */
-  this.lenbits = 0;           /* index bits for lencode */
-  this.distbits = 0;          /* index bits for distcode */
 
-  /* dynamic table building */
-  this.ncode = 0;             /* number of code length code lengths */
-  this.nlen = 0;              /* number of length code lengths */
-  this.ndist = 0;             /* number of distance code lengths */
-  this.have = 0;              /* number of code lengths in lens[] */
-  this.next = null;              /* next available space in codes[] */
+  const ENOUGH_LENS = 852;
+  const ENOUGH_DISTS = 592;
+  //const ENOUGH =  (ENOUGH_LENS+ENOUGH_DISTS);
 
-  this.lens = new utils.Buf16(320); /* temporary storage for code lengths */
-  this.work = new utils.Buf16(288); /* work area for code table building */
+  const MAX_WBITS = 15;
+  /* 32K LZ77 window */
+  const DEF_WBITS = MAX_WBITS;
+
+
+  const zswap32 = (q) => {
+
+    return  (((q >>> 24) & 0xff) +
+            ((q >>> 8) & 0xff00) +
+            ((q & 0xff00) << 8) +
+            ((q & 0xff) << 24));
+  };
+
+
+  function InflateState() {
+    this.mode = 0;             /* current inflate mode */
+    this.last = false;          /* true if processing last block */
+    this.wrap = 0;              /* bit 0 true for zlib, bit 1 true for gzip */
+    this.havedict = false;      /* true if dictionary provided */
+    this.flags = 0;             /* gzip header method and flags (0 if zlib) */
+    this.dmax = 0;              /* zlib header max distance (INFLATE_STRICT) */
+    this.check = 0;             /* protected copy of check value */
+    this.total = 0;             /* protected copy of output count */
+    // TODO: may be {}
+    this.head = null;           /* where to save gzip header information */
+
+    /* sliding window */
+    this.wbits = 0;             /* log base 2 of requested window size */
+    this.wsize = 0;             /* window size or zero if not using window */
+    this.whave = 0;             /* valid bytes in the window */
+    this.wnext = 0;             /* window write index */
+    this.window = null;         /* allocated sliding window, if needed */
+
+    /* bit accumulator */
+    this.hold = 0;              /* input bit accumulator */
+    this.bits = 0;              /* number of bits in "in" */
+
+    /* for string and stored block copying */
+    this.length = 0;            /* literal or length of data to copy */
+    this.offset = 0;            /* distance back to copy string from */
+
+    /* for table and code decoding */
+    this.extra = 0;             /* extra bits needed */
+
+    /* fixed and dynamic code tables */
+    this.lencode = null;          /* starting table for length/literal codes */
+    this.distcode = null;         /* starting table for distance codes */
+    this.lenbits = 0;           /* index bits for lencode */
+    this.distbits = 0;          /* index bits for distcode */
+
+    /* dynamic table building */
+    this.ncode = 0;             /* number of code length code lengths */
+    this.nlen = 0;              /* number of length code lengths */
+    this.ndist = 0;             /* number of distance code lengths */
+    this.have = 0;              /* number of code lengths in lens[] */
+    this.next = null;              /* next available space in codes[] */
+
+    this.lens = new Uint16Array(320); /* temporary storage for code lengths */
+    this.work = new Uint16Array(288); /* work area for code table building */
+
+    /*
+     because we don't have pointers in js, we use lencode and distcode directly
+     as buffers so we don't need codes
+    */
+    //this.codes = new Int32Array(ENOUGH);       /* space for code tables */
+    this.lendyn = null;              /* dynamic table for length/literal codes (JS specific) */
+    this.distdyn = null;             /* dynamic table for distance codes (JS specific) */
+    this.sane = 0;                   /* if false, allow invalid distance too far */
+    this.back = 0;                   /* bits back of last unprocessed length/lit */
+    this.was = 0;                    /* initial length of match */
+  }
+
+
+  const inflateResetKeep = (strm) => {
+
+    if (!strm || !strm.state) { return Z_STREAM_ERROR$1; }
+    const state = strm.state;
+    strm.total_in = strm.total_out = state.total = 0;
+    strm.msg = ''; /*Z_NULL*/
+    if (state.wrap) {       /* to support ill-conceived Java test suite */
+      strm.adler = state.wrap & 1;
+    }
+    state.mode = HEAD;
+    state.last = 0;
+    state.havedict = 0;
+    state.dmax = 32768;
+    state.head = null/*Z_NULL*/;
+    state.hold = 0;
+    state.bits = 0;
+    //state.lencode = state.distcode = state.next = state.codes;
+    state.lencode = state.lendyn = new Int32Array(ENOUGH_LENS);
+    state.distcode = state.distdyn = new Int32Array(ENOUGH_DISTS);
+
+    state.sane = 1;
+    state.back = -1;
+    //Tracev((stderr, "inflate: reset\n"));
+    return Z_OK$1;
+  };
+
+
+  const inflateReset = (strm) => {
+
+    if (!strm || !strm.state) { return Z_STREAM_ERROR$1; }
+    const state = strm.state;
+    state.wsize = 0;
+    state.whave = 0;
+    state.wnext = 0;
+    return inflateResetKeep(strm);
+
+  };
+
+
+  const inflateReset2 = (strm, windowBits) => {
+    let wrap;
+
+    /* get the state */
+    if (!strm || !strm.state) { return Z_STREAM_ERROR$1; }
+    const state = strm.state;
+
+    /* extract wrap request from windowBits parameter */
+    if (windowBits < 0) {
+      wrap = 0;
+      windowBits = -windowBits;
+    }
+    else {
+      wrap = (windowBits >> 4) + 1;
+      if (windowBits < 48) {
+        windowBits &= 15;
+      }
+    }
+
+    /* set number of window bits, free window if different */
+    if (windowBits && (windowBits < 8 || windowBits > 15)) {
+      return Z_STREAM_ERROR$1;
+    }
+    if (state.window !== null && state.wbits !== windowBits) {
+      state.window = null;
+    }
+
+    /* update state and reset the rest of it */
+    state.wrap = wrap;
+    state.wbits = windowBits;
+    return inflateReset(strm);
+  };
+
+
+  const inflateInit2 = (strm, windowBits) => {
+
+    if (!strm) { return Z_STREAM_ERROR$1; }
+    //strm.msg = Z_NULL;                 /* in case we return an error */
+
+    const state = new InflateState();
+
+    //if (state === Z_NULL) return Z_MEM_ERROR;
+    //Tracev((stderr, "inflate: allocated\n"));
+    strm.state = state;
+    state.window = null/*Z_NULL*/;
+    const ret = inflateReset2(strm, windowBits);
+    if (ret !== Z_OK$1) {
+      strm.state = null/*Z_NULL*/;
+    }
+    return ret;
+  };
+
+
+  const inflateInit = (strm) => {
+
+    return inflateInit2(strm, DEF_WBITS);
+  };
+
 
   /*
-   because we don't have pointers in js, we use lencode and distcode directly
-   as buffers so we don't need codes
-  */
-  //this.codes = new utils.Buf32(ENOUGH);       /* space for code tables */
-  this.lendyn = null;              /* dynamic table for length/literal codes (JS specific) */
-  this.distdyn = null;             /* dynamic table for distance codes (JS specific) */
-  this.sane = 0;                   /* if false, allow invalid distance too far */
-  this.back = 0;                   /* bits back of last unprocessed length/lit */
-  this.was = 0;                    /* initial length of match */
-}
+   Return state with length and distance decoding tables and index sizes set to
+   fixed code decoding.  Normally this returns fixed tables from inffixed.h.
+   If BUILDFIXED is defined, then instead this routine builds the tables the
+   first time it's called, and returns those tables the first time and
+   thereafter.  This reduces the size of the code by about 2K bytes, in
+   exchange for a little execution time.  However, BUILDFIXED should not be
+   used for threaded applications, since the rewriting of the tables and virgin
+   may not be thread-safe.
+   */
+  let virgin = true;
 
-function inflateResetKeep(strm) {
-  var state;
+  let lenfix, distfix; // We have no pointers in JS, so keep tables separate
 
-  if (!strm || !strm.state) { return Z_STREAM_ERROR; }
-  state = strm.state;
-  strm.total_in = strm.total_out = state.total = 0;
-  strm.msg = ''; /*Z_NULL*/
-  if (state.wrap) {       /* to support ill-conceived Java test suite */
-    strm.adler = state.wrap & 1;
-  }
-  state.mode = HEAD;
-  state.last = 0;
-  state.havedict = 0;
-  state.dmax = 32768;
-  state.head = null/*Z_NULL*/;
-  state.hold = 0;
-  state.bits = 0;
-  //state.lencode = state.distcode = state.next = state.codes;
-  state.lencode = state.lendyn = new utils.Buf32(ENOUGH_LENS);
-  state.distcode = state.distdyn = new utils.Buf32(ENOUGH_DISTS);
 
-  state.sane = 1;
-  state.back = -1;
-  //Tracev((stderr, "inflate: reset\n"));
-  return Z_OK;
-}
+  const fixedtables = (state) => {
 
-function inflateReset(strm) {
-  var state;
+    /* build fixed huffman tables if first call (may not be thread safe) */
+    if (virgin) {
+      lenfix = new Int32Array(512);
+      distfix = new Int32Array(32);
 
-  if (!strm || !strm.state) { return Z_STREAM_ERROR; }
-  state = strm.state;
-  state.wsize = 0;
-  state.whave = 0;
-  state.wnext = 0;
-  return inflateResetKeep(strm);
+      /* literal/length table */
+      let sym = 0;
+      while (sym < 144) { state.lens[sym++] = 8; }
+      while (sym < 256) { state.lens[sym++] = 9; }
+      while (sym < 280) { state.lens[sym++] = 7; }
+      while (sym < 288) { state.lens[sym++] = 8; }
 
-}
+      inftrees(LENS,  state.lens, 0, 288, lenfix,   0, state.work, { bits: 9 });
 
-function inflateReset2(strm, windowBits) {
-  var wrap;
-  var state;
+      /* distance table */
+      sym = 0;
+      while (sym < 32) { state.lens[sym++] = 5; }
 
-  /* get the state */
-  if (!strm || !strm.state) { return Z_STREAM_ERROR; }
-  state = strm.state;
+      inftrees(DISTS, state.lens, 0, 32,   distfix, 0, state.work, { bits: 5 });
 
-  /* extract wrap request from windowBits parameter */
-  if (windowBits < 0) {
-    wrap = 0;
-    windowBits = -windowBits;
-  }
-  else {
-    wrap = (windowBits >> 4) + 1;
-    if (windowBits < 48) {
-      windowBits &= 15;
+      /* do this just once */
+      virgin = false;
     }
-  }
 
-  /* set number of window bits, free window if different */
-  if (windowBits && (windowBits < 8 || windowBits > 15)) {
-    return Z_STREAM_ERROR;
-  }
-  if (state.window !== null && state.wbits !== windowBits) {
-    state.window = null;
-  }
-
-  /* update state and reset the rest of it */
-  state.wrap = wrap;
-  state.wbits = windowBits;
-  return inflateReset(strm);
-}
-
-function inflateInit2(strm, windowBits) {
-  var ret;
-  var state;
-
-  if (!strm) { return Z_STREAM_ERROR; }
-  //strm.msg = Z_NULL;                 /* in case we return an error */
-
-  state = new InflateState();
-
-  //if (state === Z_NULL) return Z_MEM_ERROR;
-  //Tracev((stderr, "inflate: allocated\n"));
-  strm.state = state;
-  state.window = null/*Z_NULL*/;
-  ret = inflateReset2(strm, windowBits);
-  if (ret !== Z_OK) {
-    strm.state = null/*Z_NULL*/;
-  }
-  return ret;
-}
-
-function inflateInit(strm) {
-  return inflateInit2(strm, DEF_WBITS);
-}
+    state.lencode = lenfix;
+    state.lenbits = 9;
+    state.distcode = distfix;
+    state.distbits = 5;
+  };
 
 
-/*
- Return state with length and distance decoding tables and index sizes set to
- fixed code decoding.  Normally this returns fixed tables from inffixed.h.
- If BUILDFIXED is defined, then instead this routine builds the tables the
- first time it's called, and returns those tables the first time and
- thereafter.  This reduces the size of the code by about 2K bytes, in
- exchange for a little execution time.  However, BUILDFIXED should not be
- used for threaded applications, since the rewriting of the tables and virgin
- may not be thread-safe.
- */
-var virgin = true;
+  /*
+   Update the window with the last wsize (normally 32K) bytes written before
+   returning.  If window does not exist yet, create it.  This is only called
+   when a window is already in use, or when output has been written during this
+   inflate call, but the end of the deflate stream has not been reached yet.
+   It is also called to create a window for dictionary data when a dictionary
+   is loaded.
 
-var lenfix, distfix; // We have no pointers in JS, so keep tables separate
+   Providing output buffers larger than 32K to inflate() should provide a speed
+   advantage, since only the last 32K of output is copied to the sliding window
+   upon return from inflate(), and since all distances after the first 32K of
+   output will fall in the output data, making match copies simpler and faster.
+   The advantage may be dependent on the size of the processor's data caches.
+   */
+  const updatewindow = (strm, src, end, copy) => {
 
-function fixedtables(state) {
-  /* build fixed huffman tables if first call (may not be thread safe) */
-  if (virgin) {
-    var sym;
+    let dist;
+    const state = strm.state;
 
-    lenfix = new utils.Buf32(512);
-    distfix = new utils.Buf32(32);
+    /* if it hasn't been done already, allocate space for the window */
+    if (state.window === null) {
+      state.wsize = 1 << state.wbits;
+      state.wnext = 0;
+      state.whave = 0;
 
-    /* literal/length table */
-    sym = 0;
-    while (sym < 144) { state.lens[sym++] = 8; }
-    while (sym < 256) { state.lens[sym++] = 9; }
-    while (sym < 280) { state.lens[sym++] = 7; }
-    while (sym < 288) { state.lens[sym++] = 8; }
-
-    inflate_table(LENS,  state.lens, 0, 288, lenfix,   0, state.work, { bits: 9 });
-
-    /* distance table */
-    sym = 0;
-    while (sym < 32) { state.lens[sym++] = 5; }
-
-    inflate_table(DISTS, state.lens, 0, 32,   distfix, 0, state.work, { bits: 5 });
-
-    /* do this just once */
-    virgin = false;
-  }
-
-  state.lencode = lenfix;
-  state.lenbits = 9;
-  state.distcode = distfix;
-  state.distbits = 5;
-}
-
-
-/*
- Update the window with the last wsize (normally 32K) bytes written before
- returning.  If window does not exist yet, create it.  This is only called
- when a window is already in use, or when output has been written during this
- inflate call, but the end of the deflate stream has not been reached yet.
- It is also called to create a window for dictionary data when a dictionary
- is loaded.
-
- Providing output buffers larger than 32K to inflate() should provide a speed
- advantage, since only the last 32K of output is copied to the sliding window
- upon return from inflate(), and since all distances after the first 32K of
- output will fall in the output data, making match copies simpler and faster.
- The advantage may be dependent on the size of the processor's data caches.
- */
-function updatewindow(strm, src, end, copy) {
-  var dist;
-  var state = strm.state;
-
-  /* if it hasn't been done already, allocate space for the window */
-  if (state.window === null) {
-    state.wsize = 1 << state.wbits;
-    state.wnext = 0;
-    state.whave = 0;
-
-    state.window = new utils.Buf8(state.wsize);
-  }
-
-  /* copy state->wsize or less output bytes into the circular window */
-  if (copy >= state.wsize) {
-    utils.arraySet(state.window, src, end - state.wsize, state.wsize, 0);
-    state.wnext = 0;
-    state.whave = state.wsize;
-  }
-  else {
-    dist = state.wsize - state.wnext;
-    if (dist > copy) {
-      dist = copy;
+      state.window = new Uint8Array(state.wsize);
     }
-    //zmemcpy(state->window + state->wnext, end - copy, dist);
-    utils.arraySet(state.window, src, end - copy, dist, state.wnext);
-    copy -= dist;
-    if (copy) {
-      //zmemcpy(state->window, end - copy, copy);
-      utils.arraySet(state.window, src, end - copy, copy, 0);
-      state.wnext = copy;
+
+    /* copy state->wsize or less output bytes into the circular window */
+    if (copy >= state.wsize) {
+      state.window.set(src.subarray(end - state.wsize, end), 0);
+      state.wnext = 0;
       state.whave = state.wsize;
     }
     else {
-      state.wnext += dist;
-      if (state.wnext === state.wsize) { state.wnext = 0; }
-      if (state.whave < state.wsize) { state.whave += dist; }
+      dist = state.wsize - state.wnext;
+      if (dist > copy) {
+        dist = copy;
+      }
+      //zmemcpy(state->window + state->wnext, end - copy, dist);
+      state.window.set(src.subarray(end - copy, end - copy + dist), state.wnext);
+      copy -= dist;
+      if (copy) {
+        //zmemcpy(state->window, end - copy, copy);
+        state.window.set(src.subarray(end - copy, end), 0);
+        state.wnext = copy;
+        state.whave = state.wsize;
+      }
+      else {
+        state.wnext += dist;
+        if (state.wnext === state.wsize) { state.wnext = 0; }
+        if (state.whave < state.wsize) { state.whave += dist; }
+      }
     }
-  }
-  return 0;
-}
-
-function inflate(strm, flush) {
-  var state;
-  var input, output;          // input/output buffers
-  var next;                   /* next input INDEX */
-  var put;                    /* next output INDEX */
-  var have, left;             /* available input and output */
-  var hold;                   /* bit buffer */
-  var bits;                   /* bits in bit buffer */
-  var _in, _out;              /* save starting available input and output */
-  var copy;                   /* number of stored or match bytes to copy */
-  var from;                   /* where to copy match bytes from */
-  var from_source;
-  var here = 0;               /* current decoding table entry */
-  var here_bits, here_op, here_val; // paked "here" denormalized (JS specific)
-  //var last;                   /* parent table entry */
-  var last_bits, last_op, last_val; // paked "last" denormalized (JS specific)
-  var len;                    /* length to copy for repeats, bits to drop */
-  var ret;                    /* return code */
-  var hbuf = new utils.Buf8(4);    /* buffer for gzip header crc calculation */
-  var opts;
-
-  var n; // temporary var for NEED_BITS
-
-  var order = /* permutation of code lengths */
-    [ 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 ];
+    return 0;
+  };
 
 
-  if (!strm || !strm.state || !strm.output ||
-      (!strm.input && strm.avail_in !== 0)) {
-    return Z_STREAM_ERROR;
-  }
+  const inflate$2 = (strm, flush) => {
 
-  state = strm.state;
-  if (state.mode === TYPE) { state.mode = TYPEDO; }    /* skip check */
+    let state;
+    let input, output;          // input/output buffers
+    let next;                   /* next input INDEX */
+    let put;                    /* next output INDEX */
+    let have, left;             /* available input and output */
+    let hold;                   /* bit buffer */
+    let bits;                   /* bits in bit buffer */
+    let _in, _out;              /* save starting available input and output */
+    let copy;                   /* number of stored or match bytes to copy */
+    let from;                   /* where to copy match bytes from */
+    let from_source;
+    let here = 0;               /* current decoding table entry */
+    let here_bits, here_op, here_val; // paked "here" denormalized (JS specific)
+    //let last;                   /* parent table entry */
+    let last_bits, last_op, last_val; // paked "last" denormalized (JS specific)
+    let len;                    /* length to copy for repeats, bits to drop */
+    let ret;                    /* return code */
+    const hbuf = new Uint8Array(4);    /* buffer for gzip header crc calculation */
+    let opts;
+
+    let n; // temporary variable for NEED_BITS
+
+    const order = /* permutation of code lengths */
+      new Uint8Array([ 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 ]);
 
 
-  //--- LOAD() ---
-  put = strm.next_out;
-  output = strm.output;
-  left = strm.avail_out;
-  next = strm.next_in;
-  input = strm.input;
-  have = strm.avail_in;
-  hold = state.hold;
-  bits = state.bits;
-  //---
+    if (!strm || !strm.state || !strm.output ||
+        (!strm.input && strm.avail_in !== 0)) {
+      return Z_STREAM_ERROR$1;
+    }
 
-  _in = have;
-  _out = left;
-  ret = Z_OK;
+    state = strm.state;
+    if (state.mode === TYPE) { state.mode = TYPEDO; }    /* skip check */
 
-  inf_leave: // goto emulation
-  for (;;) {
-    switch (state.mode) {
-      case HEAD:
-        if (state.wrap === 0) {
-          state.mode = TYPEDO;
-          break;
-        }
-        //=== NEEDBITS(16);
-        while (bits < 16) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        if ((state.wrap & 2) && hold === 0x8b1f) {  /* gzip header */
-          state.check = 0/*crc32(0L, Z_NULL, 0)*/;
-          //=== CRC2(state.check, hold);
-          hbuf[0] = hold & 0xff;
-          hbuf[1] = (hold >>> 8) & 0xff;
-          state.check = crc32(state.check, hbuf, 2, 0);
+
+    //--- LOAD() ---
+    put = strm.next_out;
+    output = strm.output;
+    left = strm.avail_out;
+    next = strm.next_in;
+    input = strm.input;
+    have = strm.avail_in;
+    hold = state.hold;
+    bits = state.bits;
+    //---
+
+    _in = have;
+    _out = left;
+    ret = Z_OK$1;
+
+    inf_leave: // goto emulation
+    for (;;) {
+      switch (state.mode) {
+        case HEAD:
+          if (state.wrap === 0) {
+            state.mode = TYPEDO;
+            break;
+          }
+          //=== NEEDBITS(16);
+          while (bits < 16) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+          }
           //===//
+          if ((state.wrap & 2) && hold === 0x8b1f) {  /* gzip header */
+            state.check = 0/*crc32(0L, Z_NULL, 0)*/;
+            //=== CRC2(state.check, hold);
+            hbuf[0] = hold & 0xff;
+            hbuf[1] = (hold >>> 8) & 0xff;
+            state.check = crc32_1(state.check, hbuf, 2, 0);
+            //===//
 
+            //=== INITBITS();
+            hold = 0;
+            bits = 0;
+            //===//
+            state.mode = FLAGS;
+            break;
+          }
+          state.flags = 0;           /* expect zlib header */
+          if (state.head) {
+            state.head.done = false;
+          }
+          if (!(state.wrap & 1) ||   /* check if zlib header allowed */
+            (((hold & 0xff)/*BITS(8)*/ << 8) + (hold >> 8)) % 31) {
+            strm.msg = 'incorrect header check';
+            state.mode = BAD;
+            break;
+          }
+          if ((hold & 0x0f)/*BITS(4)*/ !== Z_DEFLATED) {
+            strm.msg = 'unknown compression method';
+            state.mode = BAD;
+            break;
+          }
+          //--- DROPBITS(4) ---//
+          hold >>>= 4;
+          bits -= 4;
+          //---//
+          len = (hold & 0x0f)/*BITS(4)*/ + 8;
+          if (state.wbits === 0) {
+            state.wbits = len;
+          }
+          else if (len > state.wbits) {
+            strm.msg = 'invalid window size';
+            state.mode = BAD;
+            break;
+          }
+
+          // !!! pako patch. Force use `options.windowBits` if passed.
+          // Required to always use max window size by default.
+          state.dmax = 1 << state.wbits;
+          //state.dmax = 1 << len;
+
+          //Tracev((stderr, "inflate:   zlib header ok\n"));
+          strm.adler = state.check = 1/*adler32(0L, Z_NULL, 0)*/;
+          state.mode = hold & 0x200 ? DICTID : TYPE;
           //=== INITBITS();
           hold = 0;
           bits = 0;
           //===//
-          state.mode = FLAGS;
           break;
-        }
-        state.flags = 0;           /* expect zlib header */
-        if (state.head) {
-          state.head.done = false;
-        }
-        if (!(state.wrap & 1) ||   /* check if zlib header allowed */
-          (((hold & 0xff)/*BITS(8)*/ << 8) + (hold >> 8)) % 31) {
-          strm.msg = 'incorrect header check';
-          state.mode = BAD;
-          break;
-        }
-        if ((hold & 0x0f)/*BITS(4)*/ !== Z_DEFLATED) {
-          strm.msg = 'unknown compression method';
-          state.mode = BAD;
-          break;
-        }
-        //--- DROPBITS(4) ---//
-        hold >>>= 4;
-        bits -= 4;
-        //---//
-        len = (hold & 0x0f)/*BITS(4)*/ + 8;
-        if (state.wbits === 0) {
-          state.wbits = len;
-        }
-        else if (len > state.wbits) {
-          strm.msg = 'invalid window size';
-          state.mode = BAD;
-          break;
-        }
-        state.dmax = 1 << len;
-        //Tracev((stderr, "inflate:   zlib header ok\n"));
-        strm.adler = state.check = 1/*adler32(0L, Z_NULL, 0)*/;
-        state.mode = hold & 0x200 ? DICTID : TYPE;
-        //=== INITBITS();
-        hold = 0;
-        bits = 0;
-        //===//
-        break;
-      case FLAGS:
-        //=== NEEDBITS(16); */
-        while (bits < 16) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        state.flags = hold;
-        if ((state.flags & 0xff) !== Z_DEFLATED) {
-          strm.msg = 'unknown compression method';
-          state.mode = BAD;
-          break;
-        }
-        if (state.flags & 0xe000) {
-          strm.msg = 'unknown header flags set';
-          state.mode = BAD;
-          break;
-        }
-        if (state.head) {
-          state.head.text = ((hold >> 8) & 1);
-        }
-        if (state.flags & 0x0200) {
-          //=== CRC2(state.check, hold);
-          hbuf[0] = hold & 0xff;
-          hbuf[1] = (hold >>> 8) & 0xff;
-          state.check = crc32(state.check, hbuf, 2, 0);
-          //===//
-        }
-        //=== INITBITS();
-        hold = 0;
-        bits = 0;
-        //===//
-        state.mode = TIME;
-        /* falls through */
-      case TIME:
-        //=== NEEDBITS(32); */
-        while (bits < 32) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        if (state.head) {
-          state.head.time = hold;
-        }
-        if (state.flags & 0x0200) {
-          //=== CRC4(state.check, hold)
-          hbuf[0] = hold & 0xff;
-          hbuf[1] = (hold >>> 8) & 0xff;
-          hbuf[2] = (hold >>> 16) & 0xff;
-          hbuf[3] = (hold >>> 24) & 0xff;
-          state.check = crc32(state.check, hbuf, 4, 0);
-          //===
-        }
-        //=== INITBITS();
-        hold = 0;
-        bits = 0;
-        //===//
-        state.mode = OS;
-        /* falls through */
-      case OS:
-        //=== NEEDBITS(16); */
-        while (bits < 16) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        if (state.head) {
-          state.head.xflags = (hold & 0xff);
-          state.head.os = (hold >> 8);
-        }
-        if (state.flags & 0x0200) {
-          //=== CRC2(state.check, hold);
-          hbuf[0] = hold & 0xff;
-          hbuf[1] = (hold >>> 8) & 0xff;
-          state.check = crc32(state.check, hbuf, 2, 0);
-          //===//
-        }
-        //=== INITBITS();
-        hold = 0;
-        bits = 0;
-        //===//
-        state.mode = EXLEN;
-        /* falls through */
-      case EXLEN:
-        if (state.flags & 0x0400) {
+        case FLAGS:
           //=== NEEDBITS(16); */
           while (bits < 16) {
             if (have === 0) { break inf_leave; }
@@ -14253,117 +17936,61 @@ function inflate(strm, flush) {
             bits += 8;
           }
           //===//
-          state.length = hold;
+          state.flags = hold;
+          if ((state.flags & 0xff) !== Z_DEFLATED) {
+            strm.msg = 'unknown compression method';
+            state.mode = BAD;
+            break;
+          }
+          if (state.flags & 0xe000) {
+            strm.msg = 'unknown header flags set';
+            state.mode = BAD;
+            break;
+          }
           if (state.head) {
-            state.head.extra_len = hold;
+            state.head.text = ((hold >> 8) & 1);
           }
           if (state.flags & 0x0200) {
             //=== CRC2(state.check, hold);
             hbuf[0] = hold & 0xff;
             hbuf[1] = (hold >>> 8) & 0xff;
-            state.check = crc32(state.check, hbuf, 2, 0);
+            state.check = crc32_1(state.check, hbuf, 2, 0);
             //===//
           }
           //=== INITBITS();
           hold = 0;
           bits = 0;
           //===//
-        }
-        else if (state.head) {
-          state.head.extra = null/*Z_NULL*/;
-        }
-        state.mode = EXTRA;
-        /* falls through */
-      case EXTRA:
-        if (state.flags & 0x0400) {
-          copy = state.length;
-          if (copy > have) { copy = have; }
-          if (copy) {
-            if (state.head) {
-              len = state.head.extra_len - state.length;
-              if (!state.head.extra) {
-                // Use untyped array for more convenient processing later
-                state.head.extra = new Array(state.head.extra_len);
-              }
-              utils.arraySet(
-                state.head.extra,
-                input,
-                next,
-                // extra field is limited to 65536 bytes
-                // - no need for additional size check
-                copy,
-                /*len + copy > state.head.extra_max - len ? state.head.extra_max : copy,*/
-                len
-              );
-              //zmemcpy(state.head.extra + len, next,
-              //        len + copy > state.head.extra_max ?
-              //        state.head.extra_max - len : copy);
-            }
-            if (state.flags & 0x0200) {
-              state.check = crc32(state.check, input, copy, next);
-            }
-            have -= copy;
-            next += copy;
-            state.length -= copy;
+          state.mode = TIME;
+          /* falls through */
+        case TIME:
+          //=== NEEDBITS(32); */
+          while (bits < 32) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
           }
-          if (state.length) { break inf_leave; }
-        }
-        state.length = 0;
-        state.mode = NAME;
-        /* falls through */
-      case NAME:
-        if (state.flags & 0x0800) {
-          if (have === 0) { break inf_leave; }
-          copy = 0;
-          do {
-            // TODO: 2 or 1 bytes?
-            len = input[next + copy++];
-            /* use constant limit because in js we should not preallocate memory */
-            if (state.head && len &&
-                (state.length < 65536 /*state.head.name_max*/)) {
-              state.head.name += String.fromCharCode(len);
-            }
-          } while (len && copy < have);
-
+          //===//
+          if (state.head) {
+            state.head.time = hold;
+          }
           if (state.flags & 0x0200) {
-            state.check = crc32(state.check, input, copy, next);
+            //=== CRC4(state.check, hold)
+            hbuf[0] = hold & 0xff;
+            hbuf[1] = (hold >>> 8) & 0xff;
+            hbuf[2] = (hold >>> 16) & 0xff;
+            hbuf[3] = (hold >>> 24) & 0xff;
+            state.check = crc32_1(state.check, hbuf, 4, 0);
+            //===
           }
-          have -= copy;
-          next += copy;
-          if (len) { break inf_leave; }
-        }
-        else if (state.head) {
-          state.head.name = null;
-        }
-        state.length = 0;
-        state.mode = COMMENT;
-        /* falls through */
-      case COMMENT:
-        if (state.flags & 0x1000) {
-          if (have === 0) { break inf_leave; }
-          copy = 0;
-          do {
-            len = input[next + copy++];
-            /* use constant limit because in js we should not preallocate memory */
-            if (state.head && len &&
-                (state.length < 65536 /*state.head.comm_max*/)) {
-              state.head.comment += String.fromCharCode(len);
-            }
-          } while (len && copy < have);
-          if (state.flags & 0x0200) {
-            state.check = crc32(state.check, input, copy, next);
-          }
-          have -= copy;
-          next += copy;
-          if (len) { break inf_leave; }
-        }
-        else if (state.head) {
-          state.head.comment = null;
-        }
-        state.mode = HCRC;
-        /* falls through */
-      case HCRC:
-        if (state.flags & 0x0200) {
+          //=== INITBITS();
+          hold = 0;
+          bits = 0;
+          //===//
+          state.mode = OS;
+          /* falls through */
+        case OS:
           //=== NEEDBITS(16); */
           while (bits < 16) {
             if (have === 0) { break inf_leave; }
@@ -14372,201 +17999,213 @@ function inflate(strm, flush) {
             bits += 8;
           }
           //===//
-          if (hold !== (state.check & 0xffff)) {
-            strm.msg = 'header crc mismatch';
-            state.mode = BAD;
-            break;
+          if (state.head) {
+            state.head.xflags = (hold & 0xff);
+            state.head.os = (hold >> 8);
+          }
+          if (state.flags & 0x0200) {
+            //=== CRC2(state.check, hold);
+            hbuf[0] = hold & 0xff;
+            hbuf[1] = (hold >>> 8) & 0xff;
+            state.check = crc32_1(state.check, hbuf, 2, 0);
+            //===//
           }
           //=== INITBITS();
           hold = 0;
           bits = 0;
           //===//
-        }
-        if (state.head) {
-          state.head.hcrc = ((state.flags >> 9) & 1);
-          state.head.done = true;
-        }
-        strm.adler = state.check = 0;
-        state.mode = TYPE;
-        break;
-      case DICTID:
-        //=== NEEDBITS(32); */
-        while (bits < 32) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        strm.adler = state.check = zswap32(hold);
-        //=== INITBITS();
-        hold = 0;
-        bits = 0;
-        //===//
-        state.mode = DICT;
-        /* falls through */
-      case DICT:
-        if (state.havedict === 0) {
-          //--- RESTORE() ---
-          strm.next_out = put;
-          strm.avail_out = left;
-          strm.next_in = next;
-          strm.avail_in = have;
-          state.hold = hold;
-          state.bits = bits;
-          //---
-          return Z_NEED_DICT;
-        }
-        strm.adler = state.check = 1/*adler32(0L, Z_NULL, 0)*/;
-        state.mode = TYPE;
-        /* falls through */
-      case TYPE:
-        if (flush === Z_BLOCK || flush === Z_TREES) { break inf_leave; }
-        /* falls through */
-      case TYPEDO:
-        if (state.last) {
-          //--- BYTEBITS() ---//
-          hold >>>= bits & 7;
-          bits -= bits & 7;
-          //---//
-          state.mode = CHECK;
-          break;
-        }
-        //=== NEEDBITS(3); */
-        while (bits < 3) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        state.last = (hold & 0x01)/*BITS(1)*/;
-        //--- DROPBITS(1) ---//
-        hold >>>= 1;
-        bits -= 1;
-        //---//
-
-        switch ((hold & 0x03)/*BITS(2)*/) {
-          case 0:                             /* stored block */
-            //Tracev((stderr, "inflate:     stored block%s\n",
-            //        state.last ? " (last)" : ""));
-            state.mode = STORED;
-            break;
-          case 1:                             /* fixed block */
-            fixedtables(state);
-            //Tracev((stderr, "inflate:     fixed codes block%s\n",
-            //        state.last ? " (last)" : ""));
-            state.mode = LEN_;             /* decode codes */
-            if (flush === Z_TREES) {
-              //--- DROPBITS(2) ---//
-              hold >>>= 2;
-              bits -= 2;
-              //---//
-              break inf_leave;
+          state.mode = EXLEN;
+          /* falls through */
+        case EXLEN:
+          if (state.flags & 0x0400) {
+            //=== NEEDBITS(16); */
+            while (bits < 16) {
+              if (have === 0) { break inf_leave; }
+              have--;
+              hold += input[next++] << bits;
+              bits += 8;
             }
+            //===//
+            state.length = hold;
+            if (state.head) {
+              state.head.extra_len = hold;
+            }
+            if (state.flags & 0x0200) {
+              //=== CRC2(state.check, hold);
+              hbuf[0] = hold & 0xff;
+              hbuf[1] = (hold >>> 8) & 0xff;
+              state.check = crc32_1(state.check, hbuf, 2, 0);
+              //===//
+            }
+            //=== INITBITS();
+            hold = 0;
+            bits = 0;
+            //===//
+          }
+          else if (state.head) {
+            state.head.extra = null/*Z_NULL*/;
+          }
+          state.mode = EXTRA;
+          /* falls through */
+        case EXTRA:
+          if (state.flags & 0x0400) {
+            copy = state.length;
+            if (copy > have) { copy = have; }
+            if (copy) {
+              if (state.head) {
+                len = state.head.extra_len - state.length;
+                if (!state.head.extra) {
+                  // Use untyped array for more convenient processing later
+                  state.head.extra = new Uint8Array(state.head.extra_len);
+                }
+                state.head.extra.set(
+                  input.subarray(
+                    next,
+                    // extra field is limited to 65536 bytes
+                    // - no need for additional size check
+                    next + copy
+                  ),
+                  /*len + copy > state.head.extra_max - len ? state.head.extra_max : copy,*/
+                  len
+                );
+                //zmemcpy(state.head.extra + len, next,
+                //        len + copy > state.head.extra_max ?
+                //        state.head.extra_max - len : copy);
+              }
+              if (state.flags & 0x0200) {
+                state.check = crc32_1(state.check, input, copy, next);
+              }
+              have -= copy;
+              next += copy;
+              state.length -= copy;
+            }
+            if (state.length) { break inf_leave; }
+          }
+          state.length = 0;
+          state.mode = NAME;
+          /* falls through */
+        case NAME:
+          if (state.flags & 0x0800) {
+            if (have === 0) { break inf_leave; }
+            copy = 0;
+            do {
+              // TODO: 2 or 1 bytes?
+              len = input[next + copy++];
+              /* use constant limit because in js we should not preallocate memory */
+              if (state.head && len &&
+                  (state.length < 65536 /*state.head.name_max*/)) {
+                state.head.name += String.fromCharCode(len);
+              }
+            } while (len && copy < have);
+
+            if (state.flags & 0x0200) {
+              state.check = crc32_1(state.check, input, copy, next);
+            }
+            have -= copy;
+            next += copy;
+            if (len) { break inf_leave; }
+          }
+          else if (state.head) {
+            state.head.name = null;
+          }
+          state.length = 0;
+          state.mode = COMMENT;
+          /* falls through */
+        case COMMENT:
+          if (state.flags & 0x1000) {
+            if (have === 0) { break inf_leave; }
+            copy = 0;
+            do {
+              len = input[next + copy++];
+              /* use constant limit because in js we should not preallocate memory */
+              if (state.head && len &&
+                  (state.length < 65536 /*state.head.comm_max*/)) {
+                state.head.comment += String.fromCharCode(len);
+              }
+            } while (len && copy < have);
+            if (state.flags & 0x0200) {
+              state.check = crc32_1(state.check, input, copy, next);
+            }
+            have -= copy;
+            next += copy;
+            if (len) { break inf_leave; }
+          }
+          else if (state.head) {
+            state.head.comment = null;
+          }
+          state.mode = HCRC;
+          /* falls through */
+        case HCRC:
+          if (state.flags & 0x0200) {
+            //=== NEEDBITS(16); */
+            while (bits < 16) {
+              if (have === 0) { break inf_leave; }
+              have--;
+              hold += input[next++] << bits;
+              bits += 8;
+            }
+            //===//
+            if (hold !== (state.check & 0xffff)) {
+              strm.msg = 'header crc mismatch';
+              state.mode = BAD;
+              break;
+            }
+            //=== INITBITS();
+            hold = 0;
+            bits = 0;
+            //===//
+          }
+          if (state.head) {
+            state.head.hcrc = ((state.flags >> 9) & 1);
+            state.head.done = true;
+          }
+          strm.adler = state.check = 0;
+          state.mode = TYPE;
+          break;
+        case DICTID:
+          //=== NEEDBITS(32); */
+          while (bits < 32) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+          }
+          //===//
+          strm.adler = state.check = zswap32(hold);
+          //=== INITBITS();
+          hold = 0;
+          bits = 0;
+          //===//
+          state.mode = DICT;
+          /* falls through */
+        case DICT:
+          if (state.havedict === 0) {
+            //--- RESTORE() ---
+            strm.next_out = put;
+            strm.avail_out = left;
+            strm.next_in = next;
+            strm.avail_in = have;
+            state.hold = hold;
+            state.bits = bits;
+            //---
+            return Z_NEED_DICT$1;
+          }
+          strm.adler = state.check = 1/*adler32(0L, Z_NULL, 0)*/;
+          state.mode = TYPE;
+          /* falls through */
+        case TYPE:
+          if (flush === Z_BLOCK || flush === Z_TREES) { break inf_leave; }
+          /* falls through */
+        case TYPEDO:
+          if (state.last) {
+            //--- BYTEBITS() ---//
+            hold >>>= bits & 7;
+            bits -= bits & 7;
+            //---//
+            state.mode = CHECK;
             break;
-          case 2:                             /* dynamic block */
-            //Tracev((stderr, "inflate:     dynamic codes block%s\n",
-            //        state.last ? " (last)" : ""));
-            state.mode = TABLE;
-            break;
-          case 3:
-            strm.msg = 'invalid block type';
-            state.mode = BAD;
-        }
-        //--- DROPBITS(2) ---//
-        hold >>>= 2;
-        bits -= 2;
-        //---//
-        break;
-      case STORED:
-        //--- BYTEBITS() ---// /* go to byte boundary */
-        hold >>>= bits & 7;
-        bits -= bits & 7;
-        //---//
-        //=== NEEDBITS(32); */
-        while (bits < 32) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        if ((hold & 0xffff) !== ((hold >>> 16) ^ 0xffff)) {
-          strm.msg = 'invalid stored block lengths';
-          state.mode = BAD;
-          break;
-        }
-        state.length = hold & 0xffff;
-        //Tracev((stderr, "inflate:       stored length %u\n",
-        //        state.length));
-        //=== INITBITS();
-        hold = 0;
-        bits = 0;
-        //===//
-        state.mode = COPY_;
-        if (flush === Z_TREES) { break inf_leave; }
-        /* falls through */
-      case COPY_:
-        state.mode = COPY;
-        /* falls through */
-      case COPY:
-        copy = state.length;
-        if (copy) {
-          if (copy > have) { copy = have; }
-          if (copy > left) { copy = left; }
-          if (copy === 0) { break inf_leave; }
-          //--- zmemcpy(put, next, copy); ---
-          utils.arraySet(output, input, next, copy, put);
-          //---//
-          have -= copy;
-          next += copy;
-          left -= copy;
-          put += copy;
-          state.length -= copy;
-          break;
-        }
-        //Tracev((stderr, "inflate:       stored end\n"));
-        state.mode = TYPE;
-        break;
-      case TABLE:
-        //=== NEEDBITS(14); */
-        while (bits < 14) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        state.nlen = (hold & 0x1f)/*BITS(5)*/ + 257;
-        //--- DROPBITS(5) ---//
-        hold >>>= 5;
-        bits -= 5;
-        //---//
-        state.ndist = (hold & 0x1f)/*BITS(5)*/ + 1;
-        //--- DROPBITS(5) ---//
-        hold >>>= 5;
-        bits -= 5;
-        //---//
-        state.ncode = (hold & 0x0f)/*BITS(4)*/ + 4;
-        //--- DROPBITS(4) ---//
-        hold >>>= 4;
-        bits -= 4;
-        //---//
-//#ifndef PKZIP_BUG_WORKAROUND
-        if (state.nlen > 286 || state.ndist > 30) {
-          strm.msg = 'too many length or distance symbols';
-          state.mode = BAD;
-          break;
-        }
-//#endif
-        //Tracev((stderr, "inflate:       table sizes ok\n"));
-        state.have = 0;
-        state.mode = LENLENS;
-        /* falls through */
-      case LENLENS:
-        while (state.have < state.ncode) {
-          //=== NEEDBITS(3);
+          }
+          //=== NEEDBITS(3); */
           while (bits < 3) {
             if (have === 0) { break inf_leave; }
             have--;
@@ -14574,39 +18213,442 @@ function inflate(strm, flush) {
             bits += 8;
           }
           //===//
-          state.lens[order[state.have++]] = (hold & 0x07);//BITS(3);
-          //--- DROPBITS(3) ---//
-          hold >>>= 3;
-          bits -= 3;
+          state.last = (hold & 0x01)/*BITS(1)*/;
+          //--- DROPBITS(1) ---//
+          hold >>>= 1;
+          bits -= 1;
           //---//
-        }
-        while (state.have < 19) {
-          state.lens[order[state.have++]] = 0;
-        }
-        // We have separate tables & no pointers. 2 commented lines below not needed.
-        //state.next = state.codes;
-        //state.lencode = state.next;
-        // Switch to use dynamic table
-        state.lencode = state.lendyn;
-        state.lenbits = 7;
 
-        opts = { bits: state.lenbits };
-        ret = inflate_table(CODES, state.lens, 0, 19, state.lencode, 0, state.work, opts);
-        state.lenbits = opts.bits;
-
-        if (ret) {
-          strm.msg = 'invalid code lengths set';
-          state.mode = BAD;
+          switch ((hold & 0x03)/*BITS(2)*/) {
+            case 0:                             /* stored block */
+              //Tracev((stderr, "inflate:     stored block%s\n",
+              //        state.last ? " (last)" : ""));
+              state.mode = STORED;
+              break;
+            case 1:                             /* fixed block */
+              fixedtables(state);
+              //Tracev((stderr, "inflate:     fixed codes block%s\n",
+              //        state.last ? " (last)" : ""));
+              state.mode = LEN_;             /* decode codes */
+              if (flush === Z_TREES) {
+                //--- DROPBITS(2) ---//
+                hold >>>= 2;
+                bits -= 2;
+                //---//
+                break inf_leave;
+              }
+              break;
+            case 2:                             /* dynamic block */
+              //Tracev((stderr, "inflate:     dynamic codes block%s\n",
+              //        state.last ? " (last)" : ""));
+              state.mode = TABLE;
+              break;
+            case 3:
+              strm.msg = 'invalid block type';
+              state.mode = BAD;
+          }
+          //--- DROPBITS(2) ---//
+          hold >>>= 2;
+          bits -= 2;
+          //---//
           break;
-        }
-        //Tracev((stderr, "inflate:       code lengths ok\n"));
-        state.have = 0;
-        state.mode = CODELENS;
-        /* falls through */
-      case CODELENS:
-        while (state.have < state.nlen + state.ndist) {
+        case STORED:
+          //--- BYTEBITS() ---// /* go to byte boundary */
+          hold >>>= bits & 7;
+          bits -= bits & 7;
+          //---//
+          //=== NEEDBITS(32); */
+          while (bits < 32) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+          }
+          //===//
+          if ((hold & 0xffff) !== ((hold >>> 16) ^ 0xffff)) {
+            strm.msg = 'invalid stored block lengths';
+            state.mode = BAD;
+            break;
+          }
+          state.length = hold & 0xffff;
+          //Tracev((stderr, "inflate:       stored length %u\n",
+          //        state.length));
+          //=== INITBITS();
+          hold = 0;
+          bits = 0;
+          //===//
+          state.mode = COPY_;
+          if (flush === Z_TREES) { break inf_leave; }
+          /* falls through */
+        case COPY_:
+          state.mode = COPY;
+          /* falls through */
+        case COPY:
+          copy = state.length;
+          if (copy) {
+            if (copy > have) { copy = have; }
+            if (copy > left) { copy = left; }
+            if (copy === 0) { break inf_leave; }
+            //--- zmemcpy(put, next, copy); ---
+            output.set(input.subarray(next, next + copy), put);
+            //---//
+            have -= copy;
+            next += copy;
+            left -= copy;
+            put += copy;
+            state.length -= copy;
+            break;
+          }
+          //Tracev((stderr, "inflate:       stored end\n"));
+          state.mode = TYPE;
+          break;
+        case TABLE:
+          //=== NEEDBITS(14); */
+          while (bits < 14) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+          }
+          //===//
+          state.nlen = (hold & 0x1f)/*BITS(5)*/ + 257;
+          //--- DROPBITS(5) ---//
+          hold >>>= 5;
+          bits -= 5;
+          //---//
+          state.ndist = (hold & 0x1f)/*BITS(5)*/ + 1;
+          //--- DROPBITS(5) ---//
+          hold >>>= 5;
+          bits -= 5;
+          //---//
+          state.ncode = (hold & 0x0f)/*BITS(4)*/ + 4;
+          //--- DROPBITS(4) ---//
+          hold >>>= 4;
+          bits -= 4;
+          //---//
+  //#ifndef PKZIP_BUG_WORKAROUND
+          if (state.nlen > 286 || state.ndist > 30) {
+            strm.msg = 'too many length or distance symbols';
+            state.mode = BAD;
+            break;
+          }
+  //#endif
+          //Tracev((stderr, "inflate:       table sizes ok\n"));
+          state.have = 0;
+          state.mode = LENLENS;
+          /* falls through */
+        case LENLENS:
+          while (state.have < state.ncode) {
+            //=== NEEDBITS(3);
+            while (bits < 3) {
+              if (have === 0) { break inf_leave; }
+              have--;
+              hold += input[next++] << bits;
+              bits += 8;
+            }
+            //===//
+            state.lens[order[state.have++]] = (hold & 0x07);//BITS(3);
+            //--- DROPBITS(3) ---//
+            hold >>>= 3;
+            bits -= 3;
+            //---//
+          }
+          while (state.have < 19) {
+            state.lens[order[state.have++]] = 0;
+          }
+          // We have separate tables & no pointers. 2 commented lines below not needed.
+          //state.next = state.codes;
+          //state.lencode = state.next;
+          // Switch to use dynamic table
+          state.lencode = state.lendyn;
+          state.lenbits = 7;
+
+          opts = { bits: state.lenbits };
+          ret = inftrees(CODES, state.lens, 0, 19, state.lencode, 0, state.work, opts);
+          state.lenbits = opts.bits;
+
+          if (ret) {
+            strm.msg = 'invalid code lengths set';
+            state.mode = BAD;
+            break;
+          }
+          //Tracev((stderr, "inflate:       code lengths ok\n"));
+          state.have = 0;
+          state.mode = CODELENS;
+          /* falls through */
+        case CODELENS:
+          while (state.have < state.nlen + state.ndist) {
+            for (;;) {
+              here = state.lencode[hold & ((1 << state.lenbits) - 1)];/*BITS(state.lenbits)*/
+              here_bits = here >>> 24;
+              here_op = (here >>> 16) & 0xff;
+              here_val = here & 0xffff;
+
+              if ((here_bits) <= bits) { break; }
+              //--- PULLBYTE() ---//
+              if (have === 0) { break inf_leave; }
+              have--;
+              hold += input[next++] << bits;
+              bits += 8;
+              //---//
+            }
+            if (here_val < 16) {
+              //--- DROPBITS(here.bits) ---//
+              hold >>>= here_bits;
+              bits -= here_bits;
+              //---//
+              state.lens[state.have++] = here_val;
+            }
+            else {
+              if (here_val === 16) {
+                //=== NEEDBITS(here.bits + 2);
+                n = here_bits + 2;
+                while (bits < n) {
+                  if (have === 0) { break inf_leave; }
+                  have--;
+                  hold += input[next++] << bits;
+                  bits += 8;
+                }
+                //===//
+                //--- DROPBITS(here.bits) ---//
+                hold >>>= here_bits;
+                bits -= here_bits;
+                //---//
+                if (state.have === 0) {
+                  strm.msg = 'invalid bit length repeat';
+                  state.mode = BAD;
+                  break;
+                }
+                len = state.lens[state.have - 1];
+                copy = 3 + (hold & 0x03);//BITS(2);
+                //--- DROPBITS(2) ---//
+                hold >>>= 2;
+                bits -= 2;
+                //---//
+              }
+              else if (here_val === 17) {
+                //=== NEEDBITS(here.bits + 3);
+                n = here_bits + 3;
+                while (bits < n) {
+                  if (have === 0) { break inf_leave; }
+                  have--;
+                  hold += input[next++] << bits;
+                  bits += 8;
+                }
+                //===//
+                //--- DROPBITS(here.bits) ---//
+                hold >>>= here_bits;
+                bits -= here_bits;
+                //---//
+                len = 0;
+                copy = 3 + (hold & 0x07);//BITS(3);
+                //--- DROPBITS(3) ---//
+                hold >>>= 3;
+                bits -= 3;
+                //---//
+              }
+              else {
+                //=== NEEDBITS(here.bits + 7);
+                n = here_bits + 7;
+                while (bits < n) {
+                  if (have === 0) { break inf_leave; }
+                  have--;
+                  hold += input[next++] << bits;
+                  bits += 8;
+                }
+                //===//
+                //--- DROPBITS(here.bits) ---//
+                hold >>>= here_bits;
+                bits -= here_bits;
+                //---//
+                len = 0;
+                copy = 11 + (hold & 0x7f);//BITS(7);
+                //--- DROPBITS(7) ---//
+                hold >>>= 7;
+                bits -= 7;
+                //---//
+              }
+              if (state.have + copy > state.nlen + state.ndist) {
+                strm.msg = 'invalid bit length repeat';
+                state.mode = BAD;
+                break;
+              }
+              while (copy--) {
+                state.lens[state.have++] = len;
+              }
+            }
+          }
+
+          /* handle error breaks in while */
+          if (state.mode === BAD) { break; }
+
+          /* check for end-of-block code (better have one) */
+          if (state.lens[256] === 0) {
+            strm.msg = 'invalid code -- missing end-of-block';
+            state.mode = BAD;
+            break;
+          }
+
+          /* build code tables -- note: do not change the lenbits or distbits
+             values here (9 and 6) without reading the comments in inftrees.h
+             concerning the ENOUGH constants, which depend on those values */
+          state.lenbits = 9;
+
+          opts = { bits: state.lenbits };
+          ret = inftrees(LENS, state.lens, 0, state.nlen, state.lencode, 0, state.work, opts);
+          // We have separate tables & no pointers. 2 commented lines below not needed.
+          // state.next_index = opts.table_index;
+          state.lenbits = opts.bits;
+          // state.lencode = state.next;
+
+          if (ret) {
+            strm.msg = 'invalid literal/lengths set';
+            state.mode = BAD;
+            break;
+          }
+
+          state.distbits = 6;
+          //state.distcode.copy(state.codes);
+          // Switch to use dynamic table
+          state.distcode = state.distdyn;
+          opts = { bits: state.distbits };
+          ret = inftrees(DISTS, state.lens, state.nlen, state.ndist, state.distcode, 0, state.work, opts);
+          // We have separate tables & no pointers. 2 commented lines below not needed.
+          // state.next_index = opts.table_index;
+          state.distbits = opts.bits;
+          // state.distcode = state.next;
+
+          if (ret) {
+            strm.msg = 'invalid distances set';
+            state.mode = BAD;
+            break;
+          }
+          //Tracev((stderr, 'inflate:       codes ok\n'));
+          state.mode = LEN_;
+          if (flush === Z_TREES) { break inf_leave; }
+          /* falls through */
+        case LEN_:
+          state.mode = LEN;
+          /* falls through */
+        case LEN:
+          if (have >= 6 && left >= 258) {
+            //--- RESTORE() ---
+            strm.next_out = put;
+            strm.avail_out = left;
+            strm.next_in = next;
+            strm.avail_in = have;
+            state.hold = hold;
+            state.bits = bits;
+            //---
+            inffast(strm, _out);
+            //--- LOAD() ---
+            put = strm.next_out;
+            output = strm.output;
+            left = strm.avail_out;
+            next = strm.next_in;
+            input = strm.input;
+            have = strm.avail_in;
+            hold = state.hold;
+            bits = state.bits;
+            //---
+
+            if (state.mode === TYPE) {
+              state.back = -1;
+            }
+            break;
+          }
+          state.back = 0;
           for (;;) {
-            here = state.lencode[hold & ((1 << state.lenbits) - 1)];/*BITS(state.lenbits)*/
+            here = state.lencode[hold & ((1 << state.lenbits) - 1)];  /*BITS(state.lenbits)*/
+            here_bits = here >>> 24;
+            here_op = (here >>> 16) & 0xff;
+            here_val = here & 0xffff;
+
+            if (here_bits <= bits) { break; }
+            //--- PULLBYTE() ---//
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+            //---//
+          }
+          if (here_op && (here_op & 0xf0) === 0) {
+            last_bits = here_bits;
+            last_op = here_op;
+            last_val = here_val;
+            for (;;) {
+              here = state.lencode[last_val +
+                      ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
+              here_bits = here >>> 24;
+              here_op = (here >>> 16) & 0xff;
+              here_val = here & 0xffff;
+
+              if ((last_bits + here_bits) <= bits) { break; }
+              //--- PULLBYTE() ---//
+              if (have === 0) { break inf_leave; }
+              have--;
+              hold += input[next++] << bits;
+              bits += 8;
+              //---//
+            }
+            //--- DROPBITS(last.bits) ---//
+            hold >>>= last_bits;
+            bits -= last_bits;
+            //---//
+            state.back += last_bits;
+          }
+          //--- DROPBITS(here.bits) ---//
+          hold >>>= here_bits;
+          bits -= here_bits;
+          //---//
+          state.back += here_bits;
+          state.length = here_val;
+          if (here_op === 0) {
+            //Tracevv((stderr, here.val >= 0x20 && here.val < 0x7f ?
+            //        "inflate:         literal '%c'\n" :
+            //        "inflate:         literal 0x%02x\n", here.val));
+            state.mode = LIT;
+            break;
+          }
+          if (here_op & 32) {
+            //Tracevv((stderr, "inflate:         end of block\n"));
+            state.back = -1;
+            state.mode = TYPE;
+            break;
+          }
+          if (here_op & 64) {
+            strm.msg = 'invalid literal/length code';
+            state.mode = BAD;
+            break;
+          }
+          state.extra = here_op & 15;
+          state.mode = LENEXT;
+          /* falls through */
+        case LENEXT:
+          if (state.extra) {
+            //=== NEEDBITS(state.extra);
+            n = state.extra;
+            while (bits < n) {
+              if (have === 0) { break inf_leave; }
+              have--;
+              hold += input[next++] << bits;
+              bits += 8;
+            }
+            //===//
+            state.length += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
+            //--- DROPBITS(state.extra) ---//
+            hold >>>= state.extra;
+            bits -= state.extra;
+            //---//
+            state.back += state.extra;
+          }
+          //Tracevv((stderr, "inflate:         length %u\n", state.length));
+          state.was = state.length;
+          state.mode = DIST;
+          /* falls through */
+        case DIST:
+          for (;;) {
+            here = state.distcode[hold & ((1 << state.distbits) - 1)];/*BITS(state.distbits)*/
             here_bits = here >>> 24;
             here_op = (here >>> 16) & 0xff;
             here_val = here & 0xffff;
@@ -14619,1454 +18661,860 @@ function inflate(strm, flush) {
             bits += 8;
             //---//
           }
-          if (here_val < 16) {
-            //--- DROPBITS(here.bits) ---//
-            hold >>>= here_bits;
-            bits -= here_bits;
-            //---//
-            state.lens[state.have++] = here_val;
-          }
-          else {
-            if (here_val === 16) {
-              //=== NEEDBITS(here.bits + 2);
-              n = here_bits + 2;
-              while (bits < n) {
-                if (have === 0) { break inf_leave; }
-                have--;
-                hold += input[next++] << bits;
-                bits += 8;
-              }
-              //===//
-              //--- DROPBITS(here.bits) ---//
-              hold >>>= here_bits;
-              bits -= here_bits;
+          if ((here_op & 0xf0) === 0) {
+            last_bits = here_bits;
+            last_op = here_op;
+            last_val = here_val;
+            for (;;) {
+              here = state.distcode[last_val +
+                      ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
+              here_bits = here >>> 24;
+              here_op = (here >>> 16) & 0xff;
+              here_val = here & 0xffff;
+
+              if ((last_bits + here_bits) <= bits) { break; }
+              //--- PULLBYTE() ---//
+              if (have === 0) { break inf_leave; }
+              have--;
+              hold += input[next++] << bits;
+              bits += 8;
               //---//
-              if (state.have === 0) {
-                strm.msg = 'invalid bit length repeat';
+            }
+            //--- DROPBITS(last.bits) ---//
+            hold >>>= last_bits;
+            bits -= last_bits;
+            //---//
+            state.back += last_bits;
+          }
+          //--- DROPBITS(here.bits) ---//
+          hold >>>= here_bits;
+          bits -= here_bits;
+          //---//
+          state.back += here_bits;
+          if (here_op & 64) {
+            strm.msg = 'invalid distance code';
+            state.mode = BAD;
+            break;
+          }
+          state.offset = here_val;
+          state.extra = (here_op) & 15;
+          state.mode = DISTEXT;
+          /* falls through */
+        case DISTEXT:
+          if (state.extra) {
+            //=== NEEDBITS(state.extra);
+            n = state.extra;
+            while (bits < n) {
+              if (have === 0) { break inf_leave; }
+              have--;
+              hold += input[next++] << bits;
+              bits += 8;
+            }
+            //===//
+            state.offset += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
+            //--- DROPBITS(state.extra) ---//
+            hold >>>= state.extra;
+            bits -= state.extra;
+            //---//
+            state.back += state.extra;
+          }
+  //#ifdef INFLATE_STRICT
+          if (state.offset > state.dmax) {
+            strm.msg = 'invalid distance too far back';
+            state.mode = BAD;
+            break;
+          }
+  //#endif
+          //Tracevv((stderr, "inflate:         distance %u\n", state.offset));
+          state.mode = MATCH;
+          /* falls through */
+        case MATCH:
+          if (left === 0) { break inf_leave; }
+          copy = _out - left;
+          if (state.offset > copy) {         /* copy from window */
+            copy = state.offset - copy;
+            if (copy > state.whave) {
+              if (state.sane) {
+                strm.msg = 'invalid distance too far back';
                 state.mode = BAD;
                 break;
               }
-              len = state.lens[state.have - 1];
-              copy = 3 + (hold & 0x03);//BITS(2);
-              //--- DROPBITS(2) ---//
-              hold >>>= 2;
-              bits -= 2;
-              //---//
+  // (!) This block is disabled in zlib defaults,
+  // don't enable it for binary compatibility
+  //#ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR
+  //          Trace((stderr, "inflate.c too far\n"));
+  //          copy -= state.whave;
+  //          if (copy > state.length) { copy = state.length; }
+  //          if (copy > left) { copy = left; }
+  //          left -= copy;
+  //          state.length -= copy;
+  //          do {
+  //            output[put++] = 0;
+  //          } while (--copy);
+  //          if (state.length === 0) { state.mode = LEN; }
+  //          break;
+  //#endif
             }
-            else if (here_val === 17) {
-              //=== NEEDBITS(here.bits + 3);
-              n = here_bits + 3;
-              while (bits < n) {
-                if (have === 0) { break inf_leave; }
-                have--;
-                hold += input[next++] << bits;
-                bits += 8;
-              }
-              //===//
-              //--- DROPBITS(here.bits) ---//
-              hold >>>= here_bits;
-              bits -= here_bits;
-              //---//
-              len = 0;
-              copy = 3 + (hold & 0x07);//BITS(3);
-              //--- DROPBITS(3) ---//
-              hold >>>= 3;
-              bits -= 3;
-              //---//
+            if (copy > state.wnext) {
+              copy -= state.wnext;
+              from = state.wsize - copy;
             }
             else {
-              //=== NEEDBITS(here.bits + 7);
-              n = here_bits + 7;
-              while (bits < n) {
-                if (have === 0) { break inf_leave; }
-                have--;
-                hold += input[next++] << bits;
-                bits += 8;
-              }
-              //===//
-              //--- DROPBITS(here.bits) ---//
-              hold >>>= here_bits;
-              bits -= here_bits;
-              //---//
-              len = 0;
-              copy = 11 + (hold & 0x7f);//BITS(7);
-              //--- DROPBITS(7) ---//
-              hold >>>= 7;
-              bits -= 7;
-              //---//
+              from = state.wnext - copy;
             }
-            if (state.have + copy > state.nlen + state.ndist) {
-              strm.msg = 'invalid bit length repeat';
+            if (copy > state.length) { copy = state.length; }
+            from_source = state.window;
+          }
+          else {                              /* copy from output */
+            from_source = output;
+            from = put - state.offset;
+            copy = state.length;
+          }
+          if (copy > left) { copy = left; }
+          left -= copy;
+          state.length -= copy;
+          do {
+            output[put++] = from_source[from++];
+          } while (--copy);
+          if (state.length === 0) { state.mode = LEN; }
+          break;
+        case LIT:
+          if (left === 0) { break inf_leave; }
+          output[put++] = state.length;
+          left--;
+          state.mode = LEN;
+          break;
+        case CHECK:
+          if (state.wrap) {
+            //=== NEEDBITS(32);
+            while (bits < 32) {
+              if (have === 0) { break inf_leave; }
+              have--;
+              // Use '|' instead of '+' to make sure that result is signed
+              hold |= input[next++] << bits;
+              bits += 8;
+            }
+            //===//
+            _out -= left;
+            strm.total_out += _out;
+            state.total += _out;
+            if (_out) {
+              strm.adler = state.check =
+                  /*UPDATE(state.check, put - _out, _out);*/
+                  (state.flags ? crc32_1(state.check, output, _out, put - _out) : adler32_1(state.check, output, _out, put - _out));
+
+            }
+            _out = left;
+            // NB: crc32 stored as signed 32-bit int, zswap32 returns signed too
+            if ((state.flags ? hold : zswap32(hold)) !== state.check) {
+              strm.msg = 'incorrect data check';
               state.mode = BAD;
               break;
             }
-            while (copy--) {
-              state.lens[state.have++] = len;
+            //=== INITBITS();
+            hold = 0;
+            bits = 0;
+            //===//
+            //Tracev((stderr, "inflate:   check matches trailer\n"));
+          }
+          state.mode = LENGTH;
+          /* falls through */
+        case LENGTH:
+          if (state.wrap && state.flags) {
+            //=== NEEDBITS(32);
+            while (bits < 32) {
+              if (have === 0) { break inf_leave; }
+              have--;
+              hold += input[next++] << bits;
+              bits += 8;
             }
-          }
-        }
-
-        /* handle error breaks in while */
-        if (state.mode === BAD) { break; }
-
-        /* check for end-of-block code (better have one) */
-        if (state.lens[256] === 0) {
-          strm.msg = 'invalid code -- missing end-of-block';
-          state.mode = BAD;
-          break;
-        }
-
-        /* build code tables -- note: do not change the lenbits or distbits
-           values here (9 and 6) without reading the comments in inftrees.h
-           concerning the ENOUGH constants, which depend on those values */
-        state.lenbits = 9;
-
-        opts = { bits: state.lenbits };
-        ret = inflate_table(LENS, state.lens, 0, state.nlen, state.lencode, 0, state.work, opts);
-        // We have separate tables & no pointers. 2 commented lines below not needed.
-        // state.next_index = opts.table_index;
-        state.lenbits = opts.bits;
-        // state.lencode = state.next;
-
-        if (ret) {
-          strm.msg = 'invalid literal/lengths set';
-          state.mode = BAD;
-          break;
-        }
-
-        state.distbits = 6;
-        //state.distcode.copy(state.codes);
-        // Switch to use dynamic table
-        state.distcode = state.distdyn;
-        opts = { bits: state.distbits };
-        ret = inflate_table(DISTS, state.lens, state.nlen, state.ndist, state.distcode, 0, state.work, opts);
-        // We have separate tables & no pointers. 2 commented lines below not needed.
-        // state.next_index = opts.table_index;
-        state.distbits = opts.bits;
-        // state.distcode = state.next;
-
-        if (ret) {
-          strm.msg = 'invalid distances set';
-          state.mode = BAD;
-          break;
-        }
-        //Tracev((stderr, 'inflate:       codes ok\n'));
-        state.mode = LEN_;
-        if (flush === Z_TREES) { break inf_leave; }
-        /* falls through */
-      case LEN_:
-        state.mode = LEN;
-        /* falls through */
-      case LEN:
-        if (have >= 6 && left >= 258) {
-          //--- RESTORE() ---
-          strm.next_out = put;
-          strm.avail_out = left;
-          strm.next_in = next;
-          strm.avail_in = have;
-          state.hold = hold;
-          state.bits = bits;
-          //---
-          inflate_fast(strm, _out);
-          //--- LOAD() ---
-          put = strm.next_out;
-          output = strm.output;
-          left = strm.avail_out;
-          next = strm.next_in;
-          input = strm.input;
-          have = strm.avail_in;
-          hold = state.hold;
-          bits = state.bits;
-          //---
-
-          if (state.mode === TYPE) {
-            state.back = -1;
-          }
-          break;
-        }
-        state.back = 0;
-        for (;;) {
-          here = state.lencode[hold & ((1 << state.lenbits) - 1)];  /*BITS(state.lenbits)*/
-          here_bits = here >>> 24;
-          here_op = (here >>> 16) & 0xff;
-          here_val = here & 0xffff;
-
-          if (here_bits <= bits) { break; }
-          //--- PULLBYTE() ---//
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-          //---//
-        }
-        if (here_op && (here_op & 0xf0) === 0) {
-          last_bits = here_bits;
-          last_op = here_op;
-          last_val = here_val;
-          for (;;) {
-            here = state.lencode[last_val +
-                    ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
-            here_bits = here >>> 24;
-            here_op = (here >>> 16) & 0xff;
-            here_val = here & 0xffff;
-
-            if ((last_bits + here_bits) <= bits) { break; }
-            //--- PULLBYTE() ---//
-            if (have === 0) { break inf_leave; }
-            have--;
-            hold += input[next++] << bits;
-            bits += 8;
-            //---//
-          }
-          //--- DROPBITS(last.bits) ---//
-          hold >>>= last_bits;
-          bits -= last_bits;
-          //---//
-          state.back += last_bits;
-        }
-        //--- DROPBITS(here.bits) ---//
-        hold >>>= here_bits;
-        bits -= here_bits;
-        //---//
-        state.back += here_bits;
-        state.length = here_val;
-        if (here_op === 0) {
-          //Tracevv((stderr, here.val >= 0x20 && here.val < 0x7f ?
-          //        "inflate:         literal '%c'\n" :
-          //        "inflate:         literal 0x%02x\n", here.val));
-          state.mode = LIT;
-          break;
-        }
-        if (here_op & 32) {
-          //Tracevv((stderr, "inflate:         end of block\n"));
-          state.back = -1;
-          state.mode = TYPE;
-          break;
-        }
-        if (here_op & 64) {
-          strm.msg = 'invalid literal/length code';
-          state.mode = BAD;
-          break;
-        }
-        state.extra = here_op & 15;
-        state.mode = LENEXT;
-        /* falls through */
-      case LENEXT:
-        if (state.extra) {
-          //=== NEEDBITS(state.extra);
-          n = state.extra;
-          while (bits < n) {
-            if (have === 0) { break inf_leave; }
-            have--;
-            hold += input[next++] << bits;
-            bits += 8;
-          }
-          //===//
-          state.length += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
-          //--- DROPBITS(state.extra) ---//
-          hold >>>= state.extra;
-          bits -= state.extra;
-          //---//
-          state.back += state.extra;
-        }
-        //Tracevv((stderr, "inflate:         length %u\n", state.length));
-        state.was = state.length;
-        state.mode = DIST;
-        /* falls through */
-      case DIST:
-        for (;;) {
-          here = state.distcode[hold & ((1 << state.distbits) - 1)];/*BITS(state.distbits)*/
-          here_bits = here >>> 24;
-          here_op = (here >>> 16) & 0xff;
-          here_val = here & 0xffff;
-
-          if ((here_bits) <= bits) { break; }
-          //--- PULLBYTE() ---//
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-          //---//
-        }
-        if ((here_op & 0xf0) === 0) {
-          last_bits = here_bits;
-          last_op = here_op;
-          last_val = here_val;
-          for (;;) {
-            here = state.distcode[last_val +
-                    ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
-            here_bits = here >>> 24;
-            here_op = (here >>> 16) & 0xff;
-            here_val = here & 0xffff;
-
-            if ((last_bits + here_bits) <= bits) { break; }
-            //--- PULLBYTE() ---//
-            if (have === 0) { break inf_leave; }
-            have--;
-            hold += input[next++] << bits;
-            bits += 8;
-            //---//
-          }
-          //--- DROPBITS(last.bits) ---//
-          hold >>>= last_bits;
-          bits -= last_bits;
-          //---//
-          state.back += last_bits;
-        }
-        //--- DROPBITS(here.bits) ---//
-        hold >>>= here_bits;
-        bits -= here_bits;
-        //---//
-        state.back += here_bits;
-        if (here_op & 64) {
-          strm.msg = 'invalid distance code';
-          state.mode = BAD;
-          break;
-        }
-        state.offset = here_val;
-        state.extra = (here_op) & 15;
-        state.mode = DISTEXT;
-        /* falls through */
-      case DISTEXT:
-        if (state.extra) {
-          //=== NEEDBITS(state.extra);
-          n = state.extra;
-          while (bits < n) {
-            if (have === 0) { break inf_leave; }
-            have--;
-            hold += input[next++] << bits;
-            bits += 8;
-          }
-          //===//
-          state.offset += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
-          //--- DROPBITS(state.extra) ---//
-          hold >>>= state.extra;
-          bits -= state.extra;
-          //---//
-          state.back += state.extra;
-        }
-//#ifdef INFLATE_STRICT
-        if (state.offset > state.dmax) {
-          strm.msg = 'invalid distance too far back';
-          state.mode = BAD;
-          break;
-        }
-//#endif
-        //Tracevv((stderr, "inflate:         distance %u\n", state.offset));
-        state.mode = MATCH;
-        /* falls through */
-      case MATCH:
-        if (left === 0) { break inf_leave; }
-        copy = _out - left;
-        if (state.offset > copy) {         /* copy from window */
-          copy = state.offset - copy;
-          if (copy > state.whave) {
-            if (state.sane) {
-              strm.msg = 'invalid distance too far back';
+            //===//
+            if (hold !== (state.total & 0xffffffff)) {
+              strm.msg = 'incorrect length check';
               state.mode = BAD;
               break;
             }
-// (!) This block is disabled in zlib defaults,
-// don't enable it for binary compatibility
-//#ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR
-//          Trace((stderr, "inflate.c too far\n"));
-//          copy -= state.whave;
-//          if (copy > state.length) { copy = state.length; }
-//          if (copy > left) { copy = left; }
-//          left -= copy;
-//          state.length -= copy;
-//          do {
-//            output[put++] = 0;
-//          } while (--copy);
-//          if (state.length === 0) { state.mode = LEN; }
-//          break;
-//#endif
+            //=== INITBITS();
+            hold = 0;
+            bits = 0;
+            //===//
+            //Tracev((stderr, "inflate:   length matches trailer\n"));
           }
-          if (copy > state.wnext) {
-            copy -= state.wnext;
-            from = state.wsize - copy;
-          }
-          else {
-            from = state.wnext - copy;
-          }
-          if (copy > state.length) { copy = state.length; }
-          from_source = state.window;
-        }
-        else {                              /* copy from output */
-          from_source = output;
-          from = put - state.offset;
-          copy = state.length;
-        }
-        if (copy > left) { copy = left; }
-        left -= copy;
-        state.length -= copy;
-        do {
-          output[put++] = from_source[from++];
-        } while (--copy);
-        if (state.length === 0) { state.mode = LEN; }
-        break;
-      case LIT:
-        if (left === 0) { break inf_leave; }
-        output[put++] = state.length;
-        left--;
-        state.mode = LEN;
-        break;
-      case CHECK:
-        if (state.wrap) {
-          //=== NEEDBITS(32);
-          while (bits < 32) {
-            if (have === 0) { break inf_leave; }
-            have--;
-            // Use '|' instead of '+' to make sure that result is signed
-            hold |= input[next++] << bits;
-            bits += 8;
-          }
-          //===//
-          _out -= left;
-          strm.total_out += _out;
-          state.total += _out;
-          if (_out) {
-            strm.adler = state.check =
-                /*UPDATE(state.check, put - _out, _out);*/
-                (state.flags ? crc32(state.check, output, _out, put - _out) : adler32(state.check, output, _out, put - _out));
-
-          }
-          _out = left;
-          // NB: crc32 stored as signed 32-bit int, zswap32 returns signed too
-          if ((state.flags ? hold : zswap32(hold)) !== state.check) {
-            strm.msg = 'incorrect data check';
-            state.mode = BAD;
-            break;
-          }
-          //=== INITBITS();
-          hold = 0;
-          bits = 0;
-          //===//
-          //Tracev((stderr, "inflate:   check matches trailer\n"));
-        }
-        state.mode = LENGTH;
-        /* falls through */
-      case LENGTH:
-        if (state.wrap && state.flags) {
-          //=== NEEDBITS(32);
-          while (bits < 32) {
-            if (have === 0) { break inf_leave; }
-            have--;
-            hold += input[next++] << bits;
-            bits += 8;
-          }
-          //===//
-          if (hold !== (state.total & 0xffffffff)) {
-            strm.msg = 'incorrect length check';
-            state.mode = BAD;
-            break;
-          }
-          //=== INITBITS();
-          hold = 0;
-          bits = 0;
-          //===//
-          //Tracev((stderr, "inflate:   length matches trailer\n"));
-        }
-        state.mode = DONE;
-        /* falls through */
-      case DONE:
-        ret = Z_STREAM_END;
-        break inf_leave;
-      case BAD:
-        ret = Z_DATA_ERROR;
-        break inf_leave;
-      case MEM:
-        return Z_MEM_ERROR;
-      case SYNC:
-        /* falls through */
-      default:
-        return Z_STREAM_ERROR;
+          state.mode = DONE;
+          /* falls through */
+        case DONE:
+          ret = Z_STREAM_END$1;
+          break inf_leave;
+        case BAD:
+          ret = Z_DATA_ERROR$1;
+          break inf_leave;
+        case MEM:
+          return Z_MEM_ERROR$1;
+        case SYNC:
+          /* falls through */
+        default:
+          return Z_STREAM_ERROR$1;
+      }
     }
-  }
 
-  // inf_leave <- here is real place for "goto inf_leave", emulated via "break inf_leave"
+    // inf_leave <- here is real place for "goto inf_leave", emulated via "break inf_leave"
 
-  /*
-     Return from inflate(), updating the total counts and the check value.
-     If there was no progress during the inflate() call, return a buffer
-     error.  Call updatewindow() to create and/or update the window state.
-     Note: a memory error from inflate() is non-recoverable.
-   */
+    /*
+       Return from inflate(), updating the total counts and the check value.
+       If there was no progress during the inflate() call, return a buffer
+       error.  Call updatewindow() to create and/or update the window state.
+       Note: a memory error from inflate() is non-recoverable.
+     */
 
-  //--- RESTORE() ---
-  strm.next_out = put;
-  strm.avail_out = left;
-  strm.next_in = next;
-  strm.avail_in = have;
-  state.hold = hold;
-  state.bits = bits;
-  //---
+    //--- RESTORE() ---
+    strm.next_out = put;
+    strm.avail_out = left;
+    strm.next_in = next;
+    strm.avail_in = have;
+    state.hold = hold;
+    state.bits = bits;
+    //---
 
-  if (state.wsize || (_out !== strm.avail_out && state.mode < BAD &&
-                      (state.mode < CHECK || flush !== Z_FINISH))) {
-    if (updatewindow(strm, strm.output, strm.next_out, _out - strm.avail_out)) {
+    if (state.wsize || (_out !== strm.avail_out && state.mode < BAD &&
+                        (state.mode < CHECK || flush !== Z_FINISH$1))) {
+      if (updatewindow(strm, strm.output, strm.next_out, _out - strm.avail_out)) ;
+    }
+    _in -= strm.avail_in;
+    _out -= strm.avail_out;
+    strm.total_in += _in;
+    strm.total_out += _out;
+    state.total += _out;
+    if (state.wrap && _out) {
+      strm.adler = state.check = /*UPDATE(state.check, strm.next_out - _out, _out);*/
+        (state.flags ? crc32_1(state.check, output, _out, strm.next_out - _out) : adler32_1(state.check, output, _out, strm.next_out - _out));
+    }
+    strm.data_type = state.bits + (state.last ? 64 : 0) +
+                      (state.mode === TYPE ? 128 : 0) +
+                      (state.mode === LEN_ || state.mode === COPY_ ? 256 : 0);
+    if (((_in === 0 && _out === 0) || flush === Z_FINISH$1) && ret === Z_OK$1) {
+      ret = Z_BUF_ERROR;
+    }
+    return ret;
+  };
+
+
+  const inflateEnd = (strm) => {
+
+    if (!strm || !strm.state /*|| strm->zfree == (free_func)0*/) {
+      return Z_STREAM_ERROR$1;
+    }
+
+    let state = strm.state;
+    if (state.window) {
+      state.window = null;
+    }
+    strm.state = null;
+    return Z_OK$1;
+  };
+
+
+  const inflateGetHeader = (strm, head) => {
+
+    /* check state */
+    if (!strm || !strm.state) { return Z_STREAM_ERROR$1; }
+    const state = strm.state;
+    if ((state.wrap & 2) === 0) { return Z_STREAM_ERROR$1; }
+
+    /* save header structure */
+    state.head = head;
+    head.done = false;
+    return Z_OK$1;
+  };
+
+
+  const inflateSetDictionary = (strm, dictionary) => {
+    const dictLength = dictionary.length;
+
+    let state;
+    let dictid;
+    let ret;
+
+    /* check state */
+    if (!strm /* == Z_NULL */ || !strm.state /* == Z_NULL */) { return Z_STREAM_ERROR$1; }
+    state = strm.state;
+
+    if (state.wrap !== 0 && state.mode !== DICT) {
+      return Z_STREAM_ERROR$1;
+    }
+
+    /* check for correct dictionary identifier */
+    if (state.mode === DICT) {
+      dictid = 1; /* adler32(0, null, 0)*/
+      /* dictid = adler32(dictid, dictionary, dictLength); */
+      dictid = adler32_1(dictid, dictionary, dictLength, 0);
+      if (dictid !== state.check) {
+        return Z_DATA_ERROR$1;
+      }
+    }
+    /* copy dictionary to window using updatewindow(), which will amend the
+     existing dictionary if appropriate */
+    ret = updatewindow(strm, dictionary, dictLength, dictLength);
+    if (ret) {
       state.mode = MEM;
-      return Z_MEM_ERROR;
+      return Z_MEM_ERROR$1;
     }
-  }
-  _in -= strm.avail_in;
-  _out -= strm.avail_out;
-  strm.total_in += _in;
-  strm.total_out += _out;
-  state.total += _out;
-  if (state.wrap && _out) {
-    strm.adler = state.check = /*UPDATE(state.check, strm.next_out - _out, _out);*/
-      (state.flags ? crc32(state.check, output, _out, strm.next_out - _out) : adler32(state.check, output, _out, strm.next_out - _out));
-  }
-  strm.data_type = state.bits + (state.last ? 64 : 0) +
-                    (state.mode === TYPE ? 128 : 0) +
-                    (state.mode === LEN_ || state.mode === COPY_ ? 256 : 0);
-  if (((_in === 0 && _out === 0) || flush === Z_FINISH) && ret === Z_OK) {
-    ret = Z_BUF_ERROR;
-  }
-  return ret;
-}
+    state.havedict = 1;
+    // Tracev((stderr, "inflate:   dictionary set\n"));
+    return Z_OK$1;
+  };
 
-function inflateEnd(strm) {
 
-  if (!strm || !strm.state /*|| strm->zfree == (free_func)0*/) {
-    return Z_STREAM_ERROR;
-  }
+  var inflateReset_1 = inflateReset;
+  var inflateReset2_1 = inflateReset2;
+  var inflateResetKeep_1 = inflateResetKeep;
+  var inflateInit_1 = inflateInit;
+  var inflateInit2_1 = inflateInit2;
+  var inflate_2$1 = inflate$2;
+  var inflateEnd_1 = inflateEnd;
+  var inflateGetHeader_1 = inflateGetHeader;
+  var inflateSetDictionary_1 = inflateSetDictionary;
+  var inflateInfo = 'pako inflate (from Nodeca project)';
 
-  var state = strm.state;
-  if (state.window) {
-    state.window = null;
-  }
-  strm.state = null;
-  return Z_OK;
-}
+  /* Not implemented
+  module.exports.inflateCopy = inflateCopy;
+  module.exports.inflateGetDictionary = inflateGetDictionary;
+  module.exports.inflateMark = inflateMark;
+  module.exports.inflatePrime = inflatePrime;
+  module.exports.inflateSync = inflateSync;
+  module.exports.inflateSyncPoint = inflateSyncPoint;
+  module.exports.inflateUndermine = inflateUndermine;
+  */
 
-function inflateGetHeader(strm, head) {
-  var state;
+  var inflate_1$2 = {
+  	inflateReset: inflateReset_1,
+  	inflateReset2: inflateReset2_1,
+  	inflateResetKeep: inflateResetKeep_1,
+  	inflateInit: inflateInit_1,
+  	inflateInit2: inflateInit2_1,
+  	inflate: inflate_2$1,
+  	inflateEnd: inflateEnd_1,
+  	inflateGetHeader: inflateGetHeader_1,
+  	inflateSetDictionary: inflateSetDictionary_1,
+  	inflateInfo: inflateInfo
+  };
 
-  /* check state */
-  if (!strm || !strm.state) { return Z_STREAM_ERROR; }
-  state = strm.state;
-  if ((state.wrap & 2) === 0) { return Z_STREAM_ERROR; }
+  // (C) 1995-2013 Jean-loup Gailly and Mark Adler
+  // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+  //
+  // This software is provided 'as-is', without any express or implied
+  // warranty. In no event will the authors be held liable for any damages
+  // arising from the use of this software.
+  //
+  // Permission is granted to anyone to use this software for any purpose,
+  // including commercial applications, and to alter it and redistribute it
+  // freely, subject to the following restrictions:
+  //
+  // 1. The origin of this software must not be misrepresented; you must not
+  //   claim that you wrote the original software. If you use this software
+  //   in a product, an acknowledgment in the product documentation would be
+  //   appreciated but is not required.
+  // 2. Altered source versions must be plainly marked as such, and must not be
+  //   misrepresented as being the original software.
+  // 3. This notice may not be removed or altered from any source distribution.
 
-  /* save header structure */
-  state.head = head;
-  head.done = false;
-  return Z_OK;
-}
+  function GZheader() {
+    /* true if compressed data believed to be text */
+    this.text       = 0;
+    /* modification time */
+    this.time       = 0;
+    /* extra flags (not used when writing a gzip file) */
+    this.xflags     = 0;
+    /* operating system */
+    this.os         = 0;
+    /* pointer to extra field or Z_NULL if none */
+    this.extra      = null;
+    /* extra field length (valid if extra != Z_NULL) */
+    this.extra_len  = 0; // Actually, we don't need it in JS,
+                         // but leave for few code modifications
 
-function inflateSetDictionary(strm, dictionary) {
-  var dictLength = dictionary.length;
+    //
+    // Setup limits is not necessary because in js we should not preallocate memory
+    // for inflate use constant limit in 65536 bytes
+    //
 
-  var state;
-  var dictid;
-  var ret;
-
-  /* check state */
-  if (!strm /* == Z_NULL */ || !strm.state /* == Z_NULL */) { return Z_STREAM_ERROR; }
-  state = strm.state;
-
-  if (state.wrap !== 0 && state.mode !== DICT) {
-    return Z_STREAM_ERROR;
-  }
-
-  /* check for correct dictionary identifier */
-  if (state.mode === DICT) {
-    dictid = 1; /* adler32(0, null, 0)*/
-    /* dictid = adler32(dictid, dictionary, dictLength); */
-    dictid = adler32(dictid, dictionary, dictLength, 0);
-    if (dictid !== state.check) {
-      return Z_DATA_ERROR;
-    }
-  }
-  /* copy dictionary to window using updatewindow(), which will amend the
-   existing dictionary if appropriate */
-  ret = updatewindow(strm, dictionary, dictLength, dictLength);
-  if (ret) {
-    state.mode = MEM;
-    return Z_MEM_ERROR;
-  }
-  state.havedict = 1;
-  // Tracev((stderr, "inflate:   dictionary set\n"));
-  return Z_OK;
-}
-
-exports.inflateReset = inflateReset;
-exports.inflateReset2 = inflateReset2;
-exports.inflateResetKeep = inflateResetKeep;
-exports.inflateInit = inflateInit;
-exports.inflateInit2 = inflateInit2;
-exports.inflate = inflate;
-exports.inflateEnd = inflateEnd;
-exports.inflateGetHeader = inflateGetHeader;
-exports.inflateSetDictionary = inflateSetDictionary;
-exports.inflateInfo = 'pako inflate (from Nodeca project)';
-
-/* Not implemented
-exports.inflateCopy = inflateCopy;
-exports.inflateGetDictionary = inflateGetDictionary;
-exports.inflateMark = inflateMark;
-exports.inflatePrime = inflatePrime;
-exports.inflateSync = inflateSync;
-exports.inflateSyncPoint = inflateSyncPoint;
-exports.inflateUndermine = inflateUndermine;
-*/
-
-},{"../utils/common":1,"./adler32":3,"./crc32":5,"./inffast":7,"./inftrees":9}],9:[function(require,module,exports){
-'use strict';
-
-// (C) 1995-2013 Jean-loup Gailly and Mark Adler
-// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//   claim that you wrote the original software. If you use this software
-//   in a product, an acknowledgment in the product documentation would be
-//   appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-//   misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
-
-var utils = require('../utils/common');
-
-var MAXBITS = 15;
-var ENOUGH_LENS = 852;
-var ENOUGH_DISTS = 592;
-//var ENOUGH = (ENOUGH_LENS+ENOUGH_DISTS);
-
-var CODES = 0;
-var LENS = 1;
-var DISTS = 2;
-
-var lbase = [ /* Length codes 257..285 base */
-  3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31,
-  35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 0, 0
-];
-
-var lext = [ /* Length codes 257..285 extra */
-  16, 16, 16, 16, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18,
-  19, 19, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 16, 72, 78
-];
-
-var dbase = [ /* Distance codes 0..29 base */
-  1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193,
-  257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145,
-  8193, 12289, 16385, 24577, 0, 0
-];
-
-var dext = [ /* Distance codes 0..29 extra */
-  16, 16, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22,
-  23, 23, 24, 24, 25, 25, 26, 26, 27, 27,
-  28, 28, 29, 29, 64, 64
-];
-
-module.exports = function inflate_table(type, lens, lens_index, codes, table, table_index, work, opts)
-{
-  var bits = opts.bits;
-      //here = opts.here; /* table entry for duplication */
-
-  var len = 0;               /* a code's length in bits */
-  var sym = 0;               /* index of code symbols */
-  var min = 0, max = 0;          /* minimum and maximum code lengths */
-  var root = 0;              /* number of index bits for root table */
-  var curr = 0;              /* number of index bits for current table */
-  var drop = 0;              /* code bits to drop for sub-table */
-  var left = 0;                   /* number of prefix codes available */
-  var used = 0;              /* code entries in table used */
-  var huff = 0;              /* Huffman code */
-  var incr;              /* for incrementing code, index */
-  var fill;              /* index for replicating entries */
-  var low;               /* low bits for current root entry */
-  var mask;              /* mask for low root bits */
-  var next;             /* next available space in table */
-  var base = null;     /* base value table to use */
-  var base_index = 0;
-//  var shoextra;    /* extra bits table to use */
-  var end;                    /* use base and extra for symbol > end */
-  var count = new utils.Buf16(MAXBITS + 1); //[MAXBITS+1];    /* number of codes of each length */
-  var offs = new utils.Buf16(MAXBITS + 1); //[MAXBITS+1];     /* offsets in table for each length */
-  var extra = null;
-  var extra_index = 0;
-
-  var here_bits, here_op, here_val;
-
-  /*
-   Process a set of code lengths to create a canonical Huffman code.  The
-   code lengths are lens[0..codes-1].  Each length corresponds to the
-   symbols 0..codes-1.  The Huffman code is generated by first sorting the
-   symbols by length from short to long, and retaining the symbol order
-   for codes with equal lengths.  Then the code starts with all zero bits
-   for the first code of the shortest length, and the codes are integer
-   increments for the same length, and zeros are appended as the length
-   increases.  For the deflate format, these bits are stored backwards
-   from their more natural integer increment ordering, and so when the
-   decoding tables are built in the large loop below, the integer codes
-   are incremented backwards.
-
-   This routine assumes, but does not check, that all of the entries in
-   lens[] are in the range 0..MAXBITS.  The caller must assure this.
-   1..MAXBITS is interpreted as that code length.  zero means that that
-   symbol does not occur in this code.
-
-   The codes are sorted by computing a count of codes for each length,
-   creating from that a table of starting indices for each length in the
-   sorted table, and then entering the symbols in order in the sorted
-   table.  The sorted table is work[], with that space being provided by
-   the caller.
-
-   The length counts are used for other purposes as well, i.e. finding
-   the minimum and maximum length codes, determining if there are any
-   codes at all, checking for a valid set of lengths, and looking ahead
-   at length counts to determine sub-table sizes when building the
-   decoding tables.
-   */
-
-  /* accumulate lengths for codes (assumes lens[] all in 0..MAXBITS) */
-  for (len = 0; len <= MAXBITS; len++) {
-    count[len] = 0;
-  }
-  for (sym = 0; sym < codes; sym++) {
-    count[lens[lens_index + sym]]++;
+    /* space at extra (only when reading header) */
+    // this.extra_max  = 0;
+    /* pointer to zero-terminated file name or Z_NULL */
+    this.name       = '';
+    /* space at name (only when reading header) */
+    // this.name_max   = 0;
+    /* pointer to zero-terminated comment or Z_NULL */
+    this.comment    = '';
+    /* space at comment (only when reading header) */
+    // this.comm_max   = 0;
+    /* true if there was or will be a header crc */
+    this.hcrc       = 0;
+    /* true when done reading gzip header (not used when writing a gzip file) */
+    this.done       = false;
   }
 
-  /* bound code lengths, force root to be within code lengths */
-  root = bits;
-  for (max = MAXBITS; max >= 1; max--) {
-    if (count[max] !== 0) { break; }
-  }
-  if (root > max) {
-    root = max;
-  }
-  if (max === 0) {                     /* no symbols to code at all */
-    //table.op[opts.table_index] = 64;  //here.op = (var char)64;    /* invalid code marker */
-    //table.bits[opts.table_index] = 1;   //here.bits = (var char)1;
-    //table.val[opts.table_index++] = 0;   //here.val = (var short)0;
-    table[table_index++] = (1 << 24) | (64 << 16) | 0;
+  var gzheader = GZheader;
+
+  const toString = Object.prototype.toString;
+
+  /* Public constants ==========================================================*/
+  /* ===========================================================================*/
+
+  const {
+    Z_NO_FLUSH, Z_FINISH,
+    Z_OK, Z_STREAM_END, Z_NEED_DICT, Z_STREAM_ERROR, Z_DATA_ERROR, Z_MEM_ERROR
+  } = constants$2;
+
+  /* ===========================================================================*/
 
 
-    //table.op[opts.table_index] = 64;
-    //table.bits[opts.table_index] = 1;
-    //table.val[opts.table_index++] = 0;
-    table[table_index++] = (1 << 24) | (64 << 16) | 0;
+  /**
+   * class Inflate
+   *
+   * Generic JS-style wrapper for zlib calls. If you don't need
+   * streaming behaviour - use more simple functions: [[inflate]]
+   * and [[inflateRaw]].
+   **/
 
-    opts.bits = 1;
-    return 0;     /* no symbols, but wait for decoding to report error */
-  }
-  for (min = 1; min < max; min++) {
-    if (count[min] !== 0) { break; }
-  }
-  if (root < min) {
-    root = min;
-  }
+  /* internal
+   * inflate.chunks -> Array
+   *
+   * Chunks of output data, if [[Inflate#onData]] not overridden.
+   **/
 
-  /* check for an over-subscribed or incomplete set of lengths */
-  left = 1;
-  for (len = 1; len <= MAXBITS; len++) {
-    left <<= 1;
-    left -= count[len];
-    if (left < 0) {
-      return -1;
-    }        /* over-subscribed */
-  }
-  if (left > 0 && (type === CODES || max !== 1)) {
-    return -1;                      /* incomplete set */
-  }
+  /**
+   * Inflate.result -> Uint8Array|String
+   *
+   * Uncompressed result, generated by default [[Inflate#onData]]
+   * and [[Inflate#onEnd]] handlers. Filled after you push last chunk
+   * (call [[Inflate#push]] with `Z_FINISH` / `true` param).
+   **/
 
-  /* generate offsets into symbol table for each length for sorting */
-  offs[1] = 0;
-  for (len = 1; len < MAXBITS; len++) {
-    offs[len + 1] = offs[len] + count[len];
-  }
+  /**
+   * Inflate.err -> Number
+   *
+   * Error code after inflate finished. 0 (Z_OK) on success.
+   * Should be checked if broken data possible.
+   **/
 
-  /* sort symbols by length, by symbol order within each length */
-  for (sym = 0; sym < codes; sym++) {
-    if (lens[lens_index + sym] !== 0) {
-      work[offs[lens[lens_index + sym]]++] = sym;
-    }
-  }
+  /**
+   * Inflate.msg -> String
+   *
+   * Error message, if [[Inflate.err]] != 0
+   **/
 
-  /*
-   Create and fill in decoding tables.  In this loop, the table being
-   filled is at next and has curr index bits.  The code being used is huff
-   with length len.  That code is converted to an index by dropping drop
-   bits off of the bottom.  For codes where len is less than drop + curr,
-   those top drop + curr - len bits are incremented through all values to
-   fill the table with replicated entries.
 
-   root is the number of index bits for the root table.  When len exceeds
-   root, sub-tables are created pointed to by the root entry with an index
-   of the low root bits of huff.  This is saved in low to check for when a
-   new sub-table should be started.  drop is zero when the root table is
-   being filled, and drop is root when sub-tables are being filled.
+  /**
+   * new Inflate(options)
+   * - options (Object): zlib inflate options.
+   *
+   * Creates new inflator instance with specified params. Throws exception
+   * on bad params. Supported options:
+   *
+   * - `windowBits`
+   * - `dictionary`
+   *
+   * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
+   * for more information on these.
+   *
+   * Additional options, for internal needs:
+   *
+   * - `chunkSize` - size of generated data chunks (16K by default)
+   * - `raw` (Boolean) - do raw inflate
+   * - `to` (String) - if equal to 'string', then result will be converted
+   *   from utf8 to utf16 (javascript) string. When string output requested,
+   *   chunk length can differ from `chunkSize`, depending on content.
+   *
+   * By default, when no options set, autodetect deflate/gzip data format via
+   * wrapper header.
+   *
+   * ##### Example:
+   *
+   * ```javascript
+   * const pako = require('pako')
+   * const chunk1 = new Uint8Array([1,2,3,4,5,6,7,8,9])
+   * const chunk2 = new Uint8Array([10,11,12,13,14,15,16,17,18,19]);
+   *
+   * const inflate = new pako.Inflate({ level: 3});
+   *
+   * inflate.push(chunk1, false);
+   * inflate.push(chunk2, true);  // true -> last chunk
+   *
+   * if (inflate.err) { throw new Error(inflate.err); }
+   *
+   * console.log(inflate.result);
+   * ```
+   **/
+  function Inflate$1(options) {
+    this.options = common.assign({
+      chunkSize: 1024 * 64,
+      windowBits: 15,
+      to: ''
+    }, options || {});
 
-   When a new sub-table is needed, it is necessary to look ahead in the
-   code lengths to determine what size sub-table is needed.  The length
-   counts are used for this, and so count[] is decremented as codes are
-   entered in the tables.
+    const opt = this.options;
 
-   used keeps track of how many table entries have been allocated from the
-   provided *table space.  It is checked for LENS and DIST tables against
-   the constants ENOUGH_LENS and ENOUGH_DISTS to guard against changes in
-   the initial root table size constants.  See the comments in inftrees.h
-   for more information.
-
-   sym increments through all symbols, and the loop terminates when
-   all codes of length max, i.e. all codes, have been processed.  This
-   routine permits incomplete codes, so another loop after this one fills
-   in the rest of the decoding tables with invalid code markers.
-   */
-
-  /* set up for code type */
-  // poor man optimization - use if-else instead of switch,
-  // to avoid deopts in old v8
-  if (type === CODES) {
-    base = extra = work;    /* dummy value--not used */
-    end = 19;
-
-  } else if (type === LENS) {
-    base = lbase;
-    base_index -= 257;
-    extra = lext;
-    extra_index -= 257;
-    end = 256;
-
-  } else {                    /* DISTS */
-    base = dbase;
-    extra = dext;
-    end = -1;
-  }
-
-  /* initialize opts for loop */
-  huff = 0;                   /* starting code */
-  sym = 0;                    /* starting code symbol */
-  len = min;                  /* starting code length */
-  next = table_index;              /* current table to fill in */
-  curr = root;                /* current table index bits */
-  drop = 0;                   /* current bits to drop from code for index */
-  low = -1;                   /* trigger new sub-table when len > root */
-  used = 1 << root;          /* use root table entries */
-  mask = used - 1;            /* mask for comparing low */
-
-  /* check available table space */
-  if ((type === LENS && used > ENOUGH_LENS) ||
-    (type === DISTS && used > ENOUGH_DISTS)) {
-    return 1;
-  }
-
-  /* process all codes and make table entries */
-  for (;;) {
-    /* create table entry */
-    here_bits = len - drop;
-    if (work[sym] < end) {
-      here_op = 0;
-      here_val = work[sym];
-    }
-    else if (work[sym] > end) {
-      here_op = extra[extra_index + work[sym]];
-      here_val = base[base_index + work[sym]];
-    }
-    else {
-      here_op = 32 + 64;         /* end of block */
-      here_val = 0;
+    // Force window size for `raw` data, if not set directly,
+    // because we have no header for autodetect.
+    if (opt.raw && (opt.windowBits >= 0) && (opt.windowBits < 16)) {
+      opt.windowBits = -opt.windowBits;
+      if (opt.windowBits === 0) { opt.windowBits = -15; }
     }
 
-    /* replicate for those indices with low len bits equal to huff */
-    incr = 1 << (len - drop);
-    fill = 1 << curr;
-    min = fill;                 /* save offset to next table */
-    do {
-      fill -= incr;
-      table[next + (huff >> drop) + fill] = (here_bits << 24) | (here_op << 16) | here_val |0;
-    } while (fill !== 0);
-
-    /* backwards increment the len-bit code huff */
-    incr = 1 << (len - 1);
-    while (huff & incr) {
-      incr >>= 1;
-    }
-    if (incr !== 0) {
-      huff &= incr - 1;
-      huff += incr;
-    } else {
-      huff = 0;
+    // If `windowBits` not defined (and mode not raw) - set autodetect flag for gzip/deflate
+    if ((opt.windowBits >= 0) && (opt.windowBits < 16) &&
+        !(options && options.windowBits)) {
+      opt.windowBits += 32;
     }
 
-    /* go to next symbol, update count, len */
-    sym++;
-    if (--count[len] === 0) {
-      if (len === max) { break; }
-      len = lens[lens_index + work[sym]];
-    }
-
-    /* create new sub-table if needed */
-    if (len > root && (huff & mask) !== low) {
-      /* if first time, transition to sub-tables */
-      if (drop === 0) {
-        drop = root;
-      }
-
-      /* increment past last table */
-      next += min;            /* here min is 1 << curr */
-
-      /* determine length of next table */
-      curr = len - drop;
-      left = 1 << curr;
-      while (curr + drop < max) {
-        left -= count[curr + drop];
-        if (left <= 0) { break; }
-        curr++;
-        left <<= 1;
-      }
-
-      /* check for enough space */
-      used += 1 << curr;
-      if ((type === LENS && used > ENOUGH_LENS) ||
-        (type === DISTS && used > ENOUGH_DISTS)) {
-        return 1;
-      }
-
-      /* point entry in root table to sub-table */
-      low = huff & mask;
-      /*table.op[low] = curr;
-      table.bits[low] = root;
-      table.val[low] = next - opts.table_index;*/
-      table[low] = (root << 24) | (curr << 16) | (next - table_index) |0;
-    }
-  }
-
-  /* fill in remaining table entry if code is incomplete (guaranteed to have
-   at most one remaining entry, since if the code is incomplete, the
-   maximum code length that was allowed to get this far is one bit) */
-  if (huff !== 0) {
-    //table.op[next + huff] = 64;            /* invalid code marker */
-    //table.bits[next + huff] = len - drop;
-    //table.val[next + huff] = 0;
-    table[next + huff] = ((len - drop) << 24) | (64 << 16) |0;
-  }
-
-  /* set return parameters */
-  //opts.table_index += used;
-  opts.bits = root;
-  return 0;
-};
-
-},{"../utils/common":1}],10:[function(require,module,exports){
-'use strict';
-
-// (C) 1995-2013 Jean-loup Gailly and Mark Adler
-// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//   claim that you wrote the original software. If you use this software
-//   in a product, an acknowledgment in the product documentation would be
-//   appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-//   misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
-
-module.exports = {
-  2:      'need dictionary',     /* Z_NEED_DICT       2  */
-  1:      'stream end',          /* Z_STREAM_END      1  */
-  0:      '',                    /* Z_OK              0  */
-  '-1':   'file error',          /* Z_ERRNO         (-1) */
-  '-2':   'stream error',        /* Z_STREAM_ERROR  (-2) */
-  '-3':   'data error',          /* Z_DATA_ERROR    (-3) */
-  '-4':   'insufficient memory', /* Z_MEM_ERROR     (-4) */
-  '-5':   'buffer error',        /* Z_BUF_ERROR     (-5) */
-  '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
-};
-
-},{}],11:[function(require,module,exports){
-'use strict';
-
-// (C) 1995-2013 Jean-loup Gailly and Mark Adler
-// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//   claim that you wrote the original software. If you use this software
-//   in a product, an acknowledgment in the product documentation would be
-//   appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-//   misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
-
-function ZStream() {
-  /* next input byte */
-  this.input = null; // JS specific, because we have no pointers
-  this.next_in = 0;
-  /* number of bytes available at input */
-  this.avail_in = 0;
-  /* total number of input bytes read so far */
-  this.total_in = 0;
-  /* next output byte should be put there */
-  this.output = null; // JS specific, because we have no pointers
-  this.next_out = 0;
-  /* remaining free space at output */
-  this.avail_out = 0;
-  /* total number of bytes output so far */
-  this.total_out = 0;
-  /* last error message, NULL if no error */
-  this.msg = ''/*Z_NULL*/;
-  /* not visible by applications */
-  this.state = null;
-  /* best guess about the data type: binary or text */
-  this.data_type = 2/*Z_UNKNOWN*/;
-  /* adler32 value of the uncompressed data */
-  this.adler = 0;
-}
-
-module.exports = ZStream;
-
-},{}],"/lib/inflate.js":[function(require,module,exports){
-'use strict';
-
-
-var zlib_inflate = require('./zlib/inflate');
-var utils        = require('./utils/common');
-var strings      = require('./utils/strings');
-var c            = require('./zlib/constants');
-var msg          = require('./zlib/messages');
-var ZStream      = require('./zlib/zstream');
-var GZheader     = require('./zlib/gzheader');
-
-var toString = Object.prototype.toString;
-
-/**
- * class Inflate
- *
- * Generic JS-style wrapper for zlib calls. If you don't need
- * streaming behaviour - use more simple functions: [[inflate]]
- * and [[inflateRaw]].
- **/
-
-/* internal
- * inflate.chunks -> Array
- *
- * Chunks of output data, if [[Inflate#onData]] not overridden.
- **/
-
-/**
- * Inflate.result -> Uint8Array|Array|String
- *
- * Uncompressed result, generated by default [[Inflate#onData]]
- * and [[Inflate#onEnd]] handlers. Filled after you push last chunk
- * (call [[Inflate#push]] with `Z_FINISH` / `true` param) or if you
- * push a chunk with explicit flush (call [[Inflate#push]] with
- * `Z_SYNC_FLUSH` param).
- **/
-
-/**
- * Inflate.err -> Number
- *
- * Error code after inflate finished. 0 (Z_OK) on success.
- * Should be checked if broken data possible.
- **/
-
-/**
- * Inflate.msg -> String
- *
- * Error message, if [[Inflate.err]] != 0
- **/
-
-
-/**
- * new Inflate(options)
- * - options (Object): zlib inflate options.
- *
- * Creates new inflator instance with specified params. Throws exception
- * on bad params. Supported options:
- *
- * - `windowBits`
- * - `dictionary`
- *
- * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
- * for more information on these.
- *
- * Additional options, for internal needs:
- *
- * - `chunkSize` - size of generated data chunks (16K by default)
- * - `raw` (Boolean) - do raw inflate
- * - `to` (String) - if equal to 'string', then result will be converted
- *   from utf8 to utf16 (javascript) string. When string output requested,
- *   chunk length can differ from `chunkSize`, depending on content.
- *
- * By default, when no options set, autodetect deflate/gzip data format via
- * wrapper header.
- *
- * ##### Example:
- *
- * ```javascript
- * var pako = require('pako')
- *   , chunk1 = Uint8Array([1,2,3,4,5,6,7,8,9])
- *   , chunk2 = Uint8Array([10,11,12,13,14,15,16,17,18,19]);
- *
- * var inflate = new pako.Inflate({ level: 3});
- *
- * inflate.push(chunk1, false);
- * inflate.push(chunk2, true);  // true -> last chunk
- *
- * if (inflate.err) { throw new Error(inflate.err); }
- *
- * console.log(inflate.result);
- * ```
- **/
-function Inflate(options) {
-  if (!(this instanceof Inflate)) return new Inflate(options);
-
-  this.options = utils.assign({
-    chunkSize: 16384,
-    windowBits: 0,
-    to: ''
-  }, options || {});
-
-  var opt = this.options;
-
-  // Force window size for `raw` data, if not set directly,
-  // because we have no header for autodetect.
-  if (opt.raw && (opt.windowBits >= 0) && (opt.windowBits < 16)) {
-    opt.windowBits = -opt.windowBits;
-    if (opt.windowBits === 0) { opt.windowBits = -15; }
-  }
-
-  // If `windowBits` not defined (and mode not raw) - set autodetect flag for gzip/deflate
-  if ((opt.windowBits >= 0) && (opt.windowBits < 16) &&
-      !(options && options.windowBits)) {
-    opt.windowBits += 32;
-  }
-
-  // Gzip header has no info about windows size, we can do autodetect only
-  // for deflate. So, if window size not set, force it to max when gzip possible
-  if ((opt.windowBits > 15) && (opt.windowBits < 48)) {
-    // bit 3 (16) -> gzipped data
-    // bit 4 (32) -> autodetect gzip/deflate
-    if ((opt.windowBits & 15) === 0) {
-      opt.windowBits |= 15;
-    }
-  }
-
-  this.err    = 0;      // error code, if happens (0 = Z_OK)
-  this.msg    = '';     // error message
-  this.ended  = false;  // used to avoid multiple onEnd() calls
-  this.chunks = [];     // chunks of compressed data
-
-  this.strm   = new ZStream();
-  this.strm.avail_out = 0;
-
-  var status  = zlib_inflate.inflateInit2(
-    this.strm,
-    opt.windowBits
-  );
-
-  if (status !== c.Z_OK) {
-    throw new Error(msg[status]);
-  }
-
-  this.header = new GZheader();
-
-  zlib_inflate.inflateGetHeader(this.strm, this.header);
-
-  // Setup dictionary
-  if (opt.dictionary) {
-    // Convert data if needed
-    if (typeof opt.dictionary === 'string') {
-      opt.dictionary = strings.string2buf(opt.dictionary);
-    } else if (toString.call(opt.dictionary) === '[object ArrayBuffer]') {
-      opt.dictionary = new Uint8Array(opt.dictionary);
-    }
-    if (opt.raw) { //In raw mode we need to set the dictionary early
-      status = zlib_inflate.inflateSetDictionary(this.strm, opt.dictionary);
-      if (status !== c.Z_OK) {
-        throw new Error(msg[status]);
+    // Gzip header has no info about windows size, we can do autodetect only
+    // for deflate. So, if window size not set, force it to max when gzip possible
+    if ((opt.windowBits > 15) && (opt.windowBits < 48)) {
+      // bit 3 (16) -> gzipped data
+      // bit 4 (32) -> autodetect gzip/deflate
+      if ((opt.windowBits & 15) === 0) {
+        opt.windowBits |= 15;
       }
     }
-  }
-}
 
-/**
- * Inflate#push(data[, mode]) -> Boolean
- * - data (Uint8Array|Array|ArrayBuffer|String): input data
- * - mode (Number|Boolean): 0..6 for corresponding Z_NO_FLUSH..Z_TREE modes.
- *   See constants. Skipped or `false` means Z_NO_FLUSH, `true` means Z_FINISH.
- *
- * Sends input data to inflate pipe, generating [[Inflate#onData]] calls with
- * new output chunks. Returns `true` on success. The last data block must have
- * mode Z_FINISH (or `true`). That will flush internal pending buffers and call
- * [[Inflate#onEnd]]. For interim explicit flushes (without ending the stream) you
- * can use mode Z_SYNC_FLUSH, keeping the decompression context.
- *
- * On fail call [[Inflate#onEnd]] with error code and return false.
- *
- * We strongly recommend to use `Uint8Array` on input for best speed (output
- * format is detected automatically). Also, don't skip last param and always
- * use the same type in your code (boolean or number). That will improve JS speed.
- *
- * For regular `Array`-s make sure all elements are [0..255].
- *
- * ##### Example
- *
- * ```javascript
- * push(chunk, false); // push one of data chunks
- * ...
- * push(chunk, true);  // push last chunk
- * ```
- **/
-Inflate.prototype.push = function (data, mode) {
-  var strm = this.strm;
-  var chunkSize = this.options.chunkSize;
-  var dictionary = this.options.dictionary;
-  var status, _mode;
-  var next_out_utf8, tail, utf8str;
+    this.err    = 0;      // error code, if happens (0 = Z_OK)
+    this.msg    = '';     // error message
+    this.ended  = false;  // used to avoid multiple onEnd() calls
+    this.chunks = [];     // chunks of compressed data
 
-  // Flag to properly process Z_BUF_ERROR on testing inflate call
-  // when we check that all output data was flushed.
-  var allowBufError = false;
+    this.strm   = new zstream();
+    this.strm.avail_out = 0;
 
-  if (this.ended) { return false; }
-  _mode = (mode === ~~mode) ? mode : ((mode === true) ? c.Z_FINISH : c.Z_NO_FLUSH);
+    let status  = inflate_1$2.inflateInit2(
+      this.strm,
+      opt.windowBits
+    );
 
-  // Convert data if needed
-  if (typeof data === 'string') {
-    // Only binary strings can be decompressed on practice
-    strm.input = strings.binstring2buf(data);
-  } else if (toString.call(data) === '[object ArrayBuffer]') {
-    strm.input = new Uint8Array(data);
-  } else {
-    strm.input = data;
-  }
-
-  strm.next_in = 0;
-  strm.avail_in = strm.input.length;
-
-  do {
-    if (strm.avail_out === 0) {
-      strm.output = new utils.Buf8(chunkSize);
-      strm.next_out = 0;
-      strm.avail_out = chunkSize;
+    if (status !== Z_OK) {
+      throw new Error(messages[status]);
     }
 
-    status = zlib_inflate.inflate(strm, c.Z_NO_FLUSH);    /* no bad return value */
+    this.header = new gzheader();
 
-    if (status === c.Z_NEED_DICT && dictionary) {
-      status = zlib_inflate.inflateSetDictionary(this.strm, dictionary);
-    }
+    inflate_1$2.inflateGetHeader(this.strm, this.header);
 
-    if (status === c.Z_BUF_ERROR && allowBufError === true) {
-      status = c.Z_OK;
-      allowBufError = false;
-    }
-
-    if (status !== c.Z_STREAM_END && status !== c.Z_OK) {
-      this.onEnd(status);
-      this.ended = true;
-      return false;
-    }
-
-    if (strm.next_out) {
-      if (strm.avail_out === 0 || status === c.Z_STREAM_END || (strm.avail_in === 0 && (_mode === c.Z_FINISH || _mode === c.Z_SYNC_FLUSH))) {
-
-        if (this.options.to === 'string') {
-
-          next_out_utf8 = strings.utf8border(strm.output, strm.next_out);
-
-          tail = strm.next_out - next_out_utf8;
-          utf8str = strings.buf2string(strm.output, next_out_utf8);
-
-          // move tail
-          strm.next_out = tail;
-          strm.avail_out = chunkSize - tail;
-          if (tail) { utils.arraySet(strm.output, strm.output, next_out_utf8, tail, 0); }
-
-          this.onData(utf8str);
-
-        } else {
-          this.onData(utils.shrinkBuf(strm.output, strm.next_out));
+    // Setup dictionary
+    if (opt.dictionary) {
+      // Convert data if needed
+      if (typeof opt.dictionary === 'string') {
+        opt.dictionary = strings.string2buf(opt.dictionary);
+      } else if (toString.call(opt.dictionary) === '[object ArrayBuffer]') {
+        opt.dictionary = new Uint8Array(opt.dictionary);
+      }
+      if (opt.raw) { //In raw mode we need to set the dictionary early
+        status = inflate_1$2.inflateSetDictionary(this.strm, opt.dictionary);
+        if (status !== Z_OK) {
+          throw new Error(messages[status]);
         }
       }
     }
-
-    // When no more input data, we should check that internal inflate buffers
-    // are flushed. The only way to do it when avail_out = 0 - run one more
-    // inflate pass. But if output data not exists, inflate return Z_BUF_ERROR.
-    // Here we set flag to process this error properly.
-    //
-    // NOTE. Deflate does not return error in this case and does not needs such
-    // logic.
-    if (strm.avail_in === 0 && strm.avail_out === 0) {
-      allowBufError = true;
-    }
-
-  } while ((strm.avail_in > 0 || strm.avail_out === 0) && status !== c.Z_STREAM_END);
-
-  if (status === c.Z_STREAM_END) {
-    _mode = c.Z_FINISH;
   }
 
-  // Finalize on the last chunk.
-  if (_mode === c.Z_FINISH) {
-    status = zlib_inflate.inflateEnd(this.strm);
-    this.onEnd(status);
-    this.ended = true;
-    return status === c.Z_OK;
-  }
+  /**
+   * Inflate#push(data[, flush_mode]) -> Boolean
+   * - data (Uint8Array|ArrayBuffer): input data
+   * - flush_mode (Number|Boolean): 0..6 for corresponding Z_NO_FLUSH..Z_TREE
+   *   flush modes. See constants. Skipped or `false` means Z_NO_FLUSH,
+   *   `true` means Z_FINISH.
+   *
+   * Sends input data to inflate pipe, generating [[Inflate#onData]] calls with
+   * new output chunks. Returns `true` on success. If end of stream detected,
+   * [[Inflate#onEnd]] will be called.
+   *
+   * `flush_mode` is not needed for normal operation, because end of stream
+   * detected automatically. You may try to use it for advanced things, but
+   * this functionality was not tested.
+   *
+   * On fail call [[Inflate#onEnd]] with error code and return false.
+   *
+   * ##### Example
+   *
+   * ```javascript
+   * push(chunk, false); // push one of data chunks
+   * ...
+   * push(chunk, true);  // push last chunk
+   * ```
+   **/
+  Inflate$1.prototype.push = function (data, flush_mode) {
+    const strm = this.strm;
+    const chunkSize = this.options.chunkSize;
+    const dictionary = this.options.dictionary;
+    let status, _flush_mode, last_avail_out;
 
-  // callback interim results if Z_SYNC_FLUSH.
-  if (_mode === c.Z_SYNC_FLUSH) {
-    this.onEnd(c.Z_OK);
-    strm.avail_out = 0;
-    return true;
-  }
+    if (this.ended) return false;
 
-  return true;
-};
+    if (flush_mode === ~~flush_mode) _flush_mode = flush_mode;
+    else _flush_mode = flush_mode === true ? Z_FINISH : Z_NO_FLUSH;
 
-
-/**
- * Inflate#onData(chunk) -> Void
- * - chunk (Uint8Array|Array|String): output data. Type of array depends
- *   on js engine support. When string output requested, each chunk
- *   will be string.
- *
- * By default, stores data blocks in `chunks[]` property and glue
- * those in `onEnd`. Override this handler, if you need another behaviour.
- **/
-Inflate.prototype.onData = function (chunk) {
-  this.chunks.push(chunk);
-};
-
-
-/**
- * Inflate#onEnd(status) -> Void
- * - status (Number): inflate status. 0 (Z_OK) on success,
- *   other if not.
- *
- * Called either after you tell inflate that the input stream is
- * complete (Z_FINISH) or should be flushed (Z_SYNC_FLUSH)
- * or if an error happened. By default - join collected chunks,
- * free memory and fill `results` / `err` properties.
- **/
-Inflate.prototype.onEnd = function (status) {
-  // On success - join
-  if (status === c.Z_OK) {
-    if (this.options.to === 'string') {
-      // Glue & convert here, until we teach pako to send
-      // utf8 aligned strings to onData
-      this.result = this.chunks.join('');
+    // Convert data if needed
+    if (toString.call(data) === '[object ArrayBuffer]') {
+      strm.input = new Uint8Array(data);
     } else {
-      this.result = utils.flattenChunks(this.chunks);
+      strm.input = data;
     }
+
+    strm.next_in = 0;
+    strm.avail_in = strm.input.length;
+
+    for (;;) {
+      if (strm.avail_out === 0) {
+        strm.output = new Uint8Array(chunkSize);
+        strm.next_out = 0;
+        strm.avail_out = chunkSize;
+      }
+
+      status = inflate_1$2.inflate(strm, _flush_mode);
+
+      if (status === Z_NEED_DICT && dictionary) {
+        status = inflate_1$2.inflateSetDictionary(strm, dictionary);
+
+        if (status === Z_OK) {
+          status = inflate_1$2.inflate(strm, _flush_mode);
+        } else if (status === Z_DATA_ERROR) {
+          // Replace code with more verbose
+          status = Z_NEED_DICT;
+        }
+      }
+
+      // Skip snyc markers if more data follows and not raw mode
+      while (strm.avail_in > 0 &&
+             status === Z_STREAM_END &&
+             strm.state.wrap > 0 &&
+             data[strm.next_in] !== 0)
+      {
+        inflate_1$2.inflateReset(strm);
+        status = inflate_1$2.inflate(strm, _flush_mode);
+      }
+
+      switch (status) {
+        case Z_STREAM_ERROR:
+        case Z_DATA_ERROR:
+        case Z_NEED_DICT:
+        case Z_MEM_ERROR:
+          this.onEnd(status);
+          this.ended = true;
+          return false;
+      }
+
+      // Remember real `avail_out` value, because we may patch out buffer content
+      // to align utf8 strings boundaries.
+      last_avail_out = strm.avail_out;
+
+      if (strm.next_out) {
+        if (strm.avail_out === 0 || status === Z_STREAM_END) {
+
+          if (this.options.to === 'string') {
+
+            let next_out_utf8 = strings.utf8border(strm.output, strm.next_out);
+
+            let tail = strm.next_out - next_out_utf8;
+            let utf8str = strings.buf2string(strm.output, next_out_utf8);
+
+            // move tail & realign counters
+            strm.next_out = tail;
+            strm.avail_out = chunkSize - tail;
+            if (tail) strm.output.set(strm.output.subarray(next_out_utf8, next_out_utf8 + tail), 0);
+
+            this.onData(utf8str);
+
+          } else {
+            this.onData(strm.output.length === strm.next_out ? strm.output : strm.output.subarray(0, strm.next_out));
+          }
+        }
+      }
+
+      // Must repeat iteration if out buffer is full
+      if (status === Z_OK && last_avail_out === 0) continue;
+
+      // Finalize if end of stream reached.
+      if (status === Z_STREAM_END) {
+        status = inflate_1$2.inflateEnd(this.strm);
+        this.onEnd(status);
+        this.ended = true;
+        return true;
+      }
+
+      if (strm.avail_in === 0) break;
+    }
+
+    return true;
+  };
+
+
+  /**
+   * Inflate#onData(chunk) -> Void
+   * - chunk (Uint8Array|String): output data. When string output requested,
+   *   each chunk will be string.
+   *
+   * By default, stores data blocks in `chunks[]` property and glue
+   * those in `onEnd`. Override this handler, if you need another behaviour.
+   **/
+  Inflate$1.prototype.onData = function (chunk) {
+    this.chunks.push(chunk);
+  };
+
+
+  /**
+   * Inflate#onEnd(status) -> Void
+   * - status (Number): inflate status. 0 (Z_OK) on success,
+   *   other if not.
+   *
+   * Called either after you tell inflate that the input stream is
+   * complete (Z_FINISH). By default - join collected chunks,
+   * free memory and fill `results` / `err` properties.
+   **/
+  Inflate$1.prototype.onEnd = function (status) {
+    // On success - join
+    if (status === Z_OK) {
+      if (this.options.to === 'string') {
+        this.result = this.chunks.join('');
+      } else {
+        this.result = common.flattenChunks(this.chunks);
+      }
+    }
+    this.chunks = [];
+    this.err = status;
+    this.msg = this.strm.msg;
+  };
+
+
+  /**
+   * inflate(data[, options]) -> Uint8Array|String
+   * - data (Uint8Array): input data to decompress.
+   * - options (Object): zlib inflate options.
+   *
+   * Decompress `data` with inflate/ungzip and `options`. Autodetect
+   * format via wrapper header by default. That's why we don't provide
+   * separate `ungzip` method.
+   *
+   * Supported options are:
+   *
+   * - windowBits
+   *
+   * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
+   * for more information.
+   *
+   * Sugar (options):
+   *
+   * - `raw` (Boolean) - say that we work with raw stream, if you don't wish to specify
+   *   negative windowBits implicitly.
+   * - `to` (String) - if equal to 'string', then result will be converted
+   *   from utf8 to utf16 (javascript) string. When string output requested,
+   *   chunk length can differ from `chunkSize`, depending on content.
+   *
+   *
+   * ##### Example:
+   *
+   * ```javascript
+   * const pako = require('pako');
+   * const input = pako.deflate(new Uint8Array([1,2,3,4,5,6,7,8,9]));
+   * let output;
+   *
+   * try {
+   *   output = pako.inflate(input);
+   * } catch (err) {
+   *   console.log(err);
+   * }
+   * ```
+   **/
+  function inflate$1(input, options) {
+    const inflator = new Inflate$1(options);
+
+    inflator.push(input);
+
+    // That will never happens, if you don't cheat with options :)
+    if (inflator.err) throw inflator.msg || messages[inflator.err];
+
+    return inflator.result;
   }
-  this.chunks = [];
-  this.err = status;
-  this.msg = this.strm.msg;
-};
 
 
-/**
- * inflate(data[, options]) -> Uint8Array|Array|String
- * - data (Uint8Array|Array|String): input data to decompress.
- * - options (Object): zlib inflate options.
- *
- * Decompress `data` with inflate/ungzip and `options`. Autodetect
- * format via wrapper header by default. That's why we don't provide
- * separate `ungzip` method.
- *
- * Supported options are:
- *
- * - windowBits
- *
- * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
- * for more information.
- *
- * Sugar (options):
- *
- * - `raw` (Boolean) - say that we work with raw stream, if you don't wish to specify
- *   negative windowBits implicitly.
- * - `to` (String) - if equal to 'string', then result will be converted
- *   from utf8 to utf16 (javascript) string. When string output requested,
- *   chunk length can differ from `chunkSize`, depending on content.
- *
- *
- * ##### Example:
- *
- * ```javascript
- * var pako = require('pako')
- *   , input = pako.deflate([1,2,3,4,5,6,7,8,9])
- *   , output;
- *
- * try {
- *   output = pako.inflate(input);
- * } catch (err)
- *   console.log(err);
- * }
- * ```
- **/
-function inflate(input, options) {
-  var inflator = new Inflate(options);
-
-  inflator.push(input, true);
-
-  // That will never happens, if you don't cheat with options :)
-  if (inflator.err) { throw inflator.msg || msg[inflator.err]; }
-
-  return inflator.result;
-}
+  /**
+   * inflateRaw(data[, options]) -> Uint8Array|String
+   * - data (Uint8Array): input data to decompress.
+   * - options (Object): zlib inflate options.
+   *
+   * The same as [[inflate]], but creates raw data, without wrapper
+   * (header and adler32 crc).
+   **/
+  function inflateRaw$1(input, options) {
+    options = options || {};
+    options.raw = true;
+    return inflate$1(input, options);
+  }
 
 
-/**
- * inflateRaw(data[, options]) -> Uint8Array|Array|String
- * - data (Uint8Array|Array|String): input data to decompress.
- * - options (Object): zlib inflate options.
- *
- * The same as [[inflate]], but creates raw data, without wrapper
- * (header and adler32 crc).
- **/
-function inflateRaw(input, options) {
-  options = options || {};
-  options.raw = true;
-  return inflate(input, options);
-}
+  /**
+   * ungzip(data[, options]) -> Uint8Array|String
+   * - data (Uint8Array): input data to decompress.
+   * - options (Object): zlib inflate options.
+   *
+   * Just shortcut to [[inflate]], because it autodetects format
+   * by header.content. Done for convenience.
+   **/
 
 
-/**
- * ungzip(data[, options]) -> Uint8Array|Array|String
- * - data (Uint8Array|Array|String): input data to decompress.
- * - options (Object): zlib inflate options.
- *
- * Just shortcut to [[inflate]], because it autodetects format
- * by header.content. Done for convenience.
- **/
+  var Inflate_1$1 = Inflate$1;
+  var inflate_2 = inflate$1;
+  var inflateRaw_1$1 = inflateRaw$1;
+  var ungzip$1 = inflate$1;
+  var constants = constants$2;
+
+  var inflate_1$1 = {
+  	Inflate: Inflate_1$1,
+  	inflate: inflate_2,
+  	inflateRaw: inflateRaw_1$1,
+  	ungzip: ungzip$1,
+  	constants: constants
+  };
+
+  const { Deflate, deflate, deflateRaw, gzip } = deflate_1$1;
+
+  const { Inflate, inflate, inflateRaw, ungzip } = inflate_1$1;
 
 
-exports.Inflate = Inflate;
-exports.inflate = inflate;
-exports.inflateRaw = inflateRaw;
-exports.ungzip  = inflate;
 
-},{"./utils/common":1,"./utils/strings":2,"./zlib/constants":4,"./zlib/gzheader":6,"./zlib/inflate":8,"./zlib/messages":10,"./zlib/zstream":11}]},{},[])("/lib/inflate.js")
-});
+  var Deflate_1 = Deflate;
+  var deflate_1 = deflate;
+  var deflateRaw_1 = deflateRaw;
+  var gzip_1 = gzip;
+  var Inflate_1 = Inflate;
+  var inflate_1 = inflate;
+  var inflateRaw_1 = inflateRaw;
+  var ungzip_1 = ungzip;
+  var constants_1 = constants$2;
+
+  var pako = {
+  	Deflate: Deflate_1,
+  	deflate: deflate_1,
+  	deflateRaw: deflateRaw_1,
+  	gzip: gzip_1,
+  	Inflate: Inflate_1,
+  	inflate: inflate_1,
+  	inflateRaw: inflateRaw_1,
+  	ungzip: ungzip_1,
+  	constants: constants_1
+  };
+
+  exports.Deflate = Deflate_1;
+  exports.Inflate = Inflate_1;
+  exports.constants = constants_1;
+  exports['default'] = pako;
+  exports.deflate = deflate_1;
+  exports.deflateRaw = deflateRaw_1;
+  exports.gzip = gzip_1;
+  exports.inflate = inflate_1;
+  exports.inflateRaw = inflateRaw_1;
+  exports.ungzip = ungzip_1;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
 
 /**
  * netcdfjs - Read and explore NetCDF files
@@ -17764,6 +21212,827 @@ module.exports = toString;
 });
 //# sourceMappingURL=netcdfjs.js.map
 
+;(function(){
+var UPNG = {};
+
+// Make available for import by `require()`
+var pako;
+if (typeof module == "object") {module.exports = UPNG;}  else {window.UPNG = UPNG;}
+if (typeof require == "function") {pako = require("pako");}  else {pako = window.pako;}
+function log() { if (typeof process=="undefined" || process.env.NODE_ENV=="development") console.log.apply(console, arguments);  }
+(function(UPNG, pako){
+
+	
+
+	
+
+UPNG.toRGBA8 = function(out)
+{
+	var w = out.width, h = out.height;
+	if(out.tabs.acTL==null) return [UPNG.toRGBA8.decodeImage(out.data, w, h, out).buffer];
+	
+	var frms = [];
+	if(out.frames[0].data==null) out.frames[0].data = out.data;
+	
+	var img, empty = new Uint8Array(w*h*4);
+	for(var i=0; i<out.frames.length; i++)
+	{
+		var frm = out.frames[i];
+		var fx=frm.rect.x, fy=frm.rect.y, fw = frm.rect.width, fh = frm.rect.height;
+		var fdata = UPNG.toRGBA8.decodeImage(frm.data, fw,fh, out);
+		
+		if(i==0) img = fdata;
+		else if(frm.blend  ==0) UPNG._copyTile(fdata, fw, fh, img, w, h, fx, fy, 0);
+		else if(frm.blend  ==1) UPNG._copyTile(fdata, fw, fh, img, w, h, fx, fy, 1);
+		
+		frms.push(img.buffer);  img = img.slice(0);
+		
+		if     (frm.dispose==0) {}
+		else if(frm.dispose==1) UPNG._copyTile(empty, fw, fh, img, w, h, fx, fy, 0);
+		else if(frm.dispose==2) {
+			var pi = i-1;
+			while(out.frames[pi].dispose==2) pi--;
+			img = new Uint8Array(frms[pi]).slice(0);
+		}
+	}
+	return frms;
+}
+UPNG.toRGBA8.decodeImage = function(data, w, h, out)
+{
+	var area = w*h, bpp = UPNG.decode._getBPP(out);
+	var bpl = Math.ceil(w*bpp/8);	// bytes per line
+
+	var bf = new Uint8Array(area*4), bf32 = new Uint32Array(bf.buffer);
+	var ctype = out.ctype, depth = out.depth;
+	var rs = UPNG._bin.readUshort;
+	
+	//console.log(ctype, depth);
+
+	if     (ctype==6) { // RGB + alpha
+		var qarea = area<<2;
+		if(depth== 8) for(var i=0; i<qarea;i++) {  bf[i] = data[i];  /*if((i&3)==3 && data[i]!=0) bf[i]=255;*/ }
+		if(depth==16) for(var i=0; i<qarea;i++) {  bf[i] = data[i<<1];  }
+	}
+	else if(ctype==2) {	// RGB
+		var ts=out.tabs["tRNS"], tr=-1, tg=-1, tb=-1;
+		if(ts) {  tr=ts[0];  tg=ts[1];  tb=ts[2];  }
+		if(depth== 8) for(var i=0; i<area; i++) {  var qi=i<<2, ti=i*3;  bf[qi] = data[ti];  bf[qi+1] = data[ti+1];  bf[qi+2] = data[ti+2];  bf[qi+3] = 255;
+			if(tr!=-1 && data[ti]   ==tr && data[ti+1]   ==tg && data[ti+2]   ==tb) bf[qi+3] = 0;  }
+		if(depth==16) for(var i=0; i<area; i++) {  var qi=i<<2, ti=i*6;  bf[qi] = data[ti];  bf[qi+1] = data[ti+2];  bf[qi+2] = data[ti+4];  bf[qi+3] = 255;
+			if(tr!=-1 && rs(data,ti)==tr && rs(data,ti+2)==tg && rs(data,ti+4)==tb) bf[qi+3] = 0;  }
+	}
+	else if(ctype==3) {	// palette
+		var p=out.tabs["PLTE"], ap=out.tabs["tRNS"], tl=ap?ap.length:0;
+		//console.log(p, ap);
+		if(depth==1) for(var y=0; y<h; y++) {  var s0 = y*bpl, t0 = y*w;
+			for(var i=0; i<w; i++) { var qi=(t0+i)<<2, j=((data[s0+(i>>3)]>>(7-((i&7)<<0)))& 1), cj=3*j;  bf[qi]=p[cj];  bf[qi+1]=p[cj+1];  bf[qi+2]=p[cj+2];  bf[qi+3]=(j<tl)?ap[j]:255;  }
+		}
+		if(depth==2) for(var y=0; y<h; y++) {  var s0 = y*bpl, t0 = y*w;
+			for(var i=0; i<w; i++) { var qi=(t0+i)<<2, j=((data[s0+(i>>2)]>>(6-((i&3)<<1)))& 3), cj=3*j;  bf[qi]=p[cj];  bf[qi+1]=p[cj+1];  bf[qi+2]=p[cj+2];  bf[qi+3]=(j<tl)?ap[j]:255;  }
+		}
+		if(depth==4) for(var y=0; y<h; y++) {  var s0 = y*bpl, t0 = y*w;
+			for(var i=0; i<w; i++) { var qi=(t0+i)<<2, j=((data[s0+(i>>1)]>>(4-((i&1)<<2)))&15), cj=3*j;  bf[qi]=p[cj];  bf[qi+1]=p[cj+1];  bf[qi+2]=p[cj+2];  bf[qi+3]=(j<tl)?ap[j]:255;  }
+		}
+		if(depth==8) for(var i=0; i<area; i++ ) {  var qi=i<<2, j=data[i]                      , cj=3*j;  bf[qi]=p[cj];  bf[qi+1]=p[cj+1];  bf[qi+2]=p[cj+2];  bf[qi+3]=(j<tl)?ap[j]:255;  }
+	}
+	else if(ctype==4) {	// gray + alpha
+		if(depth== 8)  for(var i=0; i<area; i++) {  var qi=i<<2, di=i<<1, gr=data[di];  bf[qi]=gr;  bf[qi+1]=gr;  bf[qi+2]=gr;  bf[qi+3]=data[di+1];  }
+		if(depth==16)  for(var i=0; i<area; i++) {  var qi=i<<2, di=i<<2, gr=data[di];  bf[qi]=gr;  bf[qi+1]=gr;  bf[qi+2]=gr;  bf[qi+3]=data[di+2];  }
+	}
+	else if(ctype==0) {	// gray
+		var tr = out.tabs["tRNS"] ? out.tabs["tRNS"] : -1;
+		if(depth== 1) for(var i=0; i<area; i++) {  var gr=255*((data[i>>3]>>(7 -((i&7)   )))& 1), al=(gr==tr*255)?0:255;  bf32[i]=(al<<24)|(gr<<16)|(gr<<8)|gr;  }
+		if(depth== 2) for(var i=0; i<area; i++) {  var gr= 85*((data[i>>2]>>(6 -((i&3)<<1)))& 3), al=(gr==tr* 85)?0:255;  bf32[i]=(al<<24)|(gr<<16)|(gr<<8)|gr;  }
+		if(depth== 4) for(var i=0; i<area; i++) {  var gr= 17*((data[i>>1]>>(4 -((i&1)<<2)))&15), al=(gr==tr* 17)?0:255;  bf32[i]=(al<<24)|(gr<<16)|(gr<<8)|gr;  }
+		if(depth== 8) for(var i=0; i<area; i++) {  var gr=data[i  ] , al=(gr           ==tr)?0:255;  bf32[i]=(al<<24)|(gr<<16)|(gr<<8)|gr;  }
+		if(depth==16) for(var i=0; i<area; i++) {  var gr=data[i<<1], al=(rs(data,i<<1)==tr)?0:255;  bf32[i]=(al<<24)|(gr<<16)|(gr<<8)|gr;  }
+	}
+	return bf;
+}
+
+
+
+UPNG.decode = function(buff)
+{
+	var data = new Uint8Array(buff), offset = 8, bin = UPNG._bin, rUs = bin.readUshort, rUi = bin.readUint;
+	var out = {tabs:{}, frames:[]};
+	var dd = new Uint8Array(data.length), doff = 0;	 // put all IDAT data into it
+	var fd, foff = 0;	// frames
+	
+	var mgck = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+	for(var i=0; i<8; i++) if(data[i]!=mgck[i]) throw "The input is not a PNG file!";
+
+	while(offset<data.length)
+	{
+		var len  = bin.readUint(data, offset);  offset += 4;
+		var type = bin.readASCII(data, offset, 4);  offset += 4;
+		//log(type,len);
+		
+		if     (type=="IHDR")  {  UPNG.decode._IHDR(data, offset, out);  }
+		else if(type=="IDAT") {
+			for(var i=0; i<len; i++) dd[doff+i] = data[offset+i];
+			doff += len;
+		}
+		else if(type=="acTL")  {
+			out.tabs[type] = {  num_frames:rUi(data, offset), num_plays:rUi(data, offset+4)  };
+			fd = new Uint8Array(data.length);
+		}
+		else if(type=="fcTL")  {
+			if(foff!=0) {  var fr = out.frames[out.frames.length-1];
+				fr.data = UPNG.decode._decompress(out, fd.slice(0,foff), fr.rect.width, fr.rect.height);  foff=0;
+			}
+			var rct = {x:rUi(data, offset+12),y:rUi(data, offset+16),width:rUi(data, offset+4),height:rUi(data, offset+8)};
+			var del = rUs(data, offset+22);  del = rUs(data, offset+20) / (del==0?100:del);
+			var frm = {rect:rct, delay:Math.round(del*1000), dispose:data[offset+24], blend:data[offset+25]};
+			//console.log(frm);
+			out.frames.push(frm);
+		}
+		else if(type=="fdAT") {
+			for(var i=0; i<len-4; i++) fd[foff+i] = data[offset+i+4];
+			foff += len-4;
+		}
+		else if(type=="pHYs") {
+			out.tabs[type] = [bin.readUint(data, offset), bin.readUint(data, offset+4), data[offset+8]];
+		}
+		else if(type=="cHRM") {
+			out.tabs[type] = [];
+			for(var i=0; i<8; i++) out.tabs[type].push(bin.readUint(data, offset+i*4));
+		}
+		else if(type=="tEXt") {
+			if(out.tabs[type]==null) out.tabs[type] = {};
+			var nz = bin.nextZero(data, offset);
+			var keyw = bin.readASCII(data, offset, nz-offset);
+			var text = bin.readASCII(data, nz+1, offset+len-nz-1);
+			out.tabs[type][keyw] = text;
+		}
+		else if(type=="iTXt") {
+			if(out.tabs[type]==null) out.tabs[type] = {};
+			var nz = 0, off = offset;
+			nz = bin.nextZero(data, off);
+			var keyw = bin.readASCII(data, off, nz-off);  off = nz + 1;
+			var cflag = data[off], cmeth = data[off+1];  off+=2;
+			nz = bin.nextZero(data, off);
+			var ltag = bin.readASCII(data, off, nz-off);  off = nz + 1;
+			nz = bin.nextZero(data, off);
+			var tkeyw = bin.readUTF8(data, off, nz-off);  off = nz + 1;
+			var text  = bin.readUTF8(data, off, len-(off-offset));
+			out.tabs[type][keyw] = text;
+		}
+		else if(type=="PLTE") {
+			out.tabs[type] = bin.readBytes(data, offset, len);
+		}
+		else if(type=="hIST") {
+			var pl = out.tabs["PLTE"].length/3;
+			out.tabs[type] = [];  for(var i=0; i<pl; i++) out.tabs[type].push(rUs(data, offset+i*2));
+		}
+		else if(type=="tRNS") {
+			if     (out.ctype==3) out.tabs[type] = bin.readBytes(data, offset, len);
+			else if(out.ctype==0) out.tabs[type] = rUs(data, offset);
+			else if(out.ctype==2) out.tabs[type] = [ rUs(data,offset),rUs(data,offset+2),rUs(data,offset+4) ];
+			//else console.log("tRNS for unsupported color type",out.ctype, len);
+		}
+		else if(type=="gAMA") out.tabs[type] = bin.readUint(data, offset)/100000;
+		else if(type=="sRGB") out.tabs[type] = data[offset];
+		else if(type=="bKGD")
+		{
+			if     (out.ctype==0 || out.ctype==4) out.tabs[type] = [rUs(data, offset)];
+			else if(out.ctype==2 || out.ctype==6) out.tabs[type] = [rUs(data, offset), rUs(data, offset+2), rUs(data, offset+4)];
+			else if(out.ctype==3) out.tabs[type] = data[offset];
+		}
+		else if(type=="IEND") {
+			if(foff!=0) {  var fr = out.frames[out.frames.length-1];
+				fr.data = UPNG.decode._decompress(out, fd.slice(0,foff), fr.rect.width, fr.rect.height);  foff=0;
+			}	
+			out.data = UPNG.decode._decompress(out, dd, out.width, out.height);  break;
+		}
+		//else {  log("unknown chunk type", type, len);  }
+		offset += len;
+		var crc = bin.readUint(data, offset);  offset += 4;
+	}
+	delete out.compress;  delete out.interlace;  delete out.filter;
+	return out;
+}
+
+UPNG.decode._decompress = function(out, dd, w, h) {
+	if(out.compress ==0) dd = UPNG.decode._inflate(dd);
+
+	if     (out.interlace==0) dd = UPNG.decode._filterZero(dd, out, 0, w, h);
+	else if(out.interlace==1) dd = UPNG.decode._readInterlace(dd, out);
+	return dd;
+}
+
+UPNG.decode._inflate = function(data) {  return pako["inflate"](data);  }
+
+UPNG.decode._readInterlace = function(data, out)
+{
+	var w = out.width, h = out.height;
+	var bpp = UPNG.decode._getBPP(out), cbpp = bpp>>3, bpl = Math.ceil(w*bpp/8);
+	var img = new Uint8Array( h * bpl );
+	var di = 0;
+
+	var starting_row  = [ 0, 0, 4, 0, 2, 0, 1 ];
+	var starting_col  = [ 0, 4, 0, 2, 0, 1, 0 ];
+	var row_increment = [ 8, 8, 8, 4, 4, 2, 2 ];
+	var col_increment = [ 8, 8, 4, 4, 2, 2, 1 ];
+
+	var pass=0;
+	while(pass<7)
+	{
+		var ri = row_increment[pass], ci = col_increment[pass];
+		var sw = 0, sh = 0;
+		var cr = starting_row[pass];  while(cr<h) {  cr+=ri;  sh++;  }
+		var cc = starting_col[pass];  while(cc<w) {  cc+=ci;  sw++;  }
+		var bpll = Math.ceil(sw*bpp/8);
+		UPNG.decode._filterZero(data, out, di, sw, sh);
+
+		var y=0, row = starting_row[pass];
+		while(row<h)
+		{
+			var col = starting_col[pass];
+			var cdi = (di+y*bpll)<<3;
+
+			while(col<w)
+			{
+				if(bpp==1) {
+					var val = data[cdi>>3];  val = (val>>(7-(cdi&7)))&1;
+					img[row*bpl + (col>>3)] |= (val << (7-((col&3)<<0)));
+				}
+				if(bpp==2) {
+					var val = data[cdi>>3];  val = (val>>(6-(cdi&7)))&3;
+					img[row*bpl + (col>>2)] |= (val << (6-((col&3)<<1)));
+				}
+				if(bpp==4) {
+					var val = data[cdi>>3];  val = (val>>(4-(cdi&7)))&15;
+					img[row*bpl + (col>>1)] |= (val << (4-((col&1)<<2)));
+				}
+				if(bpp>=8) {
+					var ii = row*bpl+col*cbpp;
+					for(var j=0; j<cbpp; j++) img[ii+j] = data[(cdi>>3)+j];
+				}
+				cdi+=bpp;  col+=ci;
+			}
+			y++;  row += ri;
+		}
+		if(sw*sh!=0) di += sh * (1 + bpll);
+		pass = pass + 1;
+	}
+	return img;
+}
+
+UPNG.decode._getBPP = function(out) {
+	var noc = [1,null,3,1,2,null,4][out.ctype];
+	return noc * out.depth;
+}
+
+UPNG.decode._filterZero = function(data, out, off, w, h)
+{
+	var bpp = UPNG.decode._getBPP(out), bpl = Math.ceil(w*bpp/8), paeth = UPNG.decode._paeth;
+	bpp = Math.ceil(bpp/8);
+
+	for(var y=0; y<h; y++)  {
+		var i = off+y*bpl, di = i+y+1;
+		var type = data[di-1];
+
+		if     (type==0) for(var x=  0; x<bpl; x++) data[i+x] = data[di+x];
+		else if(type==1) {
+			for(var x=  0; x<bpp; x++) data[i+x] = data[di+x];
+			for(var x=bpp; x<bpl; x++) data[i+x] = (data[di+x] + data[i+x-bpp])&255;
+		}
+		else if(y==0) {
+			for(var x=  0; x<bpp; x++) data[i+x] = data[di+x];
+			if(type==2) for(var x=bpp; x<bpl; x++) data[i+x] = (data[di+x])&255;
+			if(type==3) for(var x=bpp; x<bpl; x++) data[i+x] = (data[di+x] + (data[i+x-bpp]>>1) )&255;
+			if(type==4) for(var x=bpp; x<bpl; x++) data[i+x] = (data[di+x] + paeth(data[i+x-bpp], 0, 0) )&255;
+		}
+		else {
+			if(type==2) { for(var x=  0; x<bpl; x++) data[i+x] = (data[di+x] + data[i+x-bpl])&255;  }
+
+			if(type==3) { for(var x=  0; x<bpp; x++) data[i+x] = (data[di+x] + (data[i+x-bpl]>>1))&255;
+			              for(var x=bpp; x<bpl; x++) data[i+x] = (data[di+x] + ((data[i+x-bpl]+data[i+x-bpp])>>1) )&255;  }
+
+			if(type==4) { for(var x=  0; x<bpp; x++) data[i+x] = (data[di+x] + paeth(0, data[i+x-bpl], 0))&255;
+						  for(var x=bpp; x<bpl; x++) data[i+x] = (data[di+x] + paeth(data[i+x-bpp], data[i+x-bpl], data[i+x-bpp-bpl]) )&255;  }
+		}
+	}
+	return data;
+}
+
+UPNG.decode._paeth = function(a,b,c)
+{
+	var p = a+b-c, pa = Math.abs(p-a), pb = Math.abs(p-b), pc = Math.abs(p-c);
+	if (pa <= pb && pa <= pc)  return a;
+	else if (pb <= pc)  return b;
+	return c;
+}
+
+UPNG.decode._IHDR = function(data, offset, out)
+{
+	var bin = UPNG._bin;
+	out.width  = bin.readUint(data, offset);  offset += 4;
+	out.height = bin.readUint(data, offset);  offset += 4;
+	out.depth     = data[offset];  offset++;
+	out.ctype     = data[offset];  offset++;
+	out.compress  = data[offset];  offset++;
+	out.filter    = data[offset];  offset++;
+	out.interlace = data[offset];  offset++;
+}
+
+UPNG._bin = {
+	nextZero   : function(data,p)  {  while(data[p]!=0) p++;  return p;  },
+	readUshort : function(buff,p)  {  return (buff[p]<< 8) | buff[p+1];  },
+	writeUshort: function(buff,p,n){  buff[p] = (n>>8)&255;  buff[p+1] = n&255;  },
+	readUint   : function(buff,p)  {  return (buff[p]*(256*256*256)) + ((buff[p+1]<<16) | (buff[p+2]<< 8) | buff[p+3]);  },
+	writeUint  : function(buff,p,n){  buff[p]=(n>>24)&255;  buff[p+1]=(n>>16)&255;  buff[p+2]=(n>>8)&255;  buff[p+3]=n&255;  },
+	readASCII  : function(buff,p,l){  var s = "";  for(var i=0; i<l; i++) s += String.fromCharCode(buff[p+i]);  return s;    },
+	writeASCII : function(data,p,s){  for(var i=0; i<s.length; i++) data[p+i] = s.charCodeAt(i);  },
+	readBytes  : function(buff,p,l){  var arr = [];   for(var i=0; i<l; i++) arr.push(buff[p+i]);   return arr;  },
+	pad : function(n) { return n.length < 2 ? "0" + n : n; },
+	readUTF8 : function(buff, p, l) {
+		var s = "", ns;
+		for(var i=0; i<l; i++) s += "%" + UPNG._bin.pad(buff[p+i].toString(16));
+		try {  ns = decodeURIComponent(s); }
+		catch(e) {  return UPNG._bin.readASCII(buff, p, l);  }
+		return  ns;
+	}
+}
+UPNG._copyTile = function(sb, sw, sh, tb, tw, th, xoff, yoff, mode)
+{
+	var w = Math.min(sw,tw), h = Math.min(sh,th);
+	var si=0, ti=0;
+	for(var y=0; y<h; y++)
+		for(var x=0; x<w; x++)
+		{
+			if(xoff>=0 && yoff>=0) {  si = (y*sw+x)<<2;  ti = (( yoff+y)*tw+xoff+x)<<2;  }
+			else                   {  si = ((-yoff+y)*sw-xoff+x)<<2;  ti = (y*tw+x)<<2;  }
+			
+			if     (mode==0) {  tb[ti] = sb[si];  tb[ti+1] = sb[si+1];  tb[ti+2] = sb[si+2];  tb[ti+3] = sb[si+3];  }
+			else if(mode==1) {
+				var fa = sb[si+3]*(1/255), fr=sb[si]*fa, fg=sb[si+1]*fa, fb=sb[si+2]*fa; 
+				var ba = tb[ti+3]*(1/255), br=tb[ti]*ba, bg=tb[ti+1]*ba, bb=tb[ti+2]*ba; 
+				
+				var ifa=1-fa, oa = fa+ba*ifa, ioa = (oa==0?0:1/oa);
+				tb[ti+3] = 255*oa;  
+				tb[ti+0] = (fr+br*ifa)*ioa;  
+				tb[ti+1] = (fg+bg*ifa)*ioa;   
+				tb[ti+2] = (fb+bb*ifa)*ioa;  
+			}
+			else if(mode==2){	// copy only differences, otherwise zero
+				var fa = sb[si+3], fr=sb[si], fg=sb[si+1], fb=sb[si+2]; 
+				var ba = tb[ti+3], br=tb[ti], bg=tb[ti+1], bb=tb[ti+2]; 
+				if(fa==ba && fr==br && fg==bg && fb==bb) {  tb[ti]=0;  tb[ti+1]=0;  tb[ti+2]=0;  tb[ti+3]=0;  }
+				else {  tb[ti]=fr;  tb[ti+1]=fg;  tb[ti+2]=fb;  tb[ti+3]=fa;  }
+			}
+			else if(mode==3){	// check if can be blended
+				var fa = sb[si+3], fr=sb[si], fg=sb[si+1], fb=sb[si+2]; 
+				var ba = tb[ti+3], br=tb[ti], bg=tb[ti+1], bb=tb[ti+2]; 
+				if(fa==ba && fr==br && fg==bg && fb==bb) continue;
+				//if(fa!=255 && ba!=0) return false;
+				if(fa<220 && ba>20) return false;
+			}
+		}
+	return true;
+}
+
+
+
+UPNG.encode = function(bufs, w, h, ps, dels, forbidPlte)
+{
+	if(ps==null) ps=0;
+	if(forbidPlte==null) forbidPlte = false;
+	var data = new Uint8Array(bufs[0].byteLength*bufs.length+100);
+	var wr=[0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+	for(var i=0; i<8; i++) data[i]=wr[i];
+	var offset = 8,  bin = UPNG._bin, crc = UPNG.crc.crc, wUi = bin.writeUint, wUs = bin.writeUshort, wAs = bin.writeASCII;
+
+	var nimg = UPNG.encode.compressPNG(bufs, w, h, ps, forbidPlte);
+
+	wUi(data,offset, 13);     offset+=4;
+	wAs(data,offset,"IHDR");  offset+=4;
+	wUi(data,offset,w);  offset+=4;
+	wUi(data,offset,h);  offset+=4;
+	data[offset] = nimg.depth;  offset++;  // depth
+	data[offset] = nimg.ctype;  offset++;  // ctype
+	data[offset] = 0;  offset++;  // compress
+	data[offset] = 0;  offset++;  // filter
+	data[offset] = 0;  offset++;  // interlace
+	wUi(data,offset,crc(data,offset-17,17));  offset+=4; // crc
+
+	// 9 bytes to say, that it is sRGB
+	wUi(data,offset, 1);      offset+=4;
+	wAs(data,offset,"sRGB");  offset+=4;
+	data[offset] = 1;  offset++;
+	wUi(data,offset,crc(data,offset-5,5));  offset+=4; // crc
+
+	var anim = bufs.length>1;
+	if(anim) {
+		wUi(data,offset, 8);      offset+=4;
+		wAs(data,offset,"acTL");  offset+=4;
+		wUi(data,offset, bufs.length);      offset+=4;
+		wUi(data,offset, 0);      offset+=4;
+		wUi(data,offset,crc(data,offset-12,12));  offset+=4; // crc
+	}
+
+	if(nimg.ctype==3) {
+		var dl = nimg.plte.length;
+		wUi(data,offset, dl*3);  offset+=4;
+		wAs(data,offset,"PLTE");  offset+=4;
+		for(var i=0; i<dl; i++){
+			var ti=i*3, c=nimg.plte[i], r=(c)&255, g=(c>>8)&255, b=(c>>16)&255;
+			data[offset+ti+0]=r;  data[offset+ti+1]=g;  data[offset+ti+2]=b;
+		}
+		offset+=dl*3;
+		wUi(data,offset,crc(data,offset-dl*3-4,dl*3+4));  offset+=4; // crc
+
+		if(nimg.gotAlpha) {
+			wUi(data,offset, dl);  offset+=4;
+			wAs(data,offset,"tRNS");  offset+=4;
+			for(var i=0; i<dl; i++)  data[offset+i]=(nimg.plte[i]>>24)&255;
+			offset+=dl;
+			wUi(data,offset,crc(data,offset-dl-4,dl+4));  offset+=4; // crc
+		}
+	}
+	
+	var fi = 0;
+	for(var j=0; j<nimg.frames.length; j++)
+	{
+		var fr = nimg.frames[j];
+		if(anim) {
+			wUi(data,offset, 26);     offset+=4;
+			wAs(data,offset,"fcTL");  offset+=4;
+			wUi(data, offset, fi++);   offset+=4;
+			wUi(data, offset, fr.rect.width );   offset+=4;
+			wUi(data, offset, fr.rect.height);   offset+=4;
+			wUi(data, offset, fr.rect.x);   offset+=4;
+			wUi(data, offset, fr.rect.y);   offset+=4;
+			wUs(data, offset, dels[j]);   offset+=2;
+			wUs(data, offset,  1000);   offset+=2;
+			data[offset] = fr.dispose;  offset++;	// dispose
+			data[offset] = fr.blend  ;  offset++;	// blend
+			wUi(data,offset,crc(data,offset-30,30));  offset+=4; // crc
+		}
+				
+		var imgd = fr.cimg, dl = imgd.length;
+		wUi(data,offset, dl+(j==0?0:4));     offset+=4;
+		var ioff = offset;
+		wAs(data,offset,(j==0)?"IDAT":"fdAT");  offset+=4;
+		if(j!=0) {  wUi(data, offset, fi++);  offset+=4;  }
+		for(var i=0; i<dl; i++) data[offset+i] = imgd[i];
+		offset += dl;
+		wUi(data,offset,crc(data,ioff,offset-ioff));  offset+=4; // crc
+	}
+
+	wUi(data,offset, 0);     offset+=4;
+	wAs(data,offset,"IEND");  offset+=4;
+	wUi(data,offset,crc(data,offset-4,4));  offset+=4; // crc
+
+	return data.buffer.slice(0,offset);
+}
+
+UPNG.encode.compressPNG = function(bufs, w, h, ps, forbidPlte)
+{
+	var out = UPNG.encode.compress(bufs, w, h, ps, false, forbidPlte);
+	for(var i=0; i<bufs.length; i++) {
+		var frm = out.frames[i], nw=frm.rect.width, nh=frm.rect.height, bpl=frm.bpl, bpp=frm.bpp;
+		var fdata = new Uint8Array(nh*bpl+nh);
+		frm.cimg = UPNG.encode._filterZero(frm.img,nh,bpp,bpl,fdata);
+	}	
+	return out;
+}
+
+UPNG.encode.compress = function(bufs, w, h, ps, forGIF, forbidPlte)
+{
+	if(forbidPlte==null) forbidPlte = false;
+	
+	var ctype = 6, depth = 8, bpp = 4, alphaAnd=255
+	
+	for(var j=0; j<bufs.length; j++)  {  // when not quantized, other frames can contain colors, that are not in an initial frame
+		var img = new Uint8Array(bufs[j]), ilen = img.length;
+		for(var i=0; i<ilen; i+=4) alphaAnd &= img[i+3];
+	}
+	var gotAlpha = (alphaAnd)!=255;
+	
+	var cmap={}, plte=[];  if(bufs.length!=0) {  cmap[0]=0;  plte.push(0);  if(ps!=0) ps--;  } 
+	
+	
+	if(ps!=0) {
+		var qres = UPNG.quantize(bufs, ps, forGIF);  bufs = qres.bufs;
+		for(var i=0; i<qres.plte.length; i++) {  var c=qres.plte[i].est.rgba;  if(cmap[c]==null) {  cmap[c]=plte.length;  plte.push(c);  }     }
+	}
+	else {
+		// what if ps==0, but there are <=256 colors?  we still need to detect, if the palette could be used
+		for(var j=0; j<bufs.length; j++)  {  // when not quantized, other frames can contain colors, that are not in an initial frame
+			var img32 = new Uint32Array(bufs[j]), ilen = img32.length;
+			for(var i=0; i<ilen; i++) {
+				var c = img32[i];
+				if((i<w || (c!=img32[i-1] && c!=img32[i-w])) && cmap[c]==null) {  cmap[c]=plte.length;  plte.push(c);  if(plte.length>=300) break;  }
+			}
+		}
+	}
+	
+	var brute = gotAlpha ? forGIF : false;		// brute : frames can only be copied, not "blended"
+	var cc=plte.length;  //console.log(cc);
+	if(cc<=256 && forbidPlte==false) {
+		if(cc<= 2) depth=1;  else if(cc<= 4) depth=2;  else if(cc<=16) depth=4;  else depth=8;
+		if(forGIF) depth=8;
+		gotAlpha = true;
+	}
+	
+	
+	var frms = [];
+	for(var j=0; j<bufs.length; j++)
+	{
+		var cimg = new Uint8Array(bufs[j]), cimg32 = new Uint32Array(cimg.buffer);
+		
+		var nx=0, ny=0, nw=w, nh=h, blend=0;
+		if(j!=0 && !brute) {
+			var tlim = (forGIF || j==1 || frms[frms.length-2].dispose==2)?1:2, tstp = 0, tarea = 1e9;
+			for(var it=0; it<tlim; it++)
+			{
+				var pimg = new Uint8Array(bufs[j-1-it]), p32 = new Uint32Array(bufs[j-1-it]);
+				var mix=w,miy=h,max=-1,may=-1;
+				for(var y=0; y<h; y++) for(var x=0; x<w; x++) {
+					var i = y*w+x;
+					if(cimg32[i]!=p32[i]) {
+						if(x<mix) mix=x;  if(x>max) max=x;
+						if(y<miy) miy=y;  if(y>may) may=y;
+					}
+				}
+				var sarea = (max==-1) ? 1 : (max-mix+1)*(may-miy+1);
+				if(sarea<tarea) {
+					tarea = sarea;  tstp = it;  
+					if(max==-1) {  nx=ny=0;  nw=nh=1;  }
+					else {  nx = mix; ny = miy; nw = max-mix+1; nh = may-miy+1;  }
+				}
+			}
+			
+			var pimg = new Uint8Array(bufs[j-1-tstp]);
+			if(tstp==1) frms[frms.length-1].dispose = 2;
+			
+			var nimg = new Uint8Array(nw*nh*4), nimg32 = new Uint32Array(nimg.buffer);
+			UPNG.   _copyTile(pimg,w,h, nimg,nw,nh, -nx,-ny, 0);
+			if(UPNG._copyTile(cimg,w,h, nimg,nw,nh, -nx,-ny, 3)) {
+				UPNG._copyTile(cimg,w,h, nimg,nw,nh, -nx,-ny, 2);  blend = 1;
+			}
+			else {
+				UPNG._copyTile(cimg,w,h, nimg,nw,nh, -nx,-ny, 0);  blend = 0;
+			}
+			cimg = nimg;  cimg32 = new Uint32Array(cimg.buffer);
+		}
+		var bpl = 4*nw;
+		if(cc<=256 && forbidPlte==false) {
+			bpl = Math.ceil(depth*nw/8);
+			var nimg = new Uint8Array(bpl*nh);
+			for(var y=0; y<nh; y++) {  var i=y*bpl, ii=y*nw;
+				if     (depth==8) for(var x=0; x<nw; x++) nimg[i+(x)   ]   =  (cmap[cimg32[ii+x]]             );
+				else if(depth==4) for(var x=0; x<nw; x++) nimg[i+(x>>1)]  |=  (cmap[cimg32[ii+x]]<<(4-(x&1)*4));
+				else if(depth==2) for(var x=0; x<nw; x++) nimg[i+(x>>2)]  |=  (cmap[cimg32[ii+x]]<<(6-(x&3)*2));
+				else if(depth==1) for(var x=0; x<nw; x++) nimg[i+(x>>3)]  |=  (cmap[cimg32[ii+x]]<<(7-(x&7)*1));
+			}
+			cimg=nimg;  ctype=3;  bpp=1;
+		}
+		else if(gotAlpha==false && bufs.length==1) {	// some next "reduced" frames may contain alpha for blending
+			var nimg = new Uint8Array(nw*nh*3), area=nw*nh;
+			for(var i=0; i<area; i++) { var ti=i*3, qi=i*4;  nimg[ti]=cimg[qi];  nimg[ti+1]=cimg[qi+1];  nimg[ti+2]=cimg[qi+2];  }
+			cimg=nimg;  ctype=2;  bpp=3;  bpl=3*nw;
+		}
+		frms.push({rect:{x:nx,y:ny,width:nw,height:nh}, img:cimg, bpl:bpl, bpp:bpp, blend:blend, dispose:brute?1:0});
+	}
+	return {ctype:ctype, depth:depth, plte:plte, gotAlpha:gotAlpha, frames:frms  };
+}
+
+UPNG.encode._filterZero = function(img,h,bpp,bpl,data)
+{
+	var fls = [];
+	for(var t=0; t<5; t++) {  if(h*bpl>500000 && (t==2 || t==3 || t==4)) continue;
+		for(var y=0; y<h; y++) UPNG.encode._filterLine(data, img, y, bpl, bpp, t);
+		fls.push(pako["deflate"](data));  if(bpp==1) break;
+	}
+	var ti, tsize=1e9;
+	for(var i=0; i<fls.length; i++) if(fls[i].length<tsize) {  ti=i;  tsize=fls[i].length;  }
+	return fls[ti];
+}
+UPNG.encode._filterLine = function(data, img, y, bpl, bpp, type)
+{
+	var i = y*bpl, di = i+y, paeth = UPNG.decode._paeth
+	data[di]=type;  di++;
+
+	if(type==0) for(var x=0; x<bpl; x++) data[di+x] = img[i+x];
+	else if(type==1) {
+		for(var x=  0; x<bpp; x++) data[di+x] =  img[i+x];
+		for(var x=bpp; x<bpl; x++) data[di+x] = (img[i+x]-img[i+x-bpp]+256)&255;
+	}
+	else if(y==0) {
+		for(var x=  0; x<bpp; x++) data[di+x] = img[i+x];
+
+		if(type==2) for(var x=bpp; x<bpl; x++) data[di+x] = img[i+x];
+		if(type==3) for(var x=bpp; x<bpl; x++) data[di+x] = (img[i+x] - (img[i+x-bpp]>>1) +256)&255;
+		if(type==4) for(var x=bpp; x<bpl; x++) data[di+x] = (img[i+x] - paeth(img[i+x-bpp], 0, 0) +256)&255;
+	}
+	else {
+		if(type==2) { for(var x=  0; x<bpl; x++) data[di+x] = (img[i+x]+256 - img[i+x-bpl])&255;  }
+		if(type==3) { for(var x=  0; x<bpp; x++) data[di+x] = (img[i+x]+256 - (img[i+x-bpl]>>1))&255;
+					  for(var x=bpp; x<bpl; x++) data[di+x] = (img[i+x]+256 - ((img[i+x-bpl]+img[i+x-bpp])>>1))&255;  }
+		if(type==4) { for(var x=  0; x<bpp; x++) data[di+x] = (img[i+x]+256 - paeth(0, img[i+x-bpl], 0))&255;
+					  for(var x=bpp; x<bpl; x++) data[di+x] = (img[i+x]+256 - paeth(img[i+x-bpp], img[i+x-bpl], img[i+x-bpp-bpl]))&255;  }
+	}
+}
+
+UPNG.crc = {
+	table : ( function() {
+	   var tab = new Uint32Array(256);
+	   for (var n=0; n<256; n++) {
+			var c = n;
+			for (var k=0; k<8; k++) {
+				if (c & 1)  c = 0xedb88320 ^ (c >>> 1);
+				else        c = c >>> 1;
+			}
+			tab[n] = c;  }
+		return tab;  })(),
+	update : function(c, buf, off, len) {
+		for (var i=0; i<len; i++)  c = UPNG.crc.table[(c ^ buf[off+i]) & 0xff] ^ (c >>> 8);
+		return c;
+	},
+	crc : function(b,o,l)  {  return UPNG.crc.update(0xffffffff,b,o,l) ^ 0xffffffff;  }
+}
+
+
+UPNG.quantize = function(bufs, ps, roundAlpha)
+{	
+	var imgs = [], totl = 0;
+	for(var i=0; i<bufs.length; i++) {  imgs.push(UPNG.encode.alphaMul(new Uint8Array(bufs[i]), roundAlpha));  totl+=bufs[i].byteLength;  }
+	
+	var nimg = new Uint8Array(totl), nimg32 = new Uint32Array(nimg.buffer), noff=0;
+	for(var i=0; i<imgs.length; i++) {
+		var img = imgs[i], il = img.length;
+		for(var j=0; j<il; j++) nimg[noff+j] = img[j];
+		noff += il;
+	}
+	
+	var root = {i0:0, i1:nimg.length, bst:null, est:null, tdst:0, left:null, right:null };  // basic statistic, extra statistic
+	root.bst = UPNG.quantize.stats(  nimg,root.i0, root.i1  );  root.est = UPNG.quantize.estats( root.bst );
+	var leafs = [root];
+	
+	while(leafs.length<ps)
+	{
+		var maxL = 0, mi=0;
+		for(var i=0; i<leafs.length; i++) if(leafs[i].est.L > maxL) {  maxL=leafs[i].est.L;  mi=i;  }
+		if(maxL<1e-3) break;
+		var node = leafs[mi];
+		
+		var s0 = UPNG.quantize.splitPixels(nimg,nimg32, node.i0, node.i1, node.est.e, node.est.eMq255);
+		
+		var ln = {i0:node.i0, i1:s0, bst:null, est:null, tdst:0, left:null, right:null };  ln.bst = UPNG.quantize.stats( nimg, ln.i0, ln.i1 );  
+		ln.est = UPNG.quantize.estats( ln.bst );
+		var rn = {i0:s0, i1:node.i1, bst:null, est:null, tdst:0, left:null, right:null };  rn.bst = {R:[], m:[], N:node.bst.N-ln.bst.N};
+		for(var i=0; i<16; i++) rn.bst.R[i] = node.bst.R[i]-ln.bst.R[i];
+		for(var i=0; i< 4; i++) rn.bst.m[i] = node.bst.m[i]-ln.bst.m[i];
+		rn.est = UPNG.quantize.estats( rn.bst );
+		
+		node.left = ln;  node.right = rn;
+		leafs[mi]=ln;  leafs.push(rn);
+	}
+	leafs.sort(function(a,b) {  return b.bst.N-a.bst.N;  });
+	
+	for(var ii=0; ii<imgs.length; ii++) {
+		var planeDst = UPNG.quantize.planeDst;
+		var sb = new Uint8Array(imgs[ii].buffer), tb = new Uint32Array(imgs[ii].buffer), len = sb.length;
+		
+		var stack = [], si=0;
+		for(var i=0; i<len; i+=4) {
+			var r=sb[i]*(1/255), g=sb[i+1]*(1/255), b=sb[i+2]*(1/255), a=sb[i+3]*(1/255);
+			
+			//  exact, but too slow :(
+			//var nd = UPNG.quantize.getNearest(root, r, g, b, a);
+			var nd = root;
+			while(nd.left) nd = (planeDst(nd.est,r,g,b,a)<=0) ? nd.left : nd.right;
+			
+			tb[i>>2] = nd.est.rgba;
+		}
+		imgs[ii]=tb.buffer;
+	}
+	return {  bufs:imgs, plte:leafs  };
+}
+UPNG.quantize.getNearest = function(nd, r,g,b,a)
+{
+	if(nd.left==null) {  nd.tdst = UPNG.quantize.dist(nd.est.q,r,g,b,a);  return nd;  }
+	var planeDst = UPNG.quantize.planeDst(nd.est,r,g,b,a);
+	
+	var node0 = nd.left, node1 = nd.right;
+	if(planeDst>0) {  node0=nd.right;  node1=nd.left;  }
+	
+	var ln = UPNG.quantize.getNearest(node0, r,g,b,a);
+	if(ln.tdst<=planeDst*planeDst) return ln;
+	var rn = UPNG.quantize.getNearest(node1, r,g,b,a);
+	return rn.tdst<ln.tdst ? rn : ln;
+}
+UPNG.quantize.planeDst = function(est, r,g,b,a) {  var e = est.e;  return e[0]*r + e[1]*g + e[2]*b + e[3]*a - est.eMq;  }
+UPNG.quantize.dist     = function(q,   r,g,b,a) {  var d0=r-q[0], d1=g-q[1], d2=b-q[2], d3=a-q[3];  return d0*d0+d1*d1+d2*d2+d3*d3;  }
+
+UPNG.quantize.splitPixels = function(nimg, nimg32, i0, i1, e, eMq)
+{
+	var vecDot = UPNG.quantize.vecDot;
+	i1-=4;
+	var shfs = 0;
+	while(i0<i1)
+	{
+		while(vecDot(nimg, i0, e)<=eMq) i0+=4;
+		while(vecDot(nimg, i1, e)> eMq) i1-=4;
+		if(i0>=i1) break;
+		
+		var t = nimg32[i0>>2];  nimg32[i0>>2] = nimg32[i1>>2];  nimg32[i1>>2]=t;
+		
+		i0+=4;  i1-=4;
+	}
+	while(vecDot(nimg, i0, e)>eMq) i0-=4;
+	return i0+4;
+}
+UPNG.quantize.vecDot = function(nimg, i, e)
+{
+	return nimg[i]*e[0] + nimg[i+1]*e[1] + nimg[i+2]*e[2] + nimg[i+3]*e[3];
+}
+UPNG.quantize.stats = function(nimg, i0, i1){
+	var R = [0,0,0,0,  0,0,0,0,  0,0,0,0,  0,0,0,0];
+	var m = [0,0,0,0];
+	var N = (i1-i0)>>2;
+	for(var i=i0; i<i1; i+=4)
+	{
+		var r = nimg[i]*(1/255), g = nimg[i+1]*(1/255), b = nimg[i+2]*(1/255), a = nimg[i+3]*(1/255);
+		//var r = nimg[i], g = nimg[i+1], b = nimg[i+2], a = nimg[i+3];
+		m[0]+=r;  m[1]+=g;  m[2]+=b;  m[3]+=a;
+		
+		R[ 0] += r*r;  R[ 1] += r*g;  R[ 2] += r*b;  R[ 3] += r*a;  
+		               R[ 5] += g*g;  R[ 6] += g*b;  R[ 7] += g*a; 
+		                              R[10] += b*b;  R[11] += b*a;  
+		                                             R[15] += a*a;  
+	}
+	R[4]=R[1];  R[8]=R[2];  R[12]=R[3];  R[9]=R[6];  R[13]=R[7];  R[14]=R[11];
+	
+	return {R:R, m:m, N:N};
+}
+UPNG.quantize.estats = function(stats){
+	var R = stats.R, m = stats.m, N = stats.N;
+	
+	var m0 = m[0], m1 = m[1], m2 = m[2], m3 = m[3], iN = (N==0 ? 0 : 1/N);
+	var Rj = [
+		R[ 0] - m0*m0*iN,  R[ 1] - m0*m1*iN,  R[ 2] - m0*m2*iN,  R[ 3] - m0*m3*iN,  
+		R[ 4] - m1*m0*iN,  R[ 5] - m1*m1*iN,  R[ 6] - m1*m2*iN,  R[ 7] - m1*m3*iN,
+		R[ 8] - m2*m0*iN,  R[ 9] - m2*m1*iN,  R[10] - m2*m2*iN,  R[11] - m2*m3*iN,  
+		R[12] - m3*m0*iN,  R[13] - m3*m1*iN,  R[14] - m3*m2*iN,  R[15] - m3*m3*iN 
+	];
+	
+	var A = Rj, M = UPNG.M4;
+	var b = [0.5,0.5,0.5,0.5], mi = 0, tmi = 0;
+	
+	if(N!=0)
+	for(var i=0; i<10; i++) {
+		b = M.multVec(A, b);  tmi = Math.sqrt(M.dot(b,b));  b = M.sml(1/tmi,  b);
+		if(Math.abs(tmi-mi)<1e-9) break;  mi = tmi;
+	}	
+	//b = [0,0,1,0];  mi=N;
+	var q = [m0*iN, m1*iN, m2*iN, m3*iN];
+	var eMq255 = M.dot(M.sml(255,q),b);
+	
+	var ia = (q[3]<0.001) ? 0 : 1/q[3];
+	
+	return {  Cov:Rj, q:q, e:b, L:mi,  eMq255:eMq255, eMq : M.dot(b,q),
+				rgba: (((Math.round(255*q[3])<<24) | (Math.round(255*q[2]*ia)<<16) |  (Math.round(255*q[1]*ia)<<8) | (Math.round(255*q[0]*ia)<<0))>>>0)  };
+}
+UPNG.M4 = {
+	multVec : function(m,v) {
+			return [
+				m[ 0]*v[0] + m[ 1]*v[1] + m[ 2]*v[2] + m[ 3]*v[3],
+				m[ 4]*v[0] + m[ 5]*v[1] + m[ 6]*v[2] + m[ 7]*v[3],
+				m[ 8]*v[0] + m[ 9]*v[1] + m[10]*v[2] + m[11]*v[3],
+				m[12]*v[0] + m[13]*v[1] + m[14]*v[2] + m[15]*v[3]
+			];
+	},
+	dot : function(x,y) {  return  x[0]*y[0]+x[1]*y[1]+x[2]*y[2]+x[3]*y[3];  },
+	sml : function(a,y) {  return [a*y[0],a*y[1],a*y[2],a*y[3]];  }
+}
+
+UPNG.encode.alphaMul = function(img, roundA) {
+	var nimg = new Uint8Array(img.length), area = img.length>>2; 
+	for(var i=0; i<area; i++) {
+		var qi=i<<2, ia=img[qi+3];   
+		if(roundA) ia = ((ia<128))?0:255;
+		var a = ia*(1/255);
+		nimg[qi+0] = img[qi+0]*a;  nimg[qi+1] = img[qi+1]*a;  nimg[qi+2] = img[qi+2]*a;  nimg[qi+3] = ia;
+	}
+	return nimg;
+}
+
+	
+	
+	
+	
+	
+
+
+})(UPNG, pako);
+})();
+
+
+
 //This defines the $3Dmol object which is used to create viewers
 //and configure system-wide settings
 
@@ -17891,18 +22160,20 @@ $.ajaxTransport(
    );
  *                        
  */
+
 $3Dmol.createViewer = function(element, config, shared_viewer_resources)
 {
     if(typeof(element) === "string")
-        element = $("#"+element);
+    element = $("#"+element);
     if(!element) return;
-
+    
     config = config || {}; 
     shared_viewer_resources = shared_viewer_resources || {};
-
+    
     //try to create the  viewer
     try {
-        return new $3Dmol.GLViewer(element, config, shared_viewer_resources);
+        var viewer = new $3Dmol.GLViewer(element, config, shared_viewer_resources);
+        return viewer;
     }
     catch(e) {
         throw "error creating viewer: "+e;
@@ -18075,6 +22346,17 @@ $3Dmol.download = function(query, viewer, options, callback) {
     var uri = "";
     var promise = null;
     var m = viewer.addModel();
+    
+    if (query.indexOf(':') < 0) {
+        //no type specifier, guess
+        if(query.length == 4) {
+            query = 'pdb:'+query;
+        } else if(!isNaN(query)) {
+            query = 'cid:'+query;
+        } else {
+            query = 'url:'+query;
+        }
+    }
     if (query.substr(0, 5) === 'mmtf:') {
         pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
         query = query.substr(5).toUpperCase();
@@ -18144,7 +22426,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
                 }).catch(function(){
                     //if mmtf server is being annoying, fallback to text
                     pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
-                    uri = pdbUri + query + "." + type;
+                    uri = pdbUri + query + ".pdb";
                     console.log("falling back to pdb format");
                     $.get(uri, function(ret) {
                         handler(ret);
@@ -18409,6 +22691,14 @@ $3Dmol.getPropertyRange = function (atomlist, prop) {
 
 //hackish way to work with requirejs - doesn't actually work yet
 //since we don't use the require optimizer to combine modules
+if(typeof(_3dmol_saved_define) !== 'undefined') {
+    /** When pulling in external sources, disable amd to ensure they
+     * populate the global namespace as expected.  Restore it so code
+     * using amd still works. */
+    /*global _3dmol_saved_define, _3dmol_saved_require, define:true, require:true */
+    define = _3dmol_saved_define;
+    require = _3dmol_saved_require;
+}
 if( typeof(define) === 'function' && define.amd) {
     define('$3Dmol',[], function() { return $3Dmol; });
 }
@@ -19695,8 +23985,7 @@ $3Dmol.Matrix4.prototype = {
         te[15] = n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11
                 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33;
 
-        var det = me[0] * te[0] + me[1] * te[4] + me[2] * te[8] + me[3]
-                * te[12];
+        var det = n11 * te[0] + n21 * te[4] + n31 * te[8] + n41 * te[12];
 
         if (det === 0) {
 
@@ -21860,7 +26149,7 @@ $3Dmol.Material = function () {
     this.id = $3Dmol.MaterialIdCount ++;
 
     this.name = '';
-    
+
     //TODO: Which of these instance variables can I remove??
     this.side = $3Dmol.FrontSide;
 
@@ -21869,7 +26158,7 @@ $3Dmol.Material = function () {
 
     this.depthTest = true;
     this.depthWrite = true;
-    
+
     this.stencilTest = true;
 
     this.polygonOffset = false;
@@ -21968,31 +26257,31 @@ $3Dmol.MaterialIdCount = 0;
 //Line basic material
 /** @constructor */
 $3Dmol.LineBasicMaterial = function(parameters) {
-    
+
     $3Dmol.Material.call(this);
-    
+
     this.color = new $3Dmol.Color(0xffffff);
-    
+
     this.linewidth = 1;
     this.linecap = 'round';
     this.linejoin = 'round';
-    
+
     this.vertexColors = false;
-    
+
     this.fog = true;
     this.shaderID = "basic";
     this.setValues(parameters);
-    
+
 };
 
 $3Dmol.LineBasicMaterial.prototype = Object.create($3Dmol.Material.prototype);
 
 $3Dmol.LineBasicMaterial.prototype.clone = function() {
-  
+
     var material = new $3Dmol.LineBasicMaterial();
-    
+
     $3Dmol.Material.prototype.clone.call(this, material);
-    
+
     material.color.copy(this.color);
     return material;
 };
@@ -22000,105 +26289,105 @@ $3Dmol.LineBasicMaterial.prototype.clone = function() {
 //Mesh Lambert material
 /** @constructor */
 $3Dmol.MeshLambertMaterial = function(parameters) {
-    
+
     $3Dmol.Material.call(this);
-    
+
     this.color = new $3Dmol.Color(0xffffff);
     this.ambient = new $3Dmol.Color(0xfffff);
     this.emissive = new $3Dmol.Color(0x000000);
-    
+
     //TODO: Which of these instance variables do I really need?
     this.wrapAround = false;
     this.wrapRGB = new $3Dmol.Vector3(1,1,1);
-    
+
     this.map = null;
-    
+
     this.lightMap = null;
-    
+
     this.specularMap = null;
-    
+
     this.envMap = null;
     this.reflectivity = 1;
     this.refractionRatio = 0.98;
-    
+
     this.fog = true;
-    
+
     this.wireframe = false;
     this.wireframeLinewidth = 1;
     this.wireframeLinecap = 'round';
     this.wireframeLinejoin = 'round';
-    
+
     this.shading = $3Dmol.SmoothShading;
     this.shaderID = "lambert";
     this.vertexColors = $3Dmol.NoColors;
-    
+
     this.skinning = false;
-    
+
     this.setValues(parameters);
-    
+
 };
 
 $3Dmol.MeshLambertMaterial.prototype = Object.create($3Dmol.Material.prototype);
 
 $3Dmol.MeshLambertMaterial.prototype.clone = function(material) {
-  
+
     if ( typeof material === "undefined" ) material = new $3Dmol.MeshLambertMaterial();
-    
+
     $3Dmol.Material.prototype.clone.call(this, material);
-    
+
     material.color.copy(this.color);
     material.ambient.copy(this.ambient);
     material.emissive.copy(this.emissive);
-    
+
     material.wrapAround = this.wrapAround;
     material.wrapRGB.copy(this.wrapRGB);
-    
+
     material.map = this.map;
-    
+
     material.lightMap = this.lightMap;
-    
+
     material.specularMap = this.specularMap;
-    
+
     material.envMap = this.envMap;
     material.combine = this.combine;
     material.reflectivity = this.reflectivity;
     material.refractionRatio = this.refractionRatio;
-    
+
     material.fog = this.fog;
-    
+
     material.shading = this.shading;
     material.shaderID = this.shaderID;
     material.vertexColors = this.vertexColors;
-    
+
     material.skinning = this.skinning;
     material.morphTargets = this.morphTargets;
     material.morphNormals = this.morphNormals;
-    
+
     return material;
-    
+
 };
 
 //Double sided Mesh Lambert material
 /** @constructor */
 $3Dmol.MeshDoubleLambertMaterial = function(parameters) {
-    
+
     $3Dmol.MeshLambertMaterial.call(this, parameters);
 
     this.shaderID = "lambertdouble";
-    this.side = $3Dmol.DoubleSide;    
-    
+    this.side = $3Dmol.DoubleSide;
+
 };
 
 $3Dmol.MeshDoubleLambertMaterial.prototype = Object.create($3Dmol.MeshLambertMaterial.prototype);
 
 $3Dmol.MeshDoubleLambertMaterial.prototype.clone = function() {
-  
+
     var material = new $3Dmol.MeshDoubleLambertMaterial();
-    
+
     $3Dmol.MeshLambertMaterial.prototype.clone.call(this, material);
-        
+
     return material;
-    
+
 };
 
 //Outlined Mesh Lamert material
@@ -22112,7 +26401,7 @@ $3Dmol.MeshOutlineMaterial = function(parameters) {
     this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
     this.outlineWidth= parameters.width || 0.1;
     this.outlinePushback= parameters.pushback || 1.0;
-    
+
 };
 
 $3Dmol.MeshOutlineMaterial.prototype = Object.create($3Dmol.Material.prototype);
@@ -22130,43 +26419,43 @@ $3Dmol.MeshOutlineMaterial.prototype.clone = function(material) {
 //Imposter material
 /** @constructor */
 $3Dmol.ImposterMaterial = function(parameters) {
-  
+
   $3Dmol.Material.call(this);
-  
+
   this.color = new $3Dmol.Color(0xffffff);
   this.ambient = new $3Dmol.Color(0xfffff);
   this.emissive = new $3Dmol.Color(0x000000);
   this.imposter = true;
-  
+
   //TODO: Which of these instance variables do I really need?
   this.wrapAround = false;
   this.wrapRGB = new $3Dmol.Vector3(1,1,1);
-  
+
   this.map = null;
-  
+
   this.lightMap = null;
-  
+
   this.specularMap = null;
-  
+
   this.envMap = null;
   this.reflectivity = 1;
   this.refractionRatio = 0.98;
-  
+
   this.fog = true;
-  
+
   this.wireframe = false;
   this.wireframeLinewidth = 1;
   this.wireframeLinecap = 'round';
   this.wireframeLinejoin = 'round';
-  
+
   this.shading = $3Dmol.SmoothShading;
   this.shaderID = null;
   this.vertexColors = $3Dmol.NoColors;
-  
+
   this.skinning = false;
-  
+
   this.setValues(parameters);
-  
+
 };
 
 $3Dmol.ImposterMaterial.prototype = Object.create($3Dmol.Material.prototype);
@@ -22174,49 +26463,49 @@ $3Dmol.ImposterMaterial.prototype = Object.create($3Dmol.Material.prototype);
 $3Dmol.ImposterMaterial.prototype.clone = function() {
 
   var material = new $3Dmol.ImposterMaterial();
-  
+
   $3Dmol.Material.prototype.clone.call(this, material);
-  
+
   material.color.copy(this.color);
   material.ambient.copy(this.ambient);
   material.emissive.copy(this.emissive);
-  
+
   material.wrapAround = this.wrapAround;
   material.wrapRGB.copy(this.wrapRGB);
-  
+
   material.map = this.map;
-  
+
   material.lightMap = this.lightMap;
-  
+
   material.specularMap = this.specularMap;
-  
+
   material.envMap = this.envMap;
   material.combine = this.combine;
   material.reflectivity = this.reflectivity;
   material.refractionRatio = this.refractionRatio;
-  
+
   material.fog = this.fog;
-  
+
   material.shading = this.shading;
   material.shaderID = this.shaderID;
   material.vertexColors = this.vertexColors;
-  
+
   material.skinning = this.skinning;
   material.morphTargets = this.morphTargets;
   material.morphNormals = this.morphNormals;
-  
+
   return material;
-  
+
 };
 
 
 $3Dmol.SphereImposterMaterial = function(parameters) {
-    
+
     $3Dmol.ImposterMaterial.call(this);
 
-    this.shaderID = "sphereimposter";    
+    this.shaderID = "sphereimposter";
     this.setValues(parameters);
-    
+
 };
 
 $3Dmol.SphereImposterMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
@@ -22230,7 +26519,7 @@ $3Dmol.SphereImposterMaterial.prototype.clone = function() {
 
 
 $3Dmol.SphereImposterOutlineMaterial = function(parameters) {
-    
+
     $3Dmol.ImposterMaterial.call(this);
     parameters = parameters || {};
 
@@ -22238,9 +26527,9 @@ $3Dmol.SphereImposterOutlineMaterial = function(parameters) {
     this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
     this.outlineWidth= parameters.width || 0.1;
     this.outlinePushback= parameters.pushback || 1.0;
-    
+
     this.setValues(parameters);
-    
+
 };
 
 $3Dmol.SphereImposterOutlineMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
@@ -22257,12 +26546,12 @@ $3Dmol.SphereImposterOutlineMaterial.prototype.clone = function() {
 
 
 $3Dmol.StickImposterMaterial = function(parameters) {
-    
+
     $3Dmol.ImposterMaterial.call(this);
 
-    this.shaderID = "stickimposter";    
+    this.shaderID = "stickimposter";
     this.setValues(parameters);
-    
+
 };
 
 $3Dmol.StickImposterMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
@@ -22276,7 +26565,7 @@ $3Dmol.StickImposterMaterial.prototype.clone = function() {
 
 
 $3Dmol.StickImposterOutlineMaterial = function(parameters) {
-    
+
     $3Dmol.ImposterMaterial.call(this);
     parameters = parameters || {};
 
@@ -22284,9 +26573,9 @@ $3Dmol.StickImposterOutlineMaterial = function(parameters) {
     this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
     this.outlineWidth= parameters.width || 0.1;
     this.outlinePushback= parameters.pushback || 1.0;
-    
+
     this.setValues(parameters);
-    
+
 };
 
 $3Dmol.StickImposterOutlineMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
@@ -22389,9 +26678,9 @@ $3Dmol.InstancedMaterial.prototype.clone = function() {
 //Volumetric material
 /** @constructor */
 $3Dmol.VolumetricMaterial = function(parameters) {
-    
+
     $3Dmol.Material.call(this);
-    
+
     this.transparent = false;
     this.volumetric = true;
 
@@ -22410,7 +26699,7 @@ $3Dmol.VolumetricMaterial = function(parameters) {
     // this.fog = true; // TODO: to integrate the new shader with the fog stuff
 
     this.shaderID = "volumetric";
-    this.side = $3Dmol.FrontSide;    
+    this.side = $3Dmol.FrontSide;
 
     this.setValues(parameters);
 };
@@ -22429,57 +26718,58 @@ $3Dmol.VolumetricMaterial.prototype.clone = function() {
 //Sprite material
 /** @constructor */
 $3Dmol.SpriteMaterial = function(parameters) {
-    
+
     $3Dmol.Material.call(this);
-    
+
     this.color = new $3Dmol.Color(0xffffff);
     this.map = new $3Dmol.Texture();
-    
+
     this.useScreenCoordinates = true;
     this.depthTest = !this.useScreenCoordinates;
     this.sizeAttenuation = !this.useScreenCoordinates;
     this.screenOffset = this.screenOffset;
     this.scaleByViewPort = !this.sizeAttenuation;
     this.alignment = $3Dmol.SpriteAlignment.center.clone();
-    
+
     this.fog = false; // use scene fog
-    
+
     this.uvOffset = new $3Dmol.Vector2(0, 0);
     this.uvScale = new $3Dmol.Vector2(1, 1);
-    
+
     this.setValues(parameters);
-    
+
     parameters = parameters || {};
-    
+
     if (parameters.depthTest === undefined)
         this.depthTest = !this.useScreenCoordinates;
     if (parameters.sizeAttenuation === undefined)
         this.sizeAttenuation = !this.useScreenCoordinates;
     if (parameters.scaleByViewPort === undefined)
-        this.scaleByViewPort = !this.sizeAttenuation;    
+        this.scaleByViewPort = !this.sizeAttenuation;
+
 };
 
 $3Dmol.SpriteMaterial.prototype = Object.create($3Dmol.Material.prototype);
 
 $3Dmol.SpriteMaterial.prototype.clone = function() {
-    
+
     var material = new $3Dmol.SpriteMaterial();
-    
+
     $3Dmol.Material.prototype.clone.call(this, material);
-    
+
     material.color.copy(this.color);
     material.map = this.map;
-    
+
     material.useScreenCoordinates = this.useScreenCoordinates;
     material.screenOffset = this.screenOffset;
     material.sizeAttenuation = this.sizeAttenuation;
     material.scaleByViewport = this.scaleByViewPort;
     material.alignment.copy(this.alignment);
-    
+
     material.uvOffset.copy(this.uvOffset);
-    
+
     return material;
-    
+
 };
 
 //Alignment for Sprites
@@ -22503,94 +26793,94 @@ $3Dmol.SpriteAlignment.bottomRight = new $3Dmol.Vector2(-1, 1);
 $3Dmol.Texture = function(image, is3D) {
 
     $3Dmol.EventDispatcher.call(this);
-    
+
     this.id = $3Dmol.TextureIdCount++;
-    
+
     this.name = "";
-    
+
     this.image = image;
-    
+
     this.mapping = new $3Dmol.UVMapping();
-    
+
     this.wrapS = $3Dmol.ClampToEdgeWrapping;
     this.wrapT = $3Dmol.ClampToEdgeWrapping;
-        
+
     this.anisotropy = 1;
-    
+
     if (is3D){
         this.format = $3Dmol.RFormat;
         this.type = $3Dmol.FloatType;
 
         this.premultiplyAlpha = false;
         this.flipY = false;
-        
-        this.unpackAlignment = 1;    
-        
+
+        this.unpackAlignment = 1;
+
         this.magFilter = $3Dmol.NearestFilter;
         this.minFilter = $3Dmol.NearestFilter;
     } else {
         this.format = $3Dmol.RGBAFormat;
         this.type = $3Dmol.UnsignedByteType;
-        
+
         this.offset = new $3Dmol.Vector2(0, 0);
         this.repeat = new $3Dmol.Vector2(1, 1);
 
         this.premultiplyAlpha = false;
         this.flipY = true;
-        this.unpackAlignment = 4;    
+        this.unpackAlignment = 4;
 
         this.magFilter = $3Dmol.LinearFilter;
-        this.minFilter = $3Dmol.LinearMipMapLinearFilter;    
-        
+        this.minFilter = $3Dmol.LinearMipMapLinearFilter;
+
     }
 
-    
+
     this.needsUpdate = false;
     this.onUpdate = null;
-    
+
 };
 
 $3Dmol.Texture.prototype = {
 
     constructor : $3Dmol.Texture,
-    
+
     clone : function(texture) {
-        
+
         if (texture === undefined)
             texture = new $3Dmol.Texture();
-        
+
         texture.image = this.image;
-        
+
         texture.mapping = this.mapping;
-        
+
         texture.wrapS = this.wrapS;
         texture.wrapT = this.wrapT;
-        
+
         texture.magFilter = this.magFilter;
         texture.minFilter = this.minFilter;
-        
+
         texture.anisotropy = this.anisotropy;
-        
+
         texture.format = this.format;
         texture.type = this.type;
-        
+
         texture.offset.copy(this.offset);
         texture.repeat.copy(this.repeat);
-        
+
         texture.premultiplyAlpha = this.premultiplyAlpha;
         texture.flipY = this.flipY;
         texture.unpackAlignment = this.unpackAlignment;
-        
+
         return texture;
-        
+
     },
-    
+
     dispose : function() {
-        
+
         this.dispatchEvent( {type: 'dispose'});
-        
-    }    
-    
+
+    }
+
 };
 
 $3Dmol.TextureIdCount = 0;
@@ -22635,7 +26925,7 @@ $3Dmol.FloatType = 1010;
 
 //Pixel formats
 $3Dmol.RGBAFormat = 1021;
-$3Dmol.RFormat = 1022; 
+$3Dmol.RFormat = 1022;
 $3Dmol.R32Format = 1023;
 
 /* 
@@ -22759,16 +27049,16 @@ $3Dmol.Renderer = function(parameters) {
             : true, _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer
             : false, _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color(
             parameters.clearColor) : new $3Dmol.Color(0x000000),
-             _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0, 
+             _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0,
             _outlineMaterial = new $3Dmol.MeshOutlineMaterial(parameters.outline),
             _outlineSphereImposterMaterial = new $3Dmol.SphereImposterOutlineMaterial(parameters.outline),
             _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters.outline),
             _outlineEnabled = !!parameters.outline
             ;
-    this.domElement = _canvas;    
+    this.domElement = _canvas;
     this.context = null;
     this.devicePixelRatio = 1.0; //set in setSize
-        
+
     _canvas.id=parameters.id;
     this.autoClear = true;
     this.autoClearColor = true;
@@ -22809,12 +27099,12 @@ $3Dmol.Renderer = function(parameters) {
     // internal state cache
     _currentProgram = null,
     _currentMaterialId = -1, _currentGeometryGroupHash = null, _currentCamera = null, _geometryGroupCounter = 0,
-      
+
     // GL state cache
     _oldDoubleSided = -1, _oldFlipSided = -1,
     _oldBlending = -1,
     _oldDepthTest = -1, _oldDepthWrite = -1,
-    _oldPolygonOffset = null, 
+    _oldPolygonOffset = null,
     _oldLineWidth = null,
 
     _viewportWidth = 0, _viewportHeight = 0, _currentWidth = 0, _currentHeight = 0,
@@ -22868,12 +27158,12 @@ $3Dmol.Renderer = function(parameters) {
     var _screenshader = null;
     var _vertexattribpos = null;
     var _screenQuadVBO = null;
-    
+
     //framebuffer variables
     var _fb = null;
     var _targetTexture = null;
     var _depthTexture = null;
-    
+
     // initialize
     var _gl;
 
@@ -22887,19 +27177,19 @@ $3Dmol.Renderer = function(parameters) {
     var _extColorBufferFloat = _gl.getExtension('EXT_color_buffer_float');
 
     // API
-    
+
     this.supportedExtensions = function() {
         return {supportsAIA: Boolean(_extInstanced),
             supportsImposters:  Boolean(_extFragDepth) || !isWebGL1()
             };
     };
-    
+
     this.getContext = function() {
         return _gl;
     };
 
     this.isLost = function() {
-        return _gl.isContextLost;
+        return _gl.isContextLost();
     };
     
     this.getPrecision = function() {
@@ -22929,7 +27219,7 @@ $3Dmol.Renderer = function(parameters) {
 
             var wid = _canvas.width/this.cols;
             var hei = _canvas.height/this.rows;
-           
+
             _viewportWidth =  wid;
             _viewportHeight = hei;
 
@@ -22939,14 +27229,15 @@ $3Dmol.Renderer = function(parameters) {
 
         }
     };
-        
+
     this.setSize = function(width, height) {
         //zooming (in the browser) changes the pixel ratio and width/height
         this.devicePixelRatio = (window.devicePixelRatio !== undefined) ? window.devicePixelRatio : 1;
-        //with antialiasing on, render at double rsolution to eliminate jaggies
-        //my iphone crashes if we do this and set the antialias property on the canvas
-        if(_antialias) this.devicePixelRatio *= 2.0;
-        
+        //with antialiasing on (which doesn't seem to do much), render at double rsolution to eliminate jaggies
+	      //my iphone crashes if we do though, so as a hacky workaround, don't do it with retina displays
+        if(_antialias && this.devicePixelRatio < 2.0) this.devicePixelRatio *= 2.0;
+
+
         if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
             var wid = width/this.cols;
             var hei = height/this.rows;
@@ -22995,7 +27286,7 @@ $3Dmol.Renderer = function(parameters) {
 
         var doubleSided = material.side === $3Dmol.DoubleSide;
         var flipSided = material.side === $3Dmol.BackSide;
-        
+
         if(!material.imposter) //ignore reflection with imposters
             flipSided = reflected ? !flipSided : flipSided;
 
@@ -23031,7 +27322,7 @@ $3Dmol.Renderer = function(parameters) {
 
         }
 
-        _gl.cullFace(_gl.BACK); 
+        _gl.cullFace(_gl.BACK);
 
     };
 
@@ -23114,7 +27405,7 @@ $3Dmol.Renderer = function(parameters) {
             _oldLineWidth = width;
         }
     }
-    
+
     var deallocateGeometry = function(geometry) {
 
         geometry.__webglInit = undefined;
@@ -23239,7 +27530,7 @@ $3Dmol.Renderer = function(parameters) {
         }
 
     };
-    
+
 
     var onGeometryDispose = function(event) {
 
@@ -23290,7 +27581,7 @@ $3Dmol.Renderer = function(parameters) {
             str = str.replace(/texture2D/g,"texture");
             str = str.replace(/\/\/DEFINEFRAGCOLOR/g,'out vec4 glFragColor;');
             str = str.replace(/gl_FragColor/g,"glFragColor");
-            str = "#version 300 es\n"+str;            
+            str = "#version 300 es\n"+str;
         }
         if (type === "fragment")
             shader = _gl.createShader(_gl.FRAGMENT_SHADER);
@@ -23345,7 +27636,7 @@ $3Dmol.Renderer = function(parameters) {
 
         // check if program requires webgl2
         if (isWebGL1()){
-            if (parameters.volumetric) 
+            if (parameters.volumetric)
                 throw new Error("Volumetric rendering requires webgl2 which is not supported by your hardware.");
         }
 
@@ -23358,7 +27649,7 @@ $3Dmol.Renderer = function(parameters) {
         var precision = _precision;
         var prefix = "precision " + precision + " float;";
 
-        var prefix_vertex = [ 
+        var prefix_vertex = [
                 parameters.volumetric ? "#version 300 es" : "", prefix ]
                 .join("\n");
 
@@ -23389,7 +27680,7 @@ $3Dmol.Renderer = function(parameters) {
         var identifiers, u, i;
 
         // uniform vars
-        identifiers = [ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix', 
+        identifiers = [ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix',
                 'normalMatrix'];
 
         // custom uniform vars
@@ -23537,13 +27828,8 @@ $3Dmol.Renderer = function(parameters) {
                 m_uniforms.outlineColor.value = material.outlineColor;
                 m_uniforms.outlineWidth.value = material.outlineWidth;
                 m_uniforms.outlinePushback.value = material.outlinePushback;
-            } else if (material.shaderID === "sphereimposter") {
-                _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false,
-                        camera.matrixWorldInverse.elements);
-                m_uniforms.directionalLightColor.value = _lights.directional.colors;
-                m_uniforms.directionalLightDirection.value = _lights.directional.positions;
-            } else if (material.shaderID === "volumetric") {
-                
+            }  else if (material.shaderID === "volumetric") {
+
                 //need a matrix that maps back from model coordinates to texture coordinates
                 //  textureMat*modelInv*position
                 object._modelViewMatrix.getScale(_direction); //scale factor of conversion
@@ -23552,7 +27838,7 @@ $3Dmol.Renderer = function(parameters) {
                 _textureMatrix.multiplyMatrices(object.material.texmatrix,_worldInverse);
                 _gl.uniformMatrix4fv(p_uniforms.textmat, false, _textureMatrix.elements);
                 _gl.uniformMatrix4fv(p_uniforms.projinv, false, _projInverse.elements);
-                
+
                 //  need the resolution (step size of ray in viewer coordinates)
                 let invscale = Math.min(Math.min(_direction.x,_direction.y),_direction.z);
                 m_uniforms.step.value = object.material.unit*invscale;
@@ -23560,6 +27846,8 @@ $3Dmol.Renderer = function(parameters) {
                 m_uniforms.transfermax.value = object.material.transfermax;
                 m_uniforms.transfermin.value = object.material.transfermin;
                 m_uniforms.subsamples.value = object.material.subsamples;
+
+
 
                 renderer.setTexture(object.material.transferfn, 4, false);
                 renderer.setTexture(object.material.map, 3, true);
@@ -23815,16 +28103,16 @@ $3Dmol.Renderer = function(parameters) {
 
                 _this.renderBuffer(camera, lights, fog, material, buffer,
                         object);
-                if (_outlineEnabled || material.outline) {                  
+                if (_outlineEnabled || material.outline) {
                     if(material.shaderID == 'sphereimposter') {
                         _this.renderBuffer(camera, lights, fog, _outlineSphereImposterMaterial,
-                                buffer, object);                        
+                                buffer, object);
                     }
                     else if(material.shaderID == 'stickimposter') {
                         _this.renderBuffer(camera, lights, fog, _outlineStickImposterMaterial,
-                                buffer, object);                        
+                                buffer, object);
                     }
-                    else if(!material.wireframe                
+                    else if(!material.wireframe
                         && material.shaderID !== 'basic'
                         && material.opacity !== 0.0) {
                         _this.renderBuffer(camera, lights, fog, _outlineMaterial,
@@ -23887,13 +28175,13 @@ $3Dmol.Renderer = function(parameters) {
         _currentHeight = _viewportHeight;
         this.setViewport();
         this.setFrameBuffer();
-        
+
         if (this.autoClear || forceClear) {
             _gl.clearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha);
             this.clear(this.autoClearColor, this.autoClearDepth, this.autoClearStencil);
         }
-        
-        
+
+
         // set matrices for regular objects (frustum culled)
 
         renderList = scene.__webglObjects;
@@ -23923,10 +28211,10 @@ $3Dmol.Renderer = function(parameters) {
 
         renderObjects(scene.__webglObjects, true, "opaque", camera, lights,
                 fog, false, material);
-                
+
         // Render embedded labels (sprites)
         renderSprites(scene, camera, false);
-        
+
         // prime depth buffer
         renderObjects(scene.__webglObjects, true, "blank", camera, lights, fog,
                 true, material);
@@ -23943,14 +28231,14 @@ $3Dmol.Renderer = function(parameters) {
             renderObjects(scene.__webglObjects, false, "volumetric", camera,
                     lights, fog, true, material);
         }
-        
+
 
         this.renderFrameBuffertoScreen();
         this.setDepthTest(true);
         this.setDepthWrite(true);
-        
+
         // Render floating labels (sprites)
-        renderSprites(scene, camera, true);        
+        renderSprites(scene, camera, true);
     };
 
     function renderSprites(scene, camera, inFront) {
@@ -23971,7 +28259,7 @@ $3Dmol.Renderer = function(parameters) {
         _lightsNeedUpdate = true;
 
         sprites.render(scene, camera, _currentWidth, _currentHeight, inFront);
-        
+
         // Reset state a
         _currentGeometryGroupHash = -1;
         _currentProgram = null;
@@ -23981,32 +28269,32 @@ $3Dmol.Renderer = function(parameters) {
         _oldDepthTest = -1;
         _oldDoubleSided = -1;
         _currentMaterialId = -1;
-        _oldFlipSided = -1;       
+        _oldFlipSided = -1;
     }
 
     //reinitialize framebuffer without the depth texture attached so we can read to it
     //do not allocate new textures
     this.reinitFrameBuffer = function() {
         // only needed/works with webgl2
-        if (isWebGL1()) return; 
+        if (isWebGL1()) return;
 
         // Create and bind the framebuffer
         _fb = _gl.createFramebuffer();
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, _fb);
-        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, _targetTexture, 0);                                      
-    };    
-    
+        _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, _targetTexture, 0);
+    };
+
     //setup framebuffer for drawing into, assumes buffers already allocated
     this.setFrameBuffer = function() {
-        if (isWebGL1() || !_fb) return; 
+        if (isWebGL1() || !_fb) return;
         let width = _viewportWidth;
         let height = _viewportHeight;
-        
+
         //when using framebuffer, always draw from origin, will shift the viewport when we render
         _gl.enable(_gl.SCISSOR_TEST);
         _gl.scissor(0,0, width, height);
         _gl.viewport(0,0, width, height);
-        
+
         //color texture
         _gl.bindTexture(_gl.TEXTURE_2D, _targetTexture);
         _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width, height, 0, _gl.RGBA, _gl.UNSIGNED_BYTE, null);
@@ -24014,7 +28302,7 @@ $3Dmol.Renderer = function(parameters) {
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
-        
+
         //depth texture
         _gl.bindTexture(_gl.TEXTURE_2D, _depthTexture);
         _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT32F, width, height, 0, _gl.DEPTH_COMPONENT, _gl.FLOAT, null);
@@ -24022,38 +28310,38 @@ $3Dmol.Renderer = function(parameters) {
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.NEAREST);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
-        
+
         //bind fb
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, _fb);
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, _targetTexture, 0);
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, _depthTexture, 0);
-          
+
     };
 
     //allocate buffers for framebuffer, needs to be called with every resize
     this.initFrameBuffer = function() {
         // only needed/works with webgl2
-        if (isWebGL1()) return; 
-        
-        
+        if (isWebGL1()) return;
+
+
         let width = _viewportWidth;
         let height = _viewportHeight;
-        
+
         //when using framebuffer, always draw from origin, will shift the viewport when we render
         _gl.enable(_gl.SCISSOR_TEST);
         _gl.scissor(0,0, width, height);
         _gl.viewport(0,0, width, height);
-        
+
         //create textures and frame buffer, will be initialized in setFrameBuffer
         _targetTexture = _gl.createTexture();
         _depthTexture = _gl.createTexture();
         _fb = _gl.createFramebuffer();
-       
+
         // build screenshader
         var screenshader = $3Dmol.ShaderLib.screen;
-        
+
         _screenshader = buildProgram(screenshader.fragmentShader,
-            screenshader.vertexShader, screenshader.uniforms, {});  
+            screenshader.vertexShader, screenshader.uniforms, {});
         _vertexattribpos = _gl.getAttribLocation(_screenshader, 'vertexPosition');
         // create the vertex array and attrib array for the full screenquad
         var verts = [
@@ -24069,13 +28357,13 @@ $3Dmol.Renderer = function(parameters) {
         _screenQuadVBO = _gl.createBuffer();
         _gl.bindBuffer(_gl.ARRAY_BUFFER, _screenQuadVBO);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(verts), _gl.STATIC_DRAW);
-          
-    };    
-    
+
+    };
+
     this.renderFrameBuffertoScreen = function(){
         // only needed/works with webgl2
-        if (isWebGL1() || _fb === null) return; 
-        
+        if (isWebGL1() || _fb === null) return;
+
         this.setViewport(); //draw texture in correct viewport
 
         // bind default framebuffer
@@ -24101,10 +28389,10 @@ $3Dmol.Renderer = function(parameters) {
 
         // Draw 6 vertexes => 2 triangles:
         _gl.drawArrays(_gl.TRIANGLES, 0, 6);
-        
+
     };
 
-    
+
     this.initWebGLObjects = function(scene) {
 
         if (!scene.__webglObjects) {
@@ -24327,7 +28615,7 @@ $3Dmol.Renderer = function(parameters) {
         else {
             //normal, non-instanced case
             _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer);
-            _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);            
+            _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);
         }
         // color buffers
         _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
@@ -24439,7 +28727,7 @@ $3Dmol.Renderer = function(parameters) {
                     filterFallback(texture.magFilter));
             _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,
                     filterFallback(texture.minFilter));
-            
+
         } else { // 3Dtexture
             _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_S,
                 _gl.CLAMP_TO_EDGE);
@@ -24447,7 +28735,7 @@ $3Dmol.Renderer = function(parameters) {
                 _gl.CLAMP_TO_EDGE);
             _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_R,
                 _gl.CLAMP_TO_EDGE);
-                
+
             if(_extColorBufferFloat && _extFloatLinear) {
               //linear interpolation isn't supported by default (despite being the default??)
               _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,_gl.LINEAR);
@@ -24456,21 +28744,21 @@ $3Dmol.Renderer = function(parameters) {
               _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,_gl.NEAREST);
               _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,_gl.NEAREST);
             }
-                
+
         }
 
     }
-    
+
     this.getYRatio = function() {
       if(this.rows !== undefined && this.row !== undefined) return this.rows;
       return 1;
     };
-    
+
     this.getXRatio = function() {
         if(this.cols !== undefined && this.col !== undefined) return this.cols;
         return 1;
-    };     
-    
+    };
+
     this.getAspect = function(width,height){
         if(width == undefined || height == undefined){
             width = _canvas.width;
@@ -24503,8 +28791,8 @@ $3Dmol.Renderer = function(parameters) {
             _gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
             _gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
             _gl.pixelStorei(_gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
-            _gl.pixelStorei(_gl.PACK_ALIGNMENT, texture.unpackAlignment);  
-            
+            _gl.pixelStorei(_gl.PACK_ALIGNMENT, texture.unpackAlignment);
+
             var glFormat = paramToGL(texture.format), glType = paramToGL(texture.type);
 
             if(!is3D) {
@@ -24526,10 +28814,10 @@ $3Dmol.Renderer = function(parameters) {
               }
             } else { //3D
               setTextureParameters(_gl.TEXTURE_3D, texture);
-              _gl.texImage3D(_gl.TEXTURE_3D, 0, _gl.R32F, texture.image.size.z, texture.image.size.y, 
+              _gl.texImage3D(_gl.TEXTURE_3D, 0, _gl.R32F, texture.image.size.z, texture.image.size.y,
                   texture.image.size.x, 0, _gl.RED, _gl.FLOAT, texture.image.data);
             }
-                      
+
             texture.needsUpdate = false;
 
             if (texture.onUpdate)
@@ -24621,21 +28909,21 @@ $3Dmol.Renderer = function(parameters) {
             if (!(_gl = _canvas.getContext('webgl2', {
                 alpha : _alpha,
                 premultipliedAlpha : _premultipliedAlpha,
-                antialias : false, 
+                antialias : false,
                 stencil : _stencil,
                 preserveDrawingBuffer : _preserveDrawingBuffer
             }))) {
                 if (!(_gl = _canvas.getContext('experimental-webgl', {
                     alpha : _alpha,
                     premultipliedAlpha : _premultipliedAlpha,
-                    antialias : false, 
+                    antialias : false,
                     stencil : _stencil,
                     preserveDrawingBuffer : _preserveDrawingBuffer
                 }))) {
                     if (!(_gl = _canvas.getContext('webgl', {
                         alpha : _alpha,
                         premultipliedAlpha : _premultipliedAlpha,
-                        antialias : false, 
+                        antialias : false,
                         stencil : _stencil,
                         preserveDrawingBuffer : _preserveDrawingBuffer
                     }))) {
@@ -24648,14 +28936,14 @@ $3Dmol.Renderer = function(parameters) {
         } catch (error) {
 
             console.error(error);
-        }              
- 
+        }
+
     }
 
     function isWebGL1() {
       return _webglversion == 1;
     }
-    
+
     this.supportsVolumetric = function() { return !isWebGL1(); };
 
     function setDefaultGLState() {
@@ -24811,28 +29099,28 @@ $3Dmol.Fog.prototype.clone = function () {
 
 
 $3Dmol.ShaderUtils = {
-    
+
     clone: function ( uniforms_src ) {
-        
+
         var u, uniforms_clone = {};
-        
+
         for (u in uniforms_src) {
             uniforms_clone[u] = {};
             uniforms_clone[u].type = uniforms_src[u].type;
-            
+
             var srcValue = uniforms_src[u].value;
-            
+
             if (srcValue instanceof $3Dmol.Color)
                 uniforms_clone[u].value = srcValue.clone();
             else if (typeof srcValue === "number")
                 uniforms_clone[u].value = srcValue;
-            else if (srcValue instanceof Array) 
+            else if (srcValue instanceof Array)
                 uniforms_clone[u].value = [];
             else
                 console.error("Error copying shader uniforms from ShaderLib: unknown type for uniform");
-            
+
         }
-        
+
         return uniforms_clone;
     },
     //fragment shader reused by outline shader
@@ -24856,11 +29144,12 @@ $3Dmol.ShaderUtils = {
      //cylinder-ray intersection testing taken from http://mrl.nyu.edu/~dzorin/cg05/lecture12.pdf
      //also useful: http://stackoverflow.com/questions/9595300/cylinder-impostor-in-glsl
      //with a bit more care (caps) this could be a general cylinder imposter (see also outline)
-     "void main() {",   
+     "void main() {",
      "    vec3 color = abs(vColor);",
      "    vec3 pos = cposition;",
      "    vec3 p = pos;", //ray point
-     "    vec3 v = normalize(pos);", //ray normal
+     "    vec3 v = vec3(0.0,0.0,-1.0);", //ray normal - orthographic
+     "    if(projectionMatrix[3][3] == 0.0) v = normalize(pos);", //ray normal - perspective
      "    vec3 pa = p1;", //cyl start
      "    vec3 va = normalize(p2-p1);", //cyl norm
      "    vec3 tmp1 = v-(dot(v,va)*va);",
@@ -24877,13 +29166,13 @@ $3Dmol.ShaderUtils = {
      "    float posT = (-B+sqrtDet)/(2.0*A);",
      "    float negT = (-B-sqrtDet)/(2.0*A);",
      "    float intersectionT = min(posT,negT);",
-     "    vec3 qi = p+v*intersectionT;", 
+     "    vec3 qi = p+v*intersectionT;",
      "    float dotp1 = dot(va,qi-p1);",
      "    float dotp2 = dot(va,qi-p2);",
      "    vec3 norm;",
      "    if( dotp1 < 0.0 || dotp2 > 0.0) {", //(p-c)^2 + 2(p-c)vt +v^2+t^2 - r^2 = 0
      "       vec3 cp;",
-     "       if( dotp1 < 0.0) {" +
+     "       if( dotp1 < 0.0) { " +
      //"        if(vColor.x < 0.0 ) discard;", //color sign bit indicates if we should cap or not
      "        cp = p1;",
      "       } else {",
@@ -24900,8 +29189,8 @@ $3Dmol.ShaderUtils = {
      "       posT = (-B+sqrtDet)/(2.0);",
      "       negT = (-B-sqrtDet)/(2.0);",
      "       float t = min(posT,negT);",
-     "       qi = p+v*t;",
-     "       norm = normalize(qi-cp);",
+     "       qi = p+v*t; ",
+     "       norm = normalize(qi-cp); ",
      "    } else {",
      "       norm = normalize(qi-(dotp1*va + p1));",
      "    }",
@@ -24909,12 +29198,12 @@ $3Dmol.ShaderUtils = {
      "    float ndcDepth = clipPos.z / clipPos.w;",
      "    float depth = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
      "    gl_FragDepthEXT = depth;",
-    ].join("\n")  
+    ].join("\n")
 };
 
-$3Dmol.ShaderLib = { 
+$3Dmol.ShaderLib = {
     'basic' : {
-        fragmentShader : [                    
+        fragmentShader : [
 "uniform mat4 viewMatrix;",
 "uniform float opacity;",
 
@@ -24926,18 +29215,18 @@ $3Dmol.ShaderLib = {
 "//DEFINEFRAGCOLOR",
 
 "void main() {",
-    
+
 "    gl_FragColor = vec4( vColor, opacity );",
-    
-"    float depth = gl_FragCoord.z / gl_FragCoord.w;",    
+
+"    float depth = gl_FragCoord.z / gl_FragCoord.w;",
 "    float fogFactor = smoothstep( fogNear, fogFar, depth );",
-    
+
 "    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
 
 "}"
-                                                     
+
 ].join("\n"),
-        
+
         vertexShader : [
 
 "uniform mat4 modelViewMatrix;",
@@ -24957,9 +29246,9 @@ $3Dmol.ShaderLib = {
 "    gl_Position = projectionMatrix * mvPosition;",
 
 "}"
-        
+
 ].join("\n"),
-    
+
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
@@ -24968,7 +29257,7 @@ $3Dmol.ShaderLib = {
         }
 
     },
-    
+
  'sphereimposter' : {
         fragmentShader : [
 "uniform mat4 viewMatrix;",
@@ -25001,17 +29290,17 @@ $3Dmol.ShaderLib = {
 "    gl_FragDepthEXT = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
 "    vec3 norm = normalize(vec3(mapping.x,mapping.y,z));",
 "    float dotProduct = dot( norm, vLight );",
-"    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",    
+"    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
 "    vec3 vLight = directionalLightColor[ 0 ] * directionalLightWeighting;",
-"    gl_FragColor = vec4(vLight*vColor, opacity*opacity );", 
+"    gl_FragColor = vec4(vLight*vColor, opacity*opacity );",
 "    float fogFactor = smoothstep( fogNear, fogFar, gl_FragDepthEXT/gl_FragCoord.w );",
 "    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
 
 
 "}"
-                                                     
+
 ].join("\n"),
-        
+
         vertexShader : [
 
 "uniform mat4 modelViewMatrix;",
@@ -25045,9 +29334,9 @@ $3Dmol.ShaderLib = {
 "    gl_Position = projPosition+adjust;",
 
 "}"
-        
+
 ].join("\n"),
-    
+
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
@@ -25058,9 +29347,9 @@ $3Dmol.ShaderLib = {
         }
 
     },
-    
-    
-    'lambert' : { 
+
+
+    'lambert' : {
         fragmentShader : [
 
 "uniform mat4 viewMatrix;",
@@ -25075,25 +29364,25 @@ $3Dmol.ShaderLib = {
 "//DEFINEFRAGCOLOR",
 
 "void main() {",
-    
+
 "    gl_FragColor = vec4( vec3 ( 1.0 ), opacity );",
-    
+
 "    #ifndef WIREFRAME",
 "    gl_FragColor.xyz *= vLightFront;",
 "    #endif",
-    
+
 "    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
 "    float depth = gl_FragCoord.z / gl_FragCoord.w;",
-    
+
 "    float fogFactor = smoothstep( fogNear, fogFar, depth );",
-    
+
 "    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
 
 "}"
 
 
 ].join("\n"),
-       
+
        vertexShader : [
 
 "uniform mat4 modelViewMatrix;",
@@ -25111,27 +29400,27 @@ $3Dmol.ShaderLib = {
 "varying vec3 vLightFront;",
 
 "void main() {",
-    
+
 "    vColor = color;",
-    
-"    vec3 objectNormal = normal;",  
-"    vec3 transformedNormal = normalMatrix * objectNormal;",    
+
+"    vec3 objectNormal = normal;",
+"    vec3 transformedNormal = normalMatrix * objectNormal;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
-    
+
 "    vLightFront = vec3( 0.0 );",
-    
+
 "    transformedNormal = normalize( transformedNormal );",
-    
+
 "    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
 "    vec3 dirVector = normalize( lDirection.xyz );",
 "    float dotProduct = dot( transformedNormal, dirVector );",
 "    vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );",
-    
+
 "    vLightFront += directionalLightColor[ 0 ] * directionalLightWeighting;",
-    
+
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
-           
+
 ].join("\n"),
 
         uniforms : {
@@ -25232,9 +29521,9 @@ $3Dmol.ShaderLib = {
         }
 
     },
- 
+
 //for outline
-     'outline' : { 
+     'outline' : {
         fragmentShader : [
 
 "uniform float opacity;",
@@ -25245,13 +29534,13 @@ $3Dmol.ShaderLib = {
 "//DEFINEFRAGCOLOR",
 
 "void main() {",
-    
+
 "    gl_FragColor = vec4( outlineColor, 1 );",
 "}"
 
 
 ].join("\n"),
-       
+
        vertexShader : [
 
 "uniform mat4 modelViewMatrix;",
@@ -25273,7 +29562,7 @@ $3Dmol.ShaderLib = {
 "    vec4 pushpos = projectionMatrix*mvPosition;", //project to get z in projection space, I'm probably missing some simple math to do the same thing..
 "    gl_Position.z = gl_Position.w*pushpos.z/pushpos.w;",
 "}"
-           
+
 ].join("\n"),
 
         uniforms : {
@@ -25281,14 +29570,14 @@ $3Dmol.ShaderLib = {
             outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
-            fogFar: { type: 'f', value: 2000},           
+            fogFar: { type: 'f', value: 2000},
             outlineWidth: { type: 'f', value: 0.1 },
             outlinePushback: { type: 'f', value: 1.0 },
         }
 
     },
 //for outlining sphere imposter
-    'sphereimposteroutline' : { 
+    'sphereimposteroutline' : {
        fragmentShader : [
 
 "uniform float opacity;",
@@ -25320,7 +29609,7 @@ $3Dmol.ShaderLib = {
 
 
 ].join("\n"),
-      
+
       vertexShader : [
 
 "uniform mat4 modelViewMatrix;",
@@ -25341,13 +29630,13 @@ $3Dmol.ShaderLib = {
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 "    center = mvPosition.xyz;",
 "    vec4 projPosition = projectionMatrix * mvPosition;",
-"    vec2 norm = normal.xy + vec2(sign(normal.x)*outlineWidth,sign(normal.y)*outlineWidth);", 
+"    vec2 norm = normal.xy + vec2(sign(normal.x)*outlineWidth,sign(normal.y)*outlineWidth);",
 "    vec4 adjust = projectionMatrix* vec4(norm,normal.z,0.0); adjust.z = 0.0; adjust.w = 0.0;",
 "    mapping = norm.xy;",
 "    rval = abs(norm.x);",
 "    gl_Position = projPosition+adjust;",
 "}"
-          
+
 ].join("\n"),
 
        uniforms : {
@@ -25355,19 +29644,19 @@ $3Dmol.ShaderLib = {
            outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
            fogNear: { type: 'f', value: 1.0 },
-           fogFar: { type: 'f', value: 2000},           
+           fogFar: { type: 'f', value: 2000},
            outlineWidth: { type: 'f', value: 0.1 },
            outlinePushback: { type: 'f', value: 1.0 },
        }
 
    },
    //stick imposters
-   'stickimposter' : { 
+   'stickimposter' : {
       fragmentShader : [$3Dmol.ShaderUtils.stickimposterFragmentShader,
     "    float dotProduct = dot( norm, vLight );",
-    "    vec3 light = vec3( max( dotProduct, 0.0 ) );",    
-    "    gl_FragColor = vec4(light*color, opacity*opacity );", 
-    "    float fogFactor = smoothstep( fogNear, fogFar, depth );",   
+    "    vec3 light = vec3( max( dotProduct, 0.0 ) );",
+    "    gl_FragColor = vec4(light*color, opacity*opacity );",
+    "    float fogFactor = smoothstep( fogNear, fogFar, depth );",
     "    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
     "}"].join("\n"),
       vertexShader : [
@@ -25392,7 +29681,7 @@ $3Dmol.ShaderLib = {
 "varying float r;",
 
 "void main() {",
-   
+
 "    vColor = color; vColor.z = abs(vColor.z);", //z indicates which vertex and so would vary
 "    r = abs(radius);",
 "    vec4 to = modelViewMatrix*vec4(normal, 1.0);", //normal is other point of cylinder
@@ -25407,39 +29696,47 @@ $3Dmol.ShaderLib = {
 "    vec3 n = normalize(mvPosition.xyz);",
 //intersect with the plane defined by the camera looking at the billboard point
 "    if(color.z >= 0.0) {", //p1
-"       vec3 pnorm = normalize(p1);",
-"       float t = dot(mvPosition.xyz-p1,n)/dot(pnorm,n);",
-"       mvPosition.xyz = p1+t*pnorm;",
+"       if(projectionMatrix[3][3] == 0.0) {", //perspective
+"         vec3 pnorm = normalize(p1);",
+"         float t = dot(mvPosition.xyz-p1,n)/dot(pnorm,n);",
+"         mvPosition.xyz = p1+t*pnorm;", 
+"       } else {", //orthographic
+"         mvPosition.xyz = p1;",
+"       }",
 "    } else {",
-"       vec3 pnorm = normalize(p2);",
-"       float t = dot(mvPosition.xyz-p2,n)/dot(pnorm,n);",
-"       mvPosition.xyz = p2+t*pnorm;",
+"      if(projectionMatrix[3][3] == 0.0) {", //perspective
+"         vec3 pnorm = normalize(p2);",
+"         float t = dot(mvPosition.xyz-p2,n)/dot(pnorm,n);",
+"         mvPosition.xyz = p2+t*pnorm;",
+"       } else {", //orthographic
+"         mvPosition.xyz = p2;",
+"       }", 
 "       mult *= -1.0;",
 "    }",
-"    vec3 cr = normalize(cross(mvPosition.xyz,norm))*radius;", 
-"    vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*radius;", 
-"    mvPosition.xy +=  mult*(cr + doublecr).xy;",
+"    vec3 cr = normalize(cross(mvPosition.xyz,norm))*radius;",
+"    vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*radius;",
+"    mvPosition.xyz +=  mult*(cr + doublecr).xyz;",
 "    cposition = mvPosition.xyz;",
 "    gl_Position = projectionMatrix * mvPosition;",
 "    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
 "    vLight = normalize( lDirection.xyz )*directionalLightColor[0];", //not really sure this is right, but color is always white so..
 "}"
-          
+
 ].join("\n"),
 
        uniforms : {
            opacity: { type: 'f', value: 1.0 },
            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
            fogNear: { type: 'f', value: 1.0 },
-           fogFar: { type: 'f', value: 2000},         
+           fogFar: { type: 'f', value: 2000},
            directionalLightColor: { type: 'fv', value: [] },
            directionalLightDirection: { type: 'fv', value: [] }
        }
 
    },
    //stick imposter outlines
-   'stickimposteroutline' : { 
-      fragmentShader : $3Dmol.ShaderUtils.stickimposterFragmentShader + 'gl_FragColor = vec4(color,1.0);}',   
+   'stickimposteroutline' : {
+      fragmentShader : $3Dmol.ShaderUtils.stickimposterFragmentShader + 'gl_FragColor = vec4(color,1.0);}',
       vertexShader : [
 
 "uniform mat4 modelViewMatrix;",
@@ -25466,7 +29763,7 @@ $3Dmol.ShaderLib = {
 "varying float r;",
 
 "void main() {",
-   
+
 "    vColor = outlineColor;",
 "    float rad = radius+sign(radius)*outlineWidth;",
 "    r = abs(rad);",
@@ -25495,29 +29792,29 @@ $3Dmol.ShaderLib = {
 "       mvPosition.xyz = p2+t*pnorm;",
 "       mult *= -1.0;",
 "    }",
-"    vec3 cr = normalize(cross(mvPosition.xyz,norm))*rad;", 
-"    vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*rad;", 
+"    vec3 cr = normalize(cross(mvPosition.xyz,norm))*rad;",
+"    vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*rad;",
 "    mvPosition.xy +=  mult*(cr + doublecr).xy;",
 "    cposition = mvPosition.xyz;",
 "    gl_Position = projectionMatrix * mvPosition;",
 "    vLight = vec3(1.0,1.0,1.0);",
 "}"
-          
+
 ].join("\n"),
 
        uniforms : {
            opacity: { type: 'f', value: 1.0 },
            fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
            fogNear: { type: 'f', value: 1.0 },
-           fogFar: { type: 'f', value: 2000},         
-           outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },         
+           fogFar: { type: 'f', value: 2000},
+           outlineColor: { type: 'c', value: new $3Dmol.Color(0.0, 0.0, 0.0) },
            outlineWidth: { type: 'f', value: 0.1 },
-           outlinePushback: { type: 'f', value: 1.0 },         
+           outlinePushback: { type: 'f', value: 1.0 },
        }
 
    },
     //for double sided lighting
-    'lambertdouble' : { 
+    'lambertdouble' : {
         fragmentShader : [
 
 "uniform mat4 viewMatrix;",
@@ -25534,28 +29831,28 @@ $3Dmol.ShaderLib = {
 "//DEFINEFRAGCOLOR",
 
 "void main() {",
-    
+
 "    gl_FragColor = vec4( vec3 ( 1.0 ), opacity );",
-    
+
 "    #ifndef WIREFRAME",
 "    if ( gl_FrontFacing )",
 "       gl_FragColor.xyz *= vLightFront;",
 "    else",
 "       gl_FragColor.xyz *= vLightBack;",
 "    #endif",
-    
+
 "    gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
 "    float depth = gl_FragCoord.z / gl_FragCoord.w;",
-    
+
 "    float fogFactor = smoothstep( fogNear, fogFar, depth );",
-    
+
 "    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );",
 
 "}"
 
 
 ].join("\n"),
-       
+
        vertexShader : [
 
 "uniform mat4 modelViewMatrix;",
@@ -25574,18 +29871,18 @@ $3Dmol.ShaderLib = {
 "varying vec3 vLightBack;",
 
 "void main() {",
-    
+
 "    vColor = color;",
-    
-"    vec3 objectNormal = normal;",  
-"    vec3 transformedNormal = normalMatrix * objectNormal;",    
+
+"    vec3 objectNormal = normal;",
+"    vec3 transformedNormal = normalMatrix * objectNormal;",
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
-    
+
 "    vLightFront = vec3( 0.0 );",
 "    vLightBack = vec3( 0.0 );",
-    
+
 "    transformedNormal = normalize( transformedNormal );",
-    
+
 "    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
 "    vec3 dirVector = normalize( lDirection.xyz );",
 "    float dotProduct = dot( transformedNormal, dirVector );",
@@ -25597,25 +29894,25 @@ $3Dmol.ShaderLib = {
 
 "    gl_Position = projectionMatrix * mvPosition;",
 "}"
-           
+
 ].join("\n"),
 
         uniforms : {
             opacity: { type: 'f', value: 1.0 },
             fogColor: { type: 'c', value: new $3Dmol.Color(1.0, 1.0, 1.0) },
             fogNear: { type: 'f', value: 1.0 },
-            fogFar: { type: 'f', value: 2000},           
+            fogFar: { type: 'f', value: 2000},
             directionalLightColor: { type: 'fv', value: [] },
             directionalLightDirection: { type: 'fv', value: [] }
         }
 
     },
-    
-    
+
+
     'sprite': {
-        
+
         fragmentShader: [
-                                                         
+
 "uniform vec3 color;",
 "uniform sampler2D map;",
 "uniform float opacity;",
@@ -25631,35 +29928,35 @@ $3Dmol.ShaderLib = {
 "//DEFINEFRAGCOLOR",
 
 "void main() {",
-    
+
 "    vec4 texture = texture2D(map, vUV);",
-    
+
 "    if (texture.a < alphaTest) discard;",
-    
+
 "    gl_FragColor = vec4(color * texture.xyz, texture.a * opacity);",
-    
+
 "    if (fogType > 0) {",
-        
+
 "        float depth = gl_FragCoord.z / gl_FragCoord.w;",
 "        float fogFactor = 0.0;",
-        
+
 "        if (fogType == 1) {",
 "            fogFactor = smoothstep(fogNear, fogFar, depth);",
 "        }",
-        
+
 "        else {",
 "            const float LOG2 = 1.442695;",
 "            float fogFactor = exp2(- fogDensity * fogDensity * depth * depth * LOG2);",
 "            fogFactor = 1.0 - clamp(fogFactor, 0.0, 1.0);",
 "        }",
-        
+
 "        gl_FragColor = mix(gl_FragColor, vec4(fogColor, gl_FragColor.w), fogFactor);",
-        
+
 "    }",
-"}"                                              
-            
+"}"
+
 ].join("\n"),
-        
+
         vertexShader: [
 
 "uniform int useScreenCoordinates;",
@@ -25678,37 +29975,37 @@ $3Dmol.ShaderLib = {
 "varying vec2 vUV;",
 
 "void main() {",
-    
+
 "    vUV = uvOffset + uv * uvScale;",
-    
+
 "    vec2 alignedPosition = position + alignment;",
-    
+
 "    vec2 rotatedPosition;",
 "    rotatedPosition.x = ( cos(rotation) * alignedPosition.x - sin(rotation) * alignedPosition.y ) * scale.x;",
 "    rotatedPosition.y = ( sin(rotation) * alignedPosition.x + cos(rotation) * alignedPosition.y ) * scale.y;",
-    
+
 "    vec4 finalPosition;",
-    
+
 "    if(useScreenCoordinates != 0) {",
 "        finalPosition = vec4(screenPosition.xy + rotatedPosition, screenPosition.z, 1.0);",
 "    }",
-    
+
 "    else {",
 "        finalPosition = projectionMatrix * modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0); finalPosition /= finalPosition.w;",
 "        finalPosition.xy += rotatedPosition; ",
 "    }",
-    
+
 "    gl_Position = finalPosition;",
-    
+
 "}"
-       
+
 ].join("\n"),
 
         uniforms : {
-            
+
         }
-        
-    }, 
+
+    },
     //raycasting volumetric rendering
     'volumetric': {
         fragmentShader: [
@@ -25716,25 +30013,27 @@ $3Dmol.ShaderLib = {
             "uniform highp sampler2D colormap;",
             "uniform highp sampler2D depthmap;",
 
+
             "uniform mat4 textmat;",
             "uniform mat4 projinv;",
             "uniform mat4 projectionMatrix;",
-            
+
             "uniform float step;",
             "uniform float subsamples;",
             "uniform float maxdepth;",
             "uniform float transfermin;",
             "uniform float transfermax;",
             "in  vec4 mvPosition;",
-            "out vec4 color;",          
+            "out vec4 color;",
             "void main(void) {",
+
             "   vec4 pos = mvPosition;",
             "   bool seengood = false;",
             "   float i = 0.0;",
             "   color = vec4(1,1,1,0);",
             "   float increment = 1.0/subsamples;",
             "   float maxsteps = (maxdepth*subsamples/step);",
-            //there's probably a better way to do this.. 
+            //there's probably a better way to do this..
             //calculate farthest possible point in model coordinates
             "   vec4 maxpos = vec4(pos.x,pos.y,pos.z-maxdepth,1.0);",
             // convert to projection
@@ -25745,7 +30044,7 @@ $3Dmol.ShaderLib = {
             "   startp /= startp.w;",
             //take x,y from start and z from max
             "   maxpos = vec4(startp.x,startp.y,maxpos.z,1.0);",
-            //convert back to model space 
+            //convert back to model space
             "   maxpos = projinv*maxpos;",
             "   maxpos /= maxpos.w;",
             "   float incr = step/subsamples;",
@@ -25754,26 +30053,35 @@ $3Dmol.ShaderLib = {
             "   vec2 tpos = startp.xy/2.0+0.5;",
             "   float depth = texture(depthmap, tpos).r;",
             //compute vector between start and end
-            "   vec4 direction = maxpos-pos;",            
+            "   vec4 direction = maxpos-pos;",
             "   for( i = 0.0; i <= maxsteps; i++) {",
-            "      vec4 pt = (pos+(i/maxsteps)*direction);",      
+            "      vec4 pt = (pos+(i/maxsteps)*direction);",
             "      vec4 ppt = projectionMatrix*pt;",
             "      float ptdepth = ppt.z/ppt.w;",
             "      ptdepth = ((gl_DepthRange.diff * ptdepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;",
             "      if(ptdepth > depth) break;",
             "      pt = textmat*pt;",
+            // "      pt /= pt.w;",
             "      if(pt.x >= -0.01 && pt.y >= -0.01 && pt.z >= -0.01 && pt.x <= 1.01 && pt.y <= 1.01 && pt.z <= 1.01) {",
             "         seengood = true;",
             "      } else if(seengood) {",
             "         break;",
             "      }",
-            "      float val = texture(data, pt.zyx).r;",
-            "      if(isinf(val)) continue;", //masked out
-            "      float cval = (val-transfermin)/(transfermax-transfermin);", //scale to texture 0-1 range
-            "      vec4 val_color = texture(colormap, vec2(cval,0.5));",
-            "      color.rgb = color.rgb*color.a + (1.0-color.a)*val_color.a*val_color.rgb;",
-            "      color.a += (1.0 - color.a) * val_color.a; ",
-            "      if(color.a > 0.0) color.rgb /= color.a;",
+            "      if( pt.x < -0.01 || pt.x > 1.01 || pt.y < -0.01 || pt.y > 1.01 || pt.z < -0.01 || pt.z > 1.01  ){",
+            "          color.a = 0.0;",
+            "          continue;",
+            "      }",
+            "      else {",
+            "         float val = texture(data, pt.zyx).r;",
+            "         if(isinf(val)) continue;", //masked out
+            "         float cval = (val-transfermin)/(transfermax-transfermin);", //scale to texture 0-1 range
+            "         vec4 val_color = texture(colormap, vec2(cval,0.5));",
+            "         color.rgb = color.rgb*color.a + (1.0-color.a)*val_color.a*val_color.rgb;",
+            "         color.a += (1.0 - color.a) * val_color.a; ",
+            "         if(color.a > 0.0) color.rgb /= color.a;",
+            // "         color = vec4(pt.x, pt.y, pt.z, 1.0);",
+            "      }",
+            // "      color = vec4(pt.x, pt.y, pt.z, 0.0)",
             "    }",
             "}"
 
@@ -25785,12 +30093,12 @@ $3Dmol.ShaderLib = {
             "uniform mat4 viewMatrix;",
 
             "in vec3 position;",
-            "out vec4 mvPosition;", 
+            "out vec4 mvPosition;",
             "void main() {",
 
             "    mvPosition = modelViewMatrix * vec4( position, 1.0 );",
             "    gl_Position = projectionMatrix*mvPosition;",
-            "}"                        
+            "}"
 
         ].join("\n"),
 
@@ -25817,7 +30125,7 @@ $3Dmol.ShaderLib = {
         fragmentShader: [
             "uniform sampler2D colormap;",
             "varying highp vec2 vTexCoords;",
-            "uniform vec2 dimensions;",            
+            "uniform vec2 dimensions;",
             "//DEFINEFRAGCOLOR",
             "void main (void) {",
             "   gl_FragColor = texture2D(colormap, vTexCoords);",
@@ -25837,7 +30145,7 @@ $3Dmol.ShaderLib = {
 
         uniforms: {
         }
-    },    
+    },
     //screen with antialiasing
     'screenaa': {
         fragmentShader: [
@@ -25845,8 +30153,8 @@ $3Dmol.ShaderLib = {
             "varying highp vec2 vTexCoords;",
             "uniform vec2 dimensions;",
 
-            "// Basic FXAA implementation based on the code on geeks3d.com ", 
-                        
+            "// Basic FXAA implementation based on the code on geeks3d.com ",
+
             "#define FXAA_REDUCE_MIN   (1.0/ 128.0)",
             "#define FXAA_REDUCE_MUL   (1.0 / 8.0)",
             "#define FXAA_SPAN_MAX     8.0",
@@ -25868,19 +30176,19 @@ $3Dmol.ShaderLib = {
             "    float lumaM  = dot(rgbM,  luma);",
             "    float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));",
             "    float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));",
-                
+
             "    vec2 dir;",
             "    dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));",
             "    dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));",
-                
+
             "    float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) *",
             "                        (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);",
-                
+
             "    float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);",
             "    dir = min(vec2(FXAA_SPAN_MAX, FXAA_SPAN_MAX),",
             "            max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),",
             "            dir * rcpDirMin)) * inverseVP;",
-                
+
             "    vec3 rgbA = 0.5 * (",
             "        texture2D(tex, fragCoord + dir * (1.0 / 3.0 - 0.5)).xyz +",
             "        texture2D(tex, fragCoord  + dir * (2.0 / 3.0 - 0.5)).xyz);",
@@ -25915,7 +30223,7 @@ $3Dmol.ShaderLib = {
         uniforms: {
         }
     }
-    
+
 };
 
 /*  ProteinSurface.js by biochem_fan
@@ -26699,6 +31007,7 @@ $3Dmol.autoload=function(viewer,callback){
         $3Dmol.autoinit = true;
 
     if ($3Dmol.autoinit) {
+        $3Dmol.processing_autoinit = true;
         viewer =(viewer!= undefined) ? viewer :null;
         
         $3Dmol.viewers = {};
@@ -26708,10 +31017,14 @@ $3Dmol.autoload=function(viewer,callback){
             var datauri = [];
             var datatypes = [];
             var uri = '';
+            var showUI = false;
             if(viewerdiv.css('position') == 'static') {
                 //slight hack - canvas needs this element to be positioned
                 viewerdiv.css('position','relative');
             }
+
+            if(viewerdiv.data('ui'))
+                showUI = true;
 
             type = null;
             if (viewerdiv.data("pdb")) {
@@ -26728,6 +31041,12 @@ $3Dmol.autoload=function(viewer,callback){
                 datauri.push(uri);
                 type = uri.substr(uri.lastIndexOf('.')+1);                
                 datatypes.push(type);
+
+                var molName = uri.substring(uri.lastIndexOf('/') + 1, uri.lastIndexOf('.'));
+                if(molName == '/') 
+                    molName = uri.substring(uri.lastIndexOf('/') + 1);
+
+                viewerdiv.data(datatypes[datatypes.length -1 ], molName);
             }
             
             var divdata=viewerdiv.data();
@@ -26764,7 +31083,7 @@ $3Dmol.autoload=function(viewer,callback){
             var spin = null;
             var d = viewerdiv.data();
             
-            //let users specify individual but matching select/style tags, eg.
+            //let users specify individual but matching select/style/surface tags, eg.
             //data-select1 data-style1
             var stylere = /style(.+)/;
             var surfre = /surface(.*)/;
@@ -26810,41 +31129,67 @@ $3Dmol.autoload=function(viewer,callback){
             
             //apply all the selections/styles parsed out above to the passed viewer
             var applyStyles = function(glviewer) {
-                var sel, sty;
                 glviewer.setStyle(select,style);
+
+                if(showUI){
+                    glviewer.ui.loadSelectionStyle(select, style);
+                }
+
                 for(i = 0; i < selectstylelist.length; i++) {
-                    sel = selectstylelist[i][0] || {};
-                    sty = selectstylelist[i][1] || {"line":{}};
+                    let sel = selectstylelist[i][0] || {};
+                    let sty = selectstylelist[i][1] || {"line":{}};
                     glviewer.setStyle(sel, sty);
+                    if(showUI){
+                        glviewer.ui.loadSelectionStyle(sel, sty);
+                    }
                 }
                 for(i = 0; i < surfaces.length; i++) {
-                    sel = surfaces[i][0] || {};
-                    sty = surfaces[i][1] || {};
-                    glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
+                    let sel = surfaces[i][0] || {};
+                    let sty = surfaces[i][1] || {};
+                    let viewer = glviewer;
+
+                    if(showUI){
+                        //seemingly unnecessary capturing of values due to jshint
+                        //not understanding let?
+                        let doload = function($3D, viewer, sel, sty) {
+                            viewer.addSurface($3D.SurfaceType.VDW, sty, sel, sel).then((surfid)=>{
+                                viewer.ui.loadSurface("VDW", sel, sty, surfid);
+                            });
+                        };
+                        doload($3Dmol, viewer, sel, sty);                 
+                    }
+                    else {
+                        glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
+                    }
+                    
                 }
                 for(i = 0; i < labels.length; i++) {
-                    sel = labels[i][0] || {};
-                    sty = labels[i][1] || {};
+                    let sel = labels[i][0] || {};
+                    let sty = labels[i][1] || {};
                     glviewer.addResLabels(sel, sty);
                 }               
                 
+                glviewer.render();             
                 glviewer.zoomTo(zoomto);
+                
                 if(spin) {
                     glviewer.spin(spin.axis,spin.speed);
                 }
-                glviewer.render();             
             };
             
             var glviewer = viewer;
             try {
+                var config = viewerdiv.data('config') || {};
+                config.defaultcolors = config.defaultcolors || $3Dmol.rasmolElementColors;
+                if(config.backgroundColor === undefined) config.backgroundColor = bgcolor;
+                if(config.backgroundAlpha === undefined) config.backgroundAlpha = bgalpha;
+                config.ui = showUI;		    
                 if(glviewer==null) {
-                    var config = viewerdiv.data('config') || {};
-                    config.defaultcolors = config.defaultcolors || $3Dmol.rasmolElementColors;
-                    if(config.backgroundColor === undefined) config.backgroundColor = bgcolor;
-                    if(config.backgroundAlpha === undefined) config.backgroundAlpha = bgalpha;                     
                     glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, config);
                 } else {
                     glviewer.setBackgroundColor(bgcolor, bgalpha);
+		            glviewer.setConfig(config);
+                    if(showUI) glviewer.ui.initiateUI();
                 } 
             } catch ( error ) {
                 console.log(error);
@@ -26860,6 +31205,10 @@ $3Dmol.autoload=function(viewer,callback){
                     uri = datauri[i]; //this is where the moldata came from
                     var type = viewerdiv.data("type") || viewerdiv.data("datatype") || datatypes[i]; 
                     glviewer.addModel(moldata, type, options);
+                    if(showUI){
+                        var modelName = viewerdiv.data(datatypes[i]);
+                        glviewer.ui.setModelTitle(modelName);
+                    }
                     i += 1;
                     if(i < datauri.length) {
                         $.get(datauri[i], process, 'text');
@@ -26875,6 +31224,7 @@ $3Dmol.autoload=function(viewer,callback){
                                 runres(glviewer);
                             }
                         }
+                        $3Dmol.processing_autoinit = false;
                         if(callback) callback(glviewer);
                     }
                 };
@@ -26905,16 +31255,25 @@ $3Dmol.autoload=function(viewer,callback){
                     if(typeof(runres) == 'function') {
                         runres(glviewer);
                     }
-                }                
+                }
+                $3Dmol.processing_autoinit = false;                
                 if (callback) 
                     callback(glviewer);
             }            
         });                      
     }};
-$(document).ready(function() {
-    $3Dmol.autoload();
-    
-});
+   
+
+//if domcontent has already load
+if (document.readyState === "interactive") {
+    $(document).ready(function() {
+        $3Dmol.autoload();
+    });
+} else {
+    document.addEventListener('DOMContentLoaded', function() {
+        $3Dmol.autoload();    
+    });
+}
     
  
 
@@ -27623,14 +31982,21 @@ $3Dmol.builtinColorSchemes = {
         'ssPyMol' : {'prop':'ss', map:$3Dmol.ssColors.pyMol},
         'ssJmol' :{'prop':'ss', map:$3Dmol.ssColors.Jmol},
         'Jmol' :{'prop':'elem', map:$3Dmol.elementColors.Jmol},
-        'greenCarbon': {'prop': 'elem', map:$3Dmol.elementColors.greenCarbon},
-        'default' : {'prop': 'elem', map:$3Dmol.elementColors.defaultColors},
         'amino' : {'prop':'resn', map:$3Dmol.residues.amino},
         'shapely' :{'prop':'resn', map:$3Dmol.residues.shapely},
         'nucleic' :{'prop':'resn', map:$3Dmol.residues.nucleic},
         'chain' :{'prop':'chain', map:$3Dmol.chains.atom},
+        'rasmol' : {'prop':'elem', map:$3Dmol.elementColors.rasmol},
+        'default' : {'prop': 'elem', map:$3Dmol.elementColors.defaultColors},
+        'greenCarbon': {'prop': 'elem', map:$3Dmol.elementColors.greenCarbon},
         'chainHetatm' :{'prop':'chain', map:$3Dmol.chains.hetatm},
-        
+        'cyanCarbon' : {'prop':'elem', map:$3Dmol.elementColors.cyanCarbon},
+        'magentaCarbon' : {'prop':'elem', map:$3Dmol.elementColors.magentaCarbon},
+        'purpleCarbon' : {'prop':'elem', map:$3Dmol.elementColors.purpleCarbon},
+        'whiteCarbon' : {'prop':'elem', map:$3Dmol.elementColors.whiteCarbon},
+        'orangeCarbon' : {'prop':'elem', map:$3Dmol.elementColors.orangeCarbon},
+        'yellowCarbon' : {'prop':'elem', map:$3Dmol.elementColors.yellowCarbon},
+        'blueCarbon' : {'prop':'elem', map:$3Dmol.elementColors.blueCarbon},
 };
 
 /** Return proper color for atom given style
@@ -27716,6 +32082,11 @@ var $3Dmol = $3Dmol || {};
 
 /**
  * A visualization of protein or nucleic acid secondary structure.  Applying this to other molecules will not show anything.
+  In nucleic acids, the base cylinders obtain their color from the
+  atom to which the cylinder is drawn, which is 'N1' for purines (resn: 'A', 'G', 'DA', 'DG') and 
+  'N3' for pyrimidines (resn: 'C', 'U', 'DC', 'DT'). 
+  The different nucleobases can therefore be distinguished as by setting the colors 
+  of each of these atoms. The backbone color is set from the 'P' atoms ('O5' for the 5' terminus).
  * @typedef CartoonStyleSpec
  * @prop {ColorSpec} color - strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number
  * @prop {string} style - style of cartoon rendering (trace, oval, rectangle
@@ -27731,11 +32102,6 @@ var $3Dmol = $3Dmol || {};
  *       structure-dependent; does not apply to trace or ribbon
  * @prop {number} opacity - set opacity from 0-1; transparency is set per-chain
  *       with a warning outputted in the event of ambiguity
- * @prop {} In nucleic acids, the base cylinders obtain their color from the
- *       atom to which the cylinder is drawn, which is 'N1' for purines (resn:
- *       'A', 'G', 'DA', 'DG') and 'N3' for pyrimidines (resn: 'C', 'U', 'DC',
- *       'DT'). The different nucleobases can therefore be distinguished as
- *       follows:
  * @example $3Dmol.download("pdb:4ZD3",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.setViewStyle({style:"outline"});
@@ -30053,33 +34419,40 @@ $3Dmol.GLModel = (function() {
         "Ni"
     ];
 
+    // prop : It is used to add the option for property in context menu in the 3dmol ui
+    // the code for prop can be found under /ui/ui.js -> UI -> ContextMenu -> setProperties -> submit.ui.on 
+    // gui : It is used to generate forms for different features in the 3dmol ui
+    // the code for gui can be found under /ui/form.js -> Form (Form defination)
+    // floatType : separates integer from float since these are used in 
+    // input validation of the 3dmol ui
     GLModel.validAtomSpecs = {
-        "resn":{type:"string",valid :true}, // Parent residue name
-        "x":{type:"number",valid:false,step:0.1}, // Atom's x coordinate
-        "y":{type:"number",valid:false,step:0.1}, // Atom's y coordinate
-        "z":{type:"number",valid:false,step:0.1}, // Atom's z coordinate
-        "color":{type:"color",gui:true}, // Atom's color, as hex code
-        "surfaceColor":{type:"color",gui:true}, // Hex code for color to be used for surface patch over this atom
-        "elem":{type:"element",gui:true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
-        "hetflag":{type:"boolean",valid:false}, // Set to true if atom is a heteroatom
-        "chain":{type:"string",gui:true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
-        "resi":{type:"number",gui:true}, // Residue number 
+        "resn":{type:"string",valid :true, prop: true, gui: true}, // Parent residue name
+        "x":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's x coordinate
+        "y":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's y coordinate
+        "z":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom's z coordinate
+        "color":{type:"color",gui:false}, // Atom's color, as hex code
+        "surfaceColor":{type:"color",gui:false}, // Hex code for color to be used for surface patch over this atom
+        "elem":{type:"element",gui:true, prop: true}, // Element abbreviation (e.g. 'H', 'Ca', etc)
+        "hetflag":{type:"boolean",valid:false, gui:true}, // Set to true if atom is a heteroatom
+        "chain":{type:"string",gui:true, prop: true}, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
+        "resi":{type:"array_range",gui:true}, // Residue number 
         "icode":{type:"number",valid:false,step:0.1},
-        "rescode":{type:"number",valid:false,step:0.1},
+        "rescode":{type:"number",valid:false,step:0.1, prop: true},
         "serial":{type:"number",valid:false,step:0.1}, // Atom's serial id numbermodels
-        "atom":{type:"string",valid:false}, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
+        "atom":{type:"string",valid:false, gui:true, prop: true}, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
         "bonds":{type:"array",valid:false}, // Array of atom ids this atom is bonded to
         "ss":{type:"string",valid:false}, // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
         "singleBonds":{type:"boolean",valid:false}, // true if this atom forms only single bonds or no bonds at all
         "bondOrder":{type:"array",valid:false}, // Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
         "properties":{type:"properties",valid:false}, // Optional mapping of additional properties
-        "b":{type:"number",valid:false,step:0.1}, // Atom b factor data
+        "b":{type:"number", floatType : true,valid:false,step:0.1, prop: true}, // Atom b factor data
         "pdbline":{type:"string",valid:false}, // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
-        "clickable":{type:"boolean",valid:false}, // Set this flag to true to enable click selection handling for this atom
+        "clickable":{type:"boolean",valid:false, gui:false}, // Set this flag to true to enable click selection handling for this atom
+        "contextMenuEnabled":{type:"boolean",valid:false, gui:false}, // Set this flag to true to enable click selection handling for this atom
         "callback":{type:"function",valid:false}, // Callback click handler function to be executed on this atom and its parent viewer
         "invert":{type:"boolean",valid:false}, // for selection, inverts the meaning of the selection
         //unsure about this
-        "reflectivity":{type:"number",gui:true,step:0.1}, //for describing the reflectivity of a model
+        "reflectivity":{type:"number", floatType : true,gui:false,step:0.1}, //for describing the reflectivity of a model
         "altLoc":{type:"invalid",valid:false}, //alternative location, e.g. in PDB
         "sym":{type:'number',gui:false}, //which symmetry
     };
@@ -30087,11 +34460,11 @@ $3Dmol.GLModel = (function() {
     //type is irrelivent here becuase htey are are invalid
     var validExtras ={  // valid atom specs are ok too
         "model":{type:"string",valid :false}, // a single model or list of models from which atoms should be selected
-        "bonds":{type:"string",valid :false}, // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
+        "bonds":{type:"number", valid :false, gui:true}, // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
         "predicate":{type:"string",valid :false}, // user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
-        "invert":{type:"string",valid :false}, // if set, inverts the meaning of the selection
-        "byres":{type:"string",valid :false}, // if set, expands the selection to include all atoms of any residue that has any atom selected
-        "expand":{type:"string",valid :false}, // expands the selection to include all atoms within a given distance from the selection
+        "invert":{type:"boolean",valid :false, gui:true}, // if set, inverts the meaning of the selection
+        "byres":{type:"boolean",valid :false, gui:true}, // if set, expands the selection to include all atoms of any residue that has any atom selected
+        "expand":{type:"number",valid :false, gui:false}, // expands the selection to include all atoms within a given distance from the selection
         "within":{type:"string",valid :false}, // intersects the selection with the set of atoms within a given distance from another selection
         "and":{type:"string",valid :false}, // and boolean logic
         "or":{type:"string",valid :false}, // or boolean logic
@@ -30101,78 +34474,82 @@ $3Dmol.GLModel = (function() {
 
     var validLineSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:true,step:0.1,default:defaultlineWidth},
+        "linewidth":{type:"number", floatType : true,gui:true,step:0.1,default:defaultlineWidth},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validCrossSpec = {
         "hidden":{type:"boolean",gui:true},
-        "linewidth":{type:"number",gui:false,step:0.1,default:defaultlineWidth,min:0},//deprecated
+        "linewidth":{type:"number", floatType : true,gui:false,step:0.1,default:defaultlineWidth,min:0},//deprecated
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:0.1,default:1,min:0.1},
-        "scale":{type:"number",gui:true,step:0.1,default:1,min:0},
+        "radius":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0.1},
+        "scale":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validStickSpec = {
         "hidden":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:0.1,default:0.25,min:0.1},
+        "radius":{type:"number", floatType : true,gui:true,step:0.1,default:0.25,min:0.1},
         "singleBonds":{type:"boolean",gui:true},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validSphereSpec = {
-        "hidden":{type:"boolean",gui:true},
+        "hidden":{type:"boolean",gui:false}, // needed in the new gui it has separate function to hide the spheres
         "singleBonds":{type:"boolean",gui:true},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "radius":{type:"number",gui:true,step:0.1,default:1.5,min:0},
-        "scale":{type:"number",gui:true,step:0.1,default:1.0,min:0.1}
+        "radius":{type:"number", floatType : true,gui:true,step:0.1,default:1.5,min:0},
+        "scale":{type:"number", floatType : true,gui:true,step:0.1,default:1.0,min:0.1},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     var validCartoonSpec = {
         "style":{validItems:["trace","oval","rectangle","parabola","edged"],gui:true},
-        "color":{type:"color",gui:true},
+        "color":{type:"color",gui:true, spectrum : true},
         "arrows":{type:"boolean",gui:true},
         "ribbon":{type:"boolean",gui:true},
         "hidden":{type:"boolean",gui:true},
         "tubes":{type:"boolean",gui:true},
-        "thickness":{type:"number",gui:true,step:0.1,default:1,min:0},
-        "width":{type:"number",gui:true,step:0.1,default:1,min:0},
-        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "thickness":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
+        "width":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
     };
 
     GLModel.validAtomStyleSpecs = {
-        "line":{validItems:validLineSpec,gui:true}, // draw bonds as lines
-        "cross":{validItems:validCrossSpec,gui:true}, // draw atoms as crossed lines (aka stars)
-        "stick":{validItems:validStickSpec,gui:true}, // draw bonds as capped cylinders
-        "sphere":{validItems:validSphereSpec,gui:true}, // draw atoms as spheres
-        "cartoon":{validItems:validCartoonSpec,gui:true}, // draw cartoon representation of secondary structure
-        "colorfunc":{validItems:null,valid:false},
-        "clicksphere":{validItems:validSphereSpec} //invisible style for click handling
+        "line":{validItems:validLineSpec,type:"form",gui:true}, // draw bonds as lines
+        "cross":{validItems:validCrossSpec,type:"form",gui:true}, // draw atoms as crossed lines (aka stars)
+        "stick":{validItems:validStickSpec,type:"form",gui:true}, // draw bonds as capped cylinders
+        "sphere":{validItems:validSphereSpec,type:"form",gui:true}, // draw atoms as spheres
+        "cartoon":{validItems:validCartoonSpec,type:"form",gui:true}, // draw cartoon representation of secondary structure
+        "colorfunc":{validItems:null,type:"js",valid:false},
+        "clicksphere":{validItems:validSphereSpec,type:"form"} //invisible style for click handling
     };
 
     GLModel.validSurfaceSpecs = {
-        "opacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "opacity":{type:"number", floatType : true,gui:true,step:0.01,default:1,min:0,max:1},
         "colorscheme":{type:"colorscheme",gui:true},
         "color":{type:"color",gui:true},
-        "voldata":{type:"number",gui:false},
-        "volscheme":{type:"number",gui:false},
+        "voldata":{type:"number", floatType : true,gui:false},
+        "volscheme":{type:"number", floatType : true,gui:false},
         "map":{type:"number",gui:false}
     };
 
     GLModel.validLabelResSpecs = {
         "font":{type:"string",gui:true},
-        "fontSize":{type:"number",gui:true,step:1,default:12,min:1},
+        "fontSize":{type:"number", floatType : true,gui:true,step:1,default:12,min:1},
         "fontColor":{type:"color",gui:true},
-        "fontOpacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
-        "borderThickness":{type:"number",gui:true,step:0.1,default:1,min:0},
+        "fontOpacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
+        "borderThickness":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0},
         "borderColor":{type:"color",gui:true},
-        "borderOpacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "borderOpacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
         "backgroundColor":{type:"color",gui:true},
-        "backgroundOpacity":{type:"number",gui:true,step:0.1,default:1,min:0,max:1},
+        "backgroundOpacity":{type:"number", floatType : true,gui:true,step:0.1,default:1,min:0,max:1},
         "position":{type:"array",valid:false},
         "inFront":{type:"boolean",gui:true},
         "showBackground":{type:"boolean",gui:true},
@@ -32252,6 +36629,10 @@ $3Dmol.GLModel = (function() {
                 sel = {};
             }
             
+            //if type is just a string, promote it to an object
+            if(typeof(style) === 'string') {
+                style = $3Dmol.specStringToObject(style);
+            }
             // report to console if this is not a valid selector
             var s;
             for (s in sel) {
@@ -32384,6 +36765,35 @@ $3Dmol.GLModel = (function() {
                 if (hover_callback) selected[i].hover_callback = hover_callback;
                 if (unhover_callback) selected[i].unhover_callback = unhover_callback;
 
+            }
+
+            if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
+        };
+
+        /** enable context menu of selected atoms
+         * 
+         * @function $3Dmol.GLModel#enableContextMenu
+         * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+         * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
+         */
+         this.enableContextMenu = function(sel, contextMenuEnabled){
+            var s;
+            for (s in sel) {
+                if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
+                    console.log('Unknown selector ' + s);
+                }
+            }
+
+            // make sure contextMenuEnabled is a boolean
+            contextMenuEnabled = !!contextMenuEnabled;
+            
+            var i;
+            var selected = this.selectedAtoms(sel, atoms);
+            var len = selected.length;
+            for (i = 0; i < len; i++) {                
+
+                selected[i].intersectionShape = {sphere : [], cylinder : [], line : [], triangle : []};
+                selected[i].contextMenuEnabled = contextMenuEnabled;
             }
 
             if (len > 0) molObj = null; // force rebuild to get correct intersection shapes         
@@ -32760,7 +37170,7 @@ $3Dmol.GLModel = (function() {
             if(box) setupDFS();
             
             return new Promise(function(resolve,reject){
-                if(!url.startsWith('http://')) url = 'http://'+url;
+                if(!url.startsWith('http')) url = 'http://'+url;
                 $.get(url+"/traj/numframes/"+path,function(numFrames){
                     if (!isNaN(parseInt(numFrames))) {
                         frames.push(atoms);
@@ -32780,7 +37190,16 @@ $3Dmol.GLModel = (function() {
     * Set coordinates for the atoms from provided trajectory file. 
     * @function $3Dmol.GLModel#setCoordinates
     * @param {string} str - contains the data of the file
-    * @param {string} format - contains the format of the file
+    * @param {string} format - contains the format of the file (mdcrd, inpcrd, pdb, netcdf, or array).  Arrays should be TxNx3 where T is the number of timesteps and N the number of atoms.
+      @example
+         let m = viewer.addModel()  //create an empty model
+         m.addAtoms([{x:0,y:0,z:0,elem:'C'},{x:2,y:0,z:0,elem:'C'}]) //provide a list of dictionaries representing the atoms
+         viewer.setStyle({'sphere':{}})
+         m.setCoordinates([[[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]], [[0.0, 0.0, 0.0], [2.8888888359069824, 0.0, 0.0]], [[0.0, 0.0, 0.0], [3.777777671813965, 0.0, 0.0]], [[0.0, 0.0, 0.0], [4.666666507720947, 0.0, 0.0]], [[0.0, 0.0, 0.0], [5.55555534362793, 0.0, 0.0]], [[0.0, 0.0, 0.0], [6.44444465637207, 0.0, 0.0]], [[0.0, 0.0, 0.0], [7.333333492279053, 0.0, 0.0]], [[0.0, 0.0, 0.0], [8.222222328186035, 0.0, 0.0]], [[0.0, 0.0, 0.0], [9.11111068725586, 0.0, 0.0]], [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0]]],'array');
+         viewer.animate({loop: "forward",reps: 1});
+         viewer.zoomTo();
+         viewer.zoom(0.5);
+         viewer.render();  
     */
 
         this.setCoordinates = function(str, format) {
@@ -32799,7 +37218,7 @@ $3Dmol.GLModel = (function() {
                     console.log(err);
                 }
             }
-            var supportedFormats = {"mdcrd":"","inpcrd":"","pdb":"","netcdf":""};
+            var supportedFormats = {"mdcrd":"","inpcrd":"","pdb":"","netcdf":"","array":""};
             if (supportedFormats.hasOwnProperty(format)) {
                 frames = [];
                 var atomCount = atoms.length;
@@ -32869,6 +37288,8 @@ $3Dmol.GLModel = (function() {
             var reader = new netcdfjs(data);
             values = [].concat.apply([],reader.getDataVariable('coordinates'));
 
+        } else if (format == "array" || Array.isArray(data)) {
+            return data.flat(2);  
         } else {
             let index = data.indexOf("\n"); // remove the first line containing title
             if(format == 'inpcrd') {
@@ -34487,9 +38908,9 @@ $3Dmol.splitMesh = function(mesh) {
 
 /**
  * WebGL-based 3Dmol.js viewer
- * Note: The preferred method of instantiating a GLViewer is through {@link $3Dmol.createViewer} 
- * 
- * @constructor 
+ * Note: The preferred method of instantiating a GLViewer is through {@link $3Dmol.createViewer}
+ *
+ * @constructor
  * @param {Object} element HTML element within which to create viewer
  * @param {ViewerSpec} config Object containing optional configuration for the viewer
  */
@@ -34500,11 +38921,11 @@ $3Dmol.GLViewer = (function() {
 
     // private class helper functions
 
-    function GLViewer(element, config) { 
+    function GLViewer(element, config) {
         // set variables
         config = config || {};
         var callback = config.callback;
-        var defaultcolors = config.defaultcolors;       
+        var defaultcolors = config.defaultcolors;
         if(!defaultcolors)
             defaultcolors = $3Dmol.elementColors.defaultColors;
         var nomouse = config.nomouse;
@@ -34515,15 +38936,16 @@ $3Dmol.GLViewer = (function() {
             bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
         }
         config.backgroundAlpha = config.backgroundAlpha == undefined ? 1.0 : config.backgroundAlpha;
-        
+
 
         var camerax = 0;
         if(typeof(config.camerax) != undefined) {
             camerax = parseFloat(config.camerax);
         }
         var _viewer = this;
-        var container = $(element); //we expect container to be jquery
+        var container = this.container = $(element); //we expect container to be jquery
         var glDOM = null;
+        var _stateManager = null;
 
         var models = []; // atomistic molecular models
         var surfaces = {};
@@ -34532,17 +38954,18 @@ $3Dmol.GLViewer = (function() {
         var fixed_labels = [];
         var clickables = []; //things you can click on
         var hoverables = []; //things you can hover over
+        var contextMenuEnabledAtoms = []; // atoms with context menu
         var current_hover = null;
         var hoverDuration = 500;
         var viewer_frame = 0;
-        
+
         if(config.hoverDuration != undefined) {
             hoverDuration = config.hoverDuration;
         }
         if(config.antialias === undefined) config.antialias = true;
         if(config.cartoonQuality === undefined) config.cartoonQuality = 5;
-        
-        //reimplement jquery getwidth/height        
+
+        //reimplement jquery getwidth/height
         var getRect = function() {
           let div = container[0];
           let rect = div.getBoundingClientRect();
@@ -34557,49 +38980,56 @@ $3Dmol.GLViewer = (function() {
             div.style.visibility = oldvis;
             div.style.position = oldpos;
           }
-          return rect;          
+          return rect;
         };
-        
+
         var getWidth = function() {
           return getRect().width;
         };
-        
+
         var getHeight = function() {
           return getRect().height;
         };
-        
+
         var WIDTH = getWidth();
         var HEIGHT = getHeight();
 
         var viewChangeCallback = null;
         var stateChangeCallback = null;
-        
+
         var NEAR = 1, FAR = 800;
         var CAMERA_Z = 150;
         var fov = 20;
 
         var linkedViewers = [];
-        var renderer = new $3Dmol.Renderer({
-            antialias : config.antialias,
-            preserveDrawingBuffer: true, //so we can export images
-            premultipliedAlpha : false,/* more traditional compositing with background */
-            id:config.id,
-            row:config.row,
-            col:config.col,
-            rows:config.rows,
-            cols:config.cols,
-            canvas:config.canvas,
-            containerWidth:WIDTH,
-            containerHeight:HEIGHT,
-        });
-        renderer.domElement.style.width = "100%";
-        renderer.domElement.style.height = "100%";
-        renderer.domElement.style.padding = "0";
-        renderer.domElement.style.position = "absolute"; //TODO: get rid of this
-        renderer.domElement.style.top = "0px";
-        renderer.domElement.style.left = "0px";
-        renderer.domElement.style.zIndex = "0";       
-        
+        var renderer = null;
+
+        function setupRenderer() {
+
+            renderer = new $3Dmol.Renderer({
+                antialias : config.antialias,
+                preserveDrawingBuffer: true, //so we can export images
+                premultipliedAlpha : false,/* more traditional compositing with background */
+                id:config.id,
+                row:config.row,
+                col:config.col,
+                rows:config.rows,
+                cols:config.cols,
+                canvas:config.canvas,
+                //cannot initialize with zero size
+                containerWidth:WIDTH || 1,
+                containerHeight:HEIGHT || 1,
+            });
+            renderer.domElement.style.width = "100%";
+            renderer.domElement.style.height = "100%";
+            renderer.domElement.style.padding = "0";
+            renderer.domElement.style.position = "absolute"; //TODO: get rid of this
+            renderer.domElement.style.top = "0px";
+            renderer.domElement.style.left = "0px";
+            renderer.domElement.style.zIndex = "0";
+        }
+        setupRenderer();
+
         var row = config.row;
         var col = config.col;
         var cols = config.cols;
@@ -34608,6 +39038,7 @@ $3Dmol.GLViewer = (function() {
         var control_all = config.control_all;
 
         var ASPECT =renderer.getAspect(WIDTH,HEIGHT);
+
 
         var camera = new $3Dmol.Camera(fov, ASPECT, NEAR, FAR, config.orthographic);
         camera.position = new $3Dmol.Vector3(camerax, 0, CAMERA_Z);
@@ -34635,11 +39066,12 @@ $3Dmol.GLViewer = (function() {
         var mouseStartX = 0;
         var mouseStartY = 0;
         var touchDistanceStart = 0;
+        var touchHold = false;
         var currentModelPos = 0;
         var cz = 0;
         var cslabNear = 0;
-        var cslabFar = 0;      
-        
+        var cslabFar = 0;
+
         var decAnim = function() {
             //decrement the number of animations currently
             animated--;
@@ -34662,7 +39094,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         var setSlabAndFog = function() {
-            
+
             var center = camera.position.z - rotationGroup.position.z;
             if (center < 1)
                 center = 1;
@@ -34678,18 +39110,18 @@ $3Dmol.GLViewer = (function() {
             camera.left = -camera.right;
             camera.top = camera.right / ASPECT;
             camera.bottom = -camera.top;
-            
+
             camera.updateProjectionMatrix();
 
             scene.fog.near = camera.near + fogStart * (camera.far - camera.near);
             // if (scene.fog.near > center) scene.fog.near = center;
             scene.fog.far = camera.far;
-            
+
             if(config.disableFog){
                 scene.fog.near=scene.fog.far;
             }
         };
-        
+
         // display scene
         //if nolink is set/true, don't propagate changes to linked viewers
         var show = function(nolink) {
@@ -34700,11 +39132,11 @@ $3Dmol.GLViewer = (function() {
             setSlabAndFog();
             renderer.render(scene, camera);
             // console.log("rendered in " + (+new Date() - time) + "ms");
-            
+
             //have any scene change trigger a callback
             if(viewChangeCallback) viewChangeCallback(_viewer.getView());
 
-            if(!nolink && linkedViewers.length > 0) {                
+            if(!nolink && linkedViewers.length > 0) {
                 var view = _viewer.getView();
                 for(var i = 0; i < linkedViewers.length; i++) {
                     var other = linkedViewers[i];
@@ -34747,17 +39179,20 @@ $3Dmol.GLViewer = (function() {
         var updateClickables = function() {
             clickables.splice(0,clickables.length);
             hoverables.splice(0,hoverables.length);
-            
+            contextMenuEnabledAtoms.splice(0, contextMenuEnabledAtoms.length);
+
             for (let i = 0, il = models.length; i < il; i++) {
                 var model = models[i];
                 if(model) {
                     let atoms = model.selectedAtoms({
                         clickable : true
                     });
-                    
+
                     let hoverable_atoms = model.selectedAtoms({
                         hoverable : true
                     });
+
+                    let contextMenuEnabled_atom = model.selectedAtoms({ contextMenuEnabled : true });
                     // Array.prototype.push.apply(hoverables,hoverable_atoms);
                     for (let n = 0; n < hoverable_atoms.length; n++) {
                         hoverables.push(hoverable_atoms[n]);
@@ -34767,7 +39202,12 @@ $3Dmol.GLViewer = (function() {
                     for (let m = 0; m < atoms.length; m++) {
                         clickables.push(atoms[m]);
                     }
-                    
+
+                    // add atoms into contextMenuEnabledAtoms
+                    for (let m = 0; m < contextMenuEnabled_atom.length; m++) {
+                        contextMenuEnabledAtoms.push(contextMenuEnabled_atom[m]);
+                    }
+
                 }
             }
             for (let i = 0, il = shapes.length; i < il; i++) {
@@ -34781,14 +39221,14 @@ $3Dmol.GLViewer = (function() {
                 }
             }
         };
-        
+
          /**
          * Return a list of objects that intersect that at the specified viewer position.
-         * 
+         *
          * @function $3Dmol.GLViewer#targetedObjects
          * @param {x} - x position in screen coordinates
          * @param {y} - y position in screen coordinates
-         * @param {objects} - list of objects or selection object specifying what object to check for targeting 
+         * @param {objects} - list of objects or selection object specifying what object to check for targeting
         */
         let targetedObjects = this.targetedObjects = function(x,y,objects) {
             var mouse = {
@@ -34803,7 +39243,7 @@ $3Dmol.GLViewer = (function() {
             raycaster.setFromCamera(mouse,camera);
             return raycaster.intersectObjects(modelGroup, objects);
         };
-        
+
         //return offset of container
         var canvasOffset = function() {
           let canvas = glDOM.get(0);
@@ -34816,7 +39256,7 @@ $3Dmol.GLViewer = (function() {
             left: rect.left + win.pageXOffset - docElem.clientLeft
           };
         };
-        
+
         /** Convert model coordinates to screen coordinates.
          * @function $3Dmol.GLViewer#modelToScreen
          * @param {object | list} - an object or list of objects with x,y,z attributes (e.g. an atom)
@@ -34828,24 +39268,25 @@ $3Dmol.GLViewer = (function() {
                 coords = [coords];
                 returnsingle = true;
             }
-            
+
             let results = [];
             let offset = canvasOffset();
             coords.forEach(coord => {
                 let t = new $3Dmol.Vector3(coord.x,coord.y,coord.z);
-                t.applyMatrix4(modelGroup.matrixWorld);   
-                projector.projectVector(t, camera);       
+                t.applyMatrix4(modelGroup.matrixWorld);
+                projector.projectVector(t, camera);
                 let screenX = WIDTH*(t.x+1)/2.0+offset.left;
                 let screenY = -HEIGHT*(t.y-1)/2.0+offset.top;
                 results.push({x:screenX,y:screenY});
-            }); 
+            });
             if(returnsingle) results = results[0];
             return results;
         };
-        
+
         // Checks for selection intersects on mousedown
-        var handleClickSelection = function(mouseX, mouseY, event) {            
+        var handleClickSelection = function(mouseX, mouseY, event) {
             let intersects = targetedObjects(mouseX,mouseY,clickables);
+            // console.log('handleClickSelection', mouseX, mouseY, intersects);
             if (intersects.length) {
                 var selected = intersects[0].clickable;
                 if (selected.callback !== undefined) {
@@ -34858,18 +39299,20 @@ $3Dmol.GLViewer = (function() {
                 }
             }
         };
-        
+
+
+
         //set current_hover to sel (which can be null), calling appropraite callbacks
         var setHover = function(selected, event) {
             if(current_hover == selected) return;
             if(current_hover) {
                 if(typeof (current_hover.unhover_callback) != "function") {
                     current_hover.unhover_callback = $3Dmol.makeFunction(current_hover.unhover_callback);
-                } 
+                }
                 current_hover.unhover_callback(current_hover, _viewer, event, container);
             }
             current_hover=selected;
-            
+
             if (selected && selected.hover_callback !== undefined) {
                 if(typeof (selected.hover_callback) != "function") {
                     selected.hover_callback = $3Dmol.makeFunction(selected.hover_callback);
@@ -34877,10 +39320,10 @@ $3Dmol.GLViewer = (function() {
                 if(typeof (selected.hover_callback) === "function") {
                     selected.hover_callback(selected, _viewer, event, container);
                 }
-            }  
-            
+            }
+
         };
-        
+
         //checks for selection intersects on hover
         var handleHoverSelection = function(mouseX, mouseY){
             if(hoverables.length == 0) return;
@@ -34894,7 +39337,7 @@ $3Dmol.GLViewer = (function() {
                 setHover(null);
             }
         };
-        
+
         //sees if the mouse is still on the object that invoked a hover event and if not then the unhover callback is called
         var handleHoverContinue = function(mouseX,mouseY){
             let intersects = targetedObjects(mouseX,mouseY,hoverables);
@@ -34914,7 +39357,7 @@ $3Dmol.GLViewer = (function() {
                     ev.originalEvent.targetTouches[1].pageY;
             return Math.sqrt(xdiff * xdiff + ydiff * ydiff);
         };
-        
+
         //check targetTouches as well
         var getX = function(ev) {
             var x = ev.pageX;
@@ -34926,10 +39369,10 @@ $3Dmol.GLViewer = (function() {
             else if (ev.originalEvent.changedTouches &&
                     ev.originalEvent.changedTouches[0]) {
                 x = ev.originalEvent.changedTouches[0].pageX;
-            }            
+            }
             return x;
         };
-        
+
         var getY = function(ev) {
             var y = ev.pageY;
             if(y == undefined) y = ev.originalEvent.pageY;
@@ -34940,54 +39383,54 @@ $3Dmol.GLViewer = (function() {
             else if (ev.originalEvent.changedTouches &&
                     ev.originalEvent.changedTouches[0]) {
                 y = ev.originalEvent.changedTouches[0].pageY;
-            }            
+            }
             return y;
         };
-        
+
         /**
          * For a given screen (x,y) displacement return model displacement
          * @param{x} x displacement in screen coordinates
          * @param{y} y displacement in screen corodinates
-         * @param{modelz} z coordinate in model coordinates to compute offset for, default is model axis 
+         * @param{modelz} z coordinate in model coordinates to compute offset for, default is model axis
          * @function $3Dmol.GLViewer#screenOffsetToModel
-        */        
+        */
         var screenOffsetToModel = this.screenOffsetToModel = function(x,y,modelz) {
             var dx = x/WIDTH;
             var dy = y/HEIGHT;
-            var zpos = (modelz === undefined ? rotationGroup.position.z : modelz); 
-            var q = rotationGroup.quaternion;                        
+            var zpos = (modelz === undefined ? rotationGroup.position.z : modelz);
+            var q = rotationGroup.quaternion;
             var t = new $3Dmol.Vector3(0,0,zpos);
             projector.projectVector(t, camera);
             t.x += dx*2;
             t.y -= dy*2;
             projector.unprojectVector(t, camera);
-            t.z = 0;                            
+            t.z = 0;
             t.applyQuaternion(q);
             return t;
         };
-        
+
         /**
          * Distance from screen coordinate to model coordinate assuming screen point
          * is projected to the same depth as model coordinate
          * @param{screen} xy screen coordinate
          * @param{model} xyz model coordinate
          * @function $3Dmol.GLViewer#screenToModelDistance
-        */   
+        */
         this.screenToModelDistance = function(screen,model) {
             let offset = canvasOffset();
-            
-            //convert model to screen to get screen z                     
+
+            //convert model to screen to get screen z
             let mvec = new $3Dmol.Vector3(model.x,model.y,model.z);
-            mvec.applyMatrix4(modelGroup.matrixWorld);   
+            mvec.applyMatrix4(modelGroup.matrixWorld);
             let m = mvec.clone();
             projector.projectVector(mvec, camera);
-            
+
             let t = new $3Dmol.Vector3((screen.x-offset.left)*2/WIDTH-1,(screen.y-offset.top)*2/-HEIGHT+1,mvec.z);
             projector.unprojectVector(t, camera);
-            
+
             return t.distanceTo(m);
-        };                         
-        
+        };
+
         //for grid viewers, return true if point is in this viewer
         var isInViewer = function(x,y) {
             if(viewers != undefined && !control_all){
@@ -34996,7 +39439,7 @@ $3Dmol.GLViewer = (function() {
                 var offset = canvasOffset();
                 var relx = (x - offset.left);
                 var rely = (y - offset.top) ;
-                    
+
                 var r = rows-Math.floor(rely/height)-1;
                 var c = Math.floor(relx/width);
 
@@ -35008,7 +39451,10 @@ $3Dmol.GLViewer = (function() {
 
         // this event is bound to the body element, not the container,
         // so no need to put it inside initContainer()
-        $('body').bind('mouseup touchend', function(ev) {
+        $('body').on('mouseup touchend', function(ev) {
+            // handle touch
+            touchHold = false;
+
             // handle selection
             if(isDragging && scene) { //saw mousedown, haven't moved
                 var x = getX(ev);
@@ -35020,12 +39466,12 @@ $3Dmol.GLViewer = (function() {
                     handleClickSelection(mouseX, mouseY, ev, container);
                 }
             }
-            
+
             isDragging = false;
 
         });
 
-        
+
         //if the user has specify zoom limits, readjust to fit within them
         //also, make sure we don't go past CAMERA_Z
         var adjustZoomToLimits = function(z) {
@@ -35034,42 +39480,57 @@ $3Dmol.GLViewer = (function() {
                 var lower = CAMERA_Z-config.lowerZoomLimit;
                 if(z > lower) z = lower;
             }
-            
+
             if(config.upperZoomLimit && config.upperZoomLimit > 0) {
                 var upper = CAMERA_Z-config.upperZoomLimit;
                 if(z < upper) z = upper;
             }
-            
+
             if(z > CAMERA_Z) {
                 z = CAMERA_Z*0.999; //avoid getting stuck
             }
             return z;
         };
-        
+
         /**
          * Set a callback to call when the view has potentially changed.
-         * 
+         *
          * @function $3Dmol.GLViewer#setViewChangeCallback
         */
         this.setViewChangeCallback = function(callback) {
-            if(typeof(callback) === 'function' || callback == null) 
+            if(typeof(callback) === 'function' || callback == null)
                 viewChangeCallback = callback;
         };
 
         /**
          * Set a callback to call when the view has potentially changed.
-         * 
+         *
          * @function $3Dmol.GLViewer#setStateChangeCallback
         */
         this.setStateChangeCallback = function(callback) {
-            if(typeof(callback) === 'function' || callback == null) 
+            if(typeof(callback) === 'function' || callback == null)
                 stateChangeCallback = callback;
         };
 
         /**
-         * Return object representing internal state of 
+         * Return configuration of viewer
+         */
+        this.getConfig = function() {
+          return config;
+        };
+        
+        /**
+         * Set the configuration object.  Note that some setting may only
+         * have an effect at viewer creation time.
+         */
+        this.setConfig = function(c) {
+          config = c;
+        };
+        	    
+        /**
+         * Return object representing internal state of
          * the viewer appropriate for passing to setInternalState
-         * 
+         *
          * @function $3Dmol.GLViewer#getInternalState
         */
         this.getInternalState = function() {
@@ -35079,39 +39540,39 @@ $3Dmol.GLViewer = (function() {
               ret.models[i] = models[i].getInternalState();
             }
           }
-          
+
           //todo: labels, shapes, surfaces
-          
+
           return ret;
         };
-        
+
         /**
          * Overwrite internal state of the viewer with passed  object
          * which should come from getInternalState.
-         * 
+         *
          * @function $3Dmol.GLViewer#setInternalState
         */
         this.setInternalState = function(state) {
-          
+
           //clear out current viewer
           this.clear();
-          
+
           //set model state
-          var newm = state.models;          
+          var newm = state.models;
           for(let i = 0; i < newm.length; i++) {
             if(newm[i]) {
               models[i] = new $3Dmol.GLModel(i);
               models[i].setInternalState(newm[i]);
             }
           }
-          
+
           //todo: labels, shapes, surfaces
           this.render();
         };
-                                             
+
         /**
          * Set lower and upper limit stops for zoom.
-         * 
+         *
          * @function $3Dmol.GLViewer#setZoomLimits
          * @param {lower} - limit on zoom in (positive number).  Default 0.
          * @param {upper} - limit on zoom out (positive number).  Default infinite.
@@ -35134,11 +39595,12 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Set camera parameters (distance to the origin and field of view)
-         * 
+         *
          * @function $3Dmol.GLViewer#setCameraParameters
-         * @param {parameters} - new camera parameters, with possible fields 
-         *                       being fov for the field of view and z for the 
-         *                       distance to the origin.
+         * @param {parameters} - new camera parameters, with possible fields
+         *                       being fov for the field of view, z for the
+         *                       distance to the origin, and orthographic (boolean)
+         *                       for kind of projection (default false).
          * @example
           $.get("data/set1_122_complex.mol2", function(data) {
                 var m = viewer.addModel(data);
@@ -35158,7 +39620,12 @@ $3Dmol.GLViewer = (function() {
                 CAMERA_Z = parameters.z;
                 camera.z = CAMERA_Z;
             }
+            if (parameters.orthographic !== undefined) {
+                camera.ortho = parameters.orthographic ;
+            }
         };
+
+
 
         var mouseButton;
         var _handleMouseDown = this._handleMouseDown = function(ev) {
@@ -35174,6 +39641,7 @@ $3Dmol.GLViewer = (function() {
             mouseButton = ev.which;
             mouseStartX = x;
             mouseStartY = y;
+            touchHold = true;
             touchDistanceStart = 0;
             if (ev.originalEvent.targetTouches &&
                     ev.originalEvent.targetTouches.length == 2) {
@@ -35184,9 +39652,25 @@ $3Dmol.GLViewer = (function() {
             currentModelPos = modelGroup.position.clone();
             cslabNear = slabNear;
             cslabFar = slabFar;
-           
+
+            setTimeout(function(){
+                if(ev.originalEvent.targetTouches) {
+                    if(touchHold == true){
+                        // console.log('Touch hold', x,y);
+                        glDOM = $(renderer.domElement);
+                        glDOM.trigger('contextmenu');
+                    }
+                    else {
+                        // console.log('Touch hold ended earlier');
+
+                    }
+                }
+            }, 1000);
+
+            // Exiting context menu on next mouse event
+            _stateManager.exitContextMenu();
         };
-        
+
         var _handleMouseScroll  = this._handleMouseScroll = function(ev) { // Zoom
             ev.preventDefault();
             if (!scene)
@@ -35205,49 +39689,106 @@ $3Dmol.GLViewer = (function() {
             if(ev.originalEvent.ctrlKey) {
                 mult = -1.0; //this is a pinch event turned into a wheel event (or they're just holding down the ctrl)
             }
-            if (ev.originalEvent.detail) { 
+            if (ev.originalEvent.detail) {
                 rotationGroup.position.z += mult * scaleFactor * ev.originalEvent.detail / 10;
-            } else if (ev.originalEvent.wheelDelta) { 
+            } else if (ev.originalEvent.wheelDelta) {
                 rotationGroup.position.z -= mult * scaleFactor * ev.originalEvent.wheelDelta / 400;
             }
-            rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);            
-            show();            
-        };        
+            rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);
+            show();
+
+            // Exiting context menu on next mouse event
+            _stateManager.exitContextMenu();
+        };
         /**
          * Return image URI of viewer contents (base64 encoded).
          * @function $3Dmol.GLViewer#pngURI
-         * 
+         *
          */
         this.pngURI = function() {
             return this.getCanvas().toDataURL('image/png');
         };
         
         /**
-         * Return underlying canvas element.         
+         * Return a promise that resolves to an animated PNG image URI of 
+         viewer contents (base64 encoded) for nframes of viewer changes.
+         * @function $3Dmol.GLViewer#apngURI
+         * @return {Promise}
+         */
+        this.apngURI = function(nframes) {
+            let viewer = this;
+            nframes = nframes ? nframes : 1;
+            return new Promise(function (resolve) {
+                let framecnt = 0;
+                let oldcb = viewChangeCallback;
+                let bufpromise = [];
+                let delays = [];
+                let lasttime = Date.now();
+                viewChangeCallback = function() {
+                    delays.push(Date.now()-lasttime);
+                    lasttime = Date.now();
+                    bufpromise.push(new Promise(resolve => {
+                        viewer.getCanvas().toBlob(function(blob) {
+                            blob.arrayBuffer().then(resolve);
+                        }, "image/png");
+                    }));
+                    framecnt += 1;
+                    if(framecnt == nframes) {
+                         viewChangeCallback = oldcb;
+                        
+                         Promise.all(bufpromise).then((buffers) => {                                
+                            //convert to apng
+                            let rgbas = [];
+                            //have to convert png to rgba, before creating the apng
+                            for(let i = 0; i < buffers.length; i++) {
+                                let img = UPNG.decode(buffers[i]);
+                                rgbas.push(UPNG.toRGBA8(img)[0]);
+                            }
+                            let width = viewer.getCanvas().width;
+                            let height = viewer.getCanvas().height;
+                            let apng = UPNG.encode(rgbas, width, height, 0, delays);
+                            let blob = new Blob([apng],{type : 'image/png'});
+                            let fr = new FileReader();
+                            fr.onload = function(e) {
+                                resolve(e.target.result);
+                            };
+                            fr.readAsDataURL(blob);
+                        });
+                    }
+                };
+            });
+            
+        };
+        
+
+        /**
+         * Return underlying canvas element.
          */
         this.getCanvas = function() {
             return glDOM.get(0);
         };
-        
+
         /**
          * Return renderer element.
          */
         this.getRenderer = function() {
             return renderer;
         };
+
+        _stateManager =new $3Dmol.StateManager(_viewer, config); // Creates the UI state management tool
       /**
            * Set the duration of the hover delay
-           * 
+           *
            * @function $3Dmol.GLViewer#setHoverDuration
            * @param {number}
            *            [hoverDuration] - an optional parameter that denotes
            *            the duration of the hover delay (in milliseconds) before the hover action is called
-           * 
+           *
        */
         this.setHoverDuration = function(duration) {
             hoverDuration = duration;
         };
-        
+
         var hoverTimeout;
         var _handleMouseMove = this._handleMouseMove = function(ev) { // touchmove
 
@@ -35255,12 +39796,12 @@ $3Dmol.GLViewer = (function() {
             var offset = canvasOffset();
             var mouseX = ((getX(ev) - offset.left) / WIDTH) * 2 - 1;
             var mouseY = -((getY(ev) - offset.top) / HEIGHT) * 2 + 1;
-            
+
             // hover timeout
             if(current_hover !== null) {
                 handleHoverContinue(mouseX,mouseY,ev);
             }
-            
+
             if(hoverables.length > 0) {
                 hoverTimeout=setTimeout(
                         function(){
@@ -35315,11 +39856,11 @@ $3Dmol.GLViewer = (function() {
                 if (scaleFactor < 80)
                     scaleFactor = 80;
                 rotationGroup.position.z = cz + dy * scaleFactor;
-                rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z); 
+                rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);
             } else if (mode == 1 || mouseButton == 2 || ev.ctrlKey) { // Translate
                 var t = screenOffsetToModel(ratioX*(x-mouseStartX), ratioY*(y-mouseStartY));
                 modelGroup.position.addVectors(currentModelPos,t);
-                
+
             } else if ((mode === 0 || mouseButton == 1) && r !== 0) { // Rotate
                 var rs = Math.sin(r * Math.PI) / r;
                 dq.x = Math.cos(r * Math.PI);
@@ -35332,7 +39873,41 @@ $3Dmol.GLViewer = (function() {
             }
             show();
         };
-        
+
+        var handleContextMenuSelection = function(mouseX, mouseY){
+            let intersects = targetedObjects(mouseX,mouseY,contextMenuEnabledAtoms);
+            // console.log('Intersected Objects',mouseX, mouseY, contextMenuEnabledAtoms,  intersects[0]);
+            var selected = null;
+            if(intersects.length) {
+                selected = intersects[0].clickable;
+                // console.log('intersects and selected', selected);
+            }
+
+            var offset = canvasOffset();
+            var x = mouseStartX - offset.left;
+            var y = mouseStartY - offset.top;
+            _stateManager.openContextMenu(selected, x, y);
+        };
+
+        var _handleContextMenu = this._handleContextMenu = function(ev){
+            ev.preventDefault();
+            var newX = getX(ev);
+            var newY = getY(ev);
+
+            if(newX != mouseStartX || newY != mouseStartY){
+                return;
+            }else{
+                // console.log('Context Menu Called', ev);
+                var x = mouseStartX;
+                var y = mouseStartY;
+                var offset = canvasOffset();
+                var mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
+                var mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
+                handleContextMenuSelection(mouseX, mouseY, _viewer, ev);
+            }
+
+        };
+
         var initContainer = function(element) {
             container = element;
             WIDTH = getWidth();
@@ -35344,24 +39919,21 @@ $3Dmol.GLViewer = (function() {
 
             if (!nomouse) {
                 // user can request that the mouse handlers not be installed
-                glDOM.bind('mousedown touchstart', _handleMouseDown);
-                glDOM.bind('DOMMouseScroll mousewheel', _handleMouseScroll);
-                glDOM.bind('mousemove touchmove', _handleMouseMove);
-                
-                glDOM.bind("contextmenu", function(ev) {
-                    ev.preventDefault();
-                });
-                
+                glDOM.on('mousedown touchstart', _handleMouseDown);
+                glDOM.on('wheel', _handleMouseScroll);
+                glDOM.on('mousemove touchmove', _handleMouseMove);
+
+                glDOM.on("contextmenu", _handleContextMenu);
             }
-            
+
         };
         initContainer(container);
 
         // public methods
         /**
-         * Change the viewer's container element 
+         * Change the viewer's container element
          * Also useful if the original container element was removed from the DOM.
-         * 
+         *
          * @function $3Dmol.GLViewer#setContainer
          *
          * @param {Object | string} element
@@ -35377,22 +39949,22 @@ $3Dmol.GLViewer = (function() {
             initContainer(element);
             return this;
         };
-        
+
         /**
          * Set the background color (default white)
-         * 
+         *
          * @function $3Dmol.GLViewer#setBackgroundColor
          * @param {number}
          *            hex Hexcode specified background color, or standard color spec
          * @param {number}
          *            a Alpha level (default 1.0)
-         * 
+         *
          * @example
-         * 
+         *
          * viewer.setBackgroundColor(0x000000);
 
 
-         * 
+         *
          */
         this.setBackgroundColor = function(hex, a) {
             if(typeof(a) == "undefined") {
@@ -35406,17 +39978,17 @@ $3Dmol.GLViewer = (function() {
             bgColor = c.getHex();
             renderer.setClearColorHex(c.getHex(), a);
             show();
-            
+
             return this;
         };
-        
+
         /**
-         * Set view projection scheme.  Either orthographic or perspective.  
+         * Set view projection scheme.  Either orthographic or perspective.
          * Default is perspective.  Orthographic can also be enabled on viewer creation
          * by setting orthographic to true in the config object.
-         * 
+         *
          * @function $3Dmol.GLViewer#setProjection
-         * 
+         *
          * @example
          viewer.setViewStyle({style:"outline"});
               $.get('data/1fas.pqr', function(data){
@@ -35429,17 +40001,17 @@ $3Dmol.GLViewer = (function() {
                   viewer.setProjection("orthographic");
                   viewer.render(callback);
               });
-         * 
+         *
          */
         this.setProjection = function(proj) {
             camera.ortho = (proj === "orthographic");
-            setSlabAndFog();            
+            setSlabAndFog();
         };
-        
+
         /**
-         * Set global view styles.  
+         * Set global view styles.
          * @function $3Dmol.GLViewer#setViewStyle
-         * 
+         *
          * @example
          *   viewer.setViewStyle({style:"outline"});
               $.get('data/1fas.pqr', function(data){
@@ -35450,7 +40022,7 @@ $3Dmol.GLViewer = (function() {
                   viewer.zoomTo();
                   viewer.render(callback);
               });
-         * 
+         *
          */
          this.setViewStyle = function(parameters) {
             if (parameters.style === "outline") {
@@ -35460,17 +40032,17 @@ $3Dmol.GLViewer = (function() {
                 renderer.enableOutline(params);
             } else {
                 renderer.disableOutline();
-            }           
+            }
             return this;
         };
-         
+
         if(config.style) { //enable setting style in constructor
              this.setViewStyle(config);
         }
 
         /**
          * Set viewer width
-         * 
+         *
          * @function $3Dmol.GLViewer#setWidth
          * @param {number}
          *            w Width in pixels
@@ -35483,7 +40055,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Set viewer height
-         * 
+         *
          * @function $3Dmol.GLViewer#setHeight
          * @param {number}
          *            h Height in pixels
@@ -35496,22 +40068,40 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Resize viewer according to containing HTML element's dimensions
-         * 
+         *
          * @function $3Dmol.GLViewer#resize
          */
         this.resize = function() {
             WIDTH = getWidth();
             HEIGHT = getHeight();
+            let regen = false;
+            if(renderer.isLost() && WIDTH > 0 && HEIGHT > 0) {
+                //create new context
+                container.children('canvas').remove(); //remove existing
+                setupRenderer();
+                initContainer(container);
+                regen = true;
+            }
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
             camera.aspect = ASPECT;
             camera.updateProjectionMatrix();
-            show();
+
+            if(regen) { //restored rendere, need to regenerate scene
+                let options =  renderer.supportedExtensions();
+                options.regen = true;
+                _viewer.render(null,options);
+            } else {
+                show();
+            }
+
+            // UI Edition
+            _stateManager.updateUI();
             return this;
         };
 
         $(window).resize(this.resize);
-        
+
         if(typeof(window.ResizeObserver) !== undefined) {
             var divwatcher = new window.ResizeObserver(this.resize);
             divwatcher.observe(container[0]);
@@ -35519,13 +40109,13 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Return specified model
-         * 
+         *
          * @function $3Dmol.GLViewer#getModel
          * @param {number}
          *            [id=last model id] - Retrieve model with specified id
          * @default Returns last model added to viewer or null if there are no models
          * @return {GLModel}
-         * 
+         *
          * @example // Retrieve reference to first GLModel added var m =
          *    $3Dmol.download("pdb:1UBQ",viewer,{},function(m1){
                   $3Dmol.download("pdb:1UBI", viewer,{}, function(m2) {
@@ -35535,24 +40125,24 @@ $3Dmol.GLViewer = (function() {
                     viewer.getModel().setStyle({cartoon: {color:'blue'}});
                     viewer.render();
                 })
-              });     
+              });
          */
         this.getModel = function(id) {
             if(id === undefined) {
                 return models.length == 0 ? null : models[models.length-1];
-            } 
+            }
             if(id instanceof $3Dmol.GLModel) {
                 return id;
             }
             if(!(id in models)) {
-                if(models.length == 0) 
+                if(models.length == 0)
                     return null;
                 else
                     return models[models.length-1]; //get last model if no (or invalid) id specified
             }
             return models[id];
         };
-        
+
         //interpolate between two normalized quaternions (t between 0 and 1)
         //https://en.wikipedia.org/wiki/Slerp
         var slerp = function(v0, v1, t) {
@@ -35569,7 +40159,7 @@ $3Dmol.GLViewer = (function() {
                         v0.y+t*(v1.y-v0.y),
                         v0.z+t*(v1.z-v0.z),
                         v0.w+t*(v1.w-v0.w));
-                        
+
                 result.normalize();
                 return result;
             }
@@ -35580,13 +40170,13 @@ $3Dmol.GLViewer = (function() {
             if (dot < 0.0) {
                 v1 = v1.clone().multiplyScalar(-1);
                 dot = -dot;
-            }  
+            }
 
             if(dot > 1) dot = 1.0;
             else if(dot < -1) dot = -1.0;
 
             var theta_0 = Math.acos(dot);  // theta_0 = angle between input vectors
-            var theta = theta_0*t;    // theta = angle between v0 and result 
+            var theta = theta_0*t;    // theta = angle between v0 and result
 
             var v2 = v1.clone();
             v2.sub(v0.clone().multiplyScalar(dot));
@@ -35603,22 +40193,22 @@ $3Dmol.GLViewer = (function() {
             ret.normalize();
             return ret;
         };
-        
+
         var spinInterval;
         /**
          * Continuously rotate a scene around the specified axis.
          *
          * Call `$3Dmol.GLViewer.spin(false)` to stop spinning.
-         * 
+         *
          * @function $3Dmol.GLViewer#spin
          * @param {string}
          *            [axis] - Axis ("x", "y", "z", "vx", "vy", or "vz") to rotate around.
-         *            Default "y".  View relative (rather than model relative) axes are prefixed with v. 
+         *            Default "y".  View relative (rather than model relative) axes are prefixed with v.
          * @param {number}
          *            [speed] - Speed multiplier for spinning the viewer. 1 is default and a negative
-         *             value reverses the direction of the spin.        
-         *  
-         */        
+         *             value reverses the direction of the spin.
+         *
+         */
         this.spin = function(axis, speed){
             clearInterval(spinInterval);
             if(typeof axis == 'undefined')
@@ -35642,10 +40232,13 @@ $3Dmol.GLViewer = (function() {
 
             spinInterval = setInterval(
                 function(){
+                    if(!viewer.getCanvas().isConnected && renderer.isLost()) {
+                        clearInterval(spinInterval);
+                    }
                     viewer.rotate(1 * speed,axis);
-                }, 25);            
-            
-        };         
+                }, 25);
+
+        };
 
         //animate motion between current position and passed position
         // can set some parameters to null
@@ -35653,19 +40246,19 @@ $3Dmol.GLViewer = (function() {
         //does relative updates
         //positions objects have modelggroup position, rotation group position.z,
         //and rotationgroup quaternion
-        //return array includes final position, but not current 
+        //return array includes final position, but not current
         //the returned array includes an animate method
         var animateMotion = function(duration, fixed, mpos, rz, rot, cam) {
             var interval = 20;
             var steps = Math.ceil(duration/interval);
             if(steps < 1) steps = 1;
             incAnim();
-            
+
             var curr = {mpos:modelGroup.position.clone(),
                     rz: rotationGroup.position.z,
                     rot: rotationGroup.quaternion.clone(),
                     cam: lookingAt.clone()};
-            
+
             if(fixed) { //precompute path and stick to it
                 steps = new Array(steps);
                 var n = steps.length;
@@ -35684,10 +40277,10 @@ $3Dmol.GLViewer = (function() {
                     if(cam) {
                         next.cam = cam.clone().sub(curr.cam).multiplyScalar(frac).add(curr.cam);
                     }
-                    
+
                     steps[i] = next;
                 }
-                
+
                 let step = 0;
                 let callback = function() {
                     var p = steps[step];
@@ -35704,7 +40297,7 @@ $3Dmol.GLViewer = (function() {
                     if(p.cam) {
                         camera.lookAt(p.cam);
                     }
-                    
+
                     if(step < steps.length) {
                         setTimeout(callback, interval);
                     } else {
@@ -35713,7 +40306,7 @@ $3Dmol.GLViewer = (function() {
                     show();
                 };
                 setTimeout(callback, interval);
-               
+
             } else { //relative update
                 var delta = {};
                 let frac = 1.0/steps;
@@ -35747,7 +40340,7 @@ $3Dmol.GLViewer = (function() {
                         lookingAt.add(delta.cam);
                         camera.lookAt(lookingAt);
                     }
-                    
+
                     if(step < steps) {
                         setTimeout(callback, interval);
                     } else {
@@ -35758,10 +40351,10 @@ $3Dmol.GLViewer = (function() {
                 setTimeout(callback, interval);
             }
         };
-        
+
         /**
          * Rotate scene by angle degrees around axis
-         * 
+         *
          * @function $3Dmol.GLViewer#rotate
          * @param {number}
          *            [angle] - Angle, in degrees, to rotate by.
@@ -35772,8 +40365,8 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of the rotation animation. Default 0 (no animation)
-         * @param {boolean} [fixedPath] - if true animation is constrained to 
-         *      requested motion, overriding updates that happen during the animation         *            
+         * @param {boolean} [fixedPath] - if true animation is constrained to
+         *      requested motion, overriding updates that happen during the animation         *
          * @example     $3Dmol.download('cid:4000', viewer, {}, function() {
       viewer.setStyle({stick:{}});
       viewer.zoomTo();
@@ -35781,7 +40374,7 @@ $3Dmol.GLViewer = (function() {
       viewer.render(callback);
     });
 
-         *  
+         *
          */
         this.rotate = function(angle, axis, animationDuration, fixedPath) {
             animationDuration = animationDuration!==undefined ? animationDuration : 0;
@@ -35797,7 +40390,7 @@ $3Dmol.GLViewer = (function() {
             }else if(axis =="z"){
                 axis = {x:0,y:0,z:1};
             }
-            
+
             //support rotating with respect to view axis, not model
             if(axis == "vx"){
                 axis = {vx:1,vy:0,vz:0};
@@ -35806,13 +40399,13 @@ $3Dmol.GLViewer = (function() {
             }else if(axis =="vz"){
                 axis = {vx:0,vy:0,vz:1};
             }
-            
+
             if(typeof(axis.vx) !== 'undefined') {
               var vaxis = new $3Dmol.Vector3(axis.vx,axis.vy,axis.vz);
               vaxis.applyQuaternion(rotationGroup.quaternion);
               axis = {x:vaxis.x, y:vaxis.y, z: vaxis.z};
             }
-                        
+
             var qFromAngle = function(rangle) {
                 var s = Math.sin(rangle / 2.0);
                 var c = Math.cos(rangle / 2.0);
@@ -35824,17 +40417,17 @@ $3Dmol.GLViewer = (function() {
 
                 return new $3Dmol.Quaternion(i, j, k, c).normalize();
             };
-            
+
             var rangle = Math.PI * angle / 180.0;
             var q = qFromAngle(rangle);
-            
+
             if(animationDuration ){
                 var final = new $3Dmol.Quaternion().copy(rotationGroup.quaternion).multiply(q);//final
                 animateMotion(animationDuration,fixedPath,
                         modelGroup.position,
-                        rotationGroup.position.z, 
+                        rotationGroup.position.z,
                         final,
-                        lookingAt);              
+                        lookingAt);
             } else { //not animated
                 rotationGroup.quaternion.multiply(q);
                 show();
@@ -35855,7 +40448,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         /** Returns an array representing the current viewpoint.
-         * Translation, zoom, and rotation quaternion. 
+         * Translation, zoom, and rotation quaternion.
          * @function $3Dmol.GLViewer#getView
          * @returns {Array.<number>} [ pos.x, pos.y, pos.z, rotationGroup.position.z, q.x, q.y, q.z, q.w ]
          *  */
@@ -35869,7 +40462,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         /** Sets the view to the specified translation, zoom, and rotation.
-         * 
+         *
          * @function $3Dmol.GLViewer#setView
          * @param {Array.<number>} arg Array formatted identically to the return value of getView */
         this.setView = function(arg, nolink) {
@@ -35900,21 +40493,21 @@ $3Dmol.GLViewer = (function() {
 
         // apply styles, models, etc in viewer
         /**
-         * Render current state of viewer, after 
+         * Render current state of viewer, after
          * adding/removing models, applying styles, etc.
-         * 
+         *
          * @function $3Dmol.GLViewer#render
          */
         this.render = function(callback, exts) {
             renderer.setViewport();
             updateClickables(); //must render for clickable styles to take effect
             var view = this.getView();
-            
+
             if(stateChangeCallback) {
               //todo: have ability to only send delta updates
               stateChangeCallback(this.getInternalState());
             }
-            
+
             var i, n;
             if(!exts) exts = renderer.supportedExtensions();
             for (i = 0; i < models.length; i++) {
@@ -35933,7 +40526,7 @@ $3Dmol.GLViewer = (function() {
                     }
                 }
             }
-            
+
             for (i = 0; i < labels.length; i++) {
                 if (labels[i] && typeof(labels[i].frame) != 'undefined' && labels[i].frame >= 0) { //exists and has frame specifier
                     modelGroup.remove(labels[i].sprite);
@@ -35941,8 +40534,8 @@ $3Dmol.GLViewer = (function() {
                         modelGroup.add(labels[i].sprite);
                     }
                 }
-            }            
-            
+            }
+
             for (i in surfaces) { // this is an object with possible holes
                 if(!surfaces.hasOwnProperty(i)) continue;
                 var surfArr = surfaces[i];
@@ -35985,8 +40578,8 @@ $3Dmol.GLViewer = (function() {
                             } else {
                                 smesh.visible = true;
                             }
-                            if (surfArr[n].symmetries.length > 1 || 
-                            (surfArr[n].symmetries.length == 1 && 
+                            if (surfArr[n].symmetries.length > 1 ||
+                            (surfArr[n].symmetries.length == 1 &&
                             !(surfArr[n].symmetries[n].isIdentity()))) {
                                 var j;
                                 var tmeshes = new $3Dmol.Object3D(); //transformed meshes
@@ -36007,7 +40600,7 @@ $3Dmol.GLViewer = (function() {
                     }
                 }
             }
-            
+
             this.setView(view); // Calls show() => renderer render
             if(typeof callback ==='function'){
                 callback(this);
@@ -36029,7 +40622,7 @@ $3Dmol.GLViewer = (function() {
                 ms = sel.model;
                 if (!Array.isArray(ms))
                     ms = [ ms ];
-                
+
                 for (let i = 0; i < ms.length; i++) {
                         //allow referencing models by order of creation
                     if(typeof ms[i] === 'number') {
@@ -36037,14 +40630,14 @@ $3Dmol.GLViewer = (function() {
                         //support python backward indexing
                         if(index < 0) index += models.length;
                         ms[i] = models[index];
-                    }             
+                    }
                 }
             }
-            
-            return ms;            
+
+            return ms;
         }
         /**
-         * 
+         *
          * @param {AtomSelectionSpec}
          *            sel
          * @return {AtomSpec[]}
@@ -36064,7 +40657,7 @@ $3Dmol.GLViewer = (function() {
         }
 
         /**
-         * 
+         *
          * @param {AtomSpec}
          *            atom
          * @param {AtomSpec}
@@ -36076,7 +40669,7 @@ $3Dmol.GLViewer = (function() {
                 sel = {};
 
             var ms = getModelList(sel);
-            
+
             for (var i = 0; i < ms.length; i++) {
                 if (ms[i].atomIsSelected(atom, sel))
                     return true;
@@ -36087,7 +40680,7 @@ $3Dmol.GLViewer = (function() {
 
 
         /** return list of atoms selected by sel
-         * 
+         *
          * @function $3Dmol.GLViewer#selectedAtoms
          * @param {AtomSelectionSpec} sel
          * @return {Array.<Object>}
@@ -36098,7 +40691,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
         * Returns valid values for the specified attribute in the given selection
-        * @function $3Dmol.GlViewer#getUniqueValues 
+        * @function $3Dmol.GlViewer#getUniqueValues
         * @param {string} attribute
         * @param {AtomSelectionSpec} sel
         * @return {Array.<Object>}
@@ -36106,7 +40699,7 @@ $3Dmol.GLViewer = (function() {
         */
         this.getUniqueValues = function(attribute, sel){
             if (typeof (sel) === "undefined")
-                sel = {};            
+                sel = {};
             var atoms = getAtomsFromSel(sel);
             var values = {};
 
@@ -36119,11 +40712,11 @@ $3Dmol.GLViewer = (function() {
 
             return Object.keys(values);
         };
-        
+
         /**
          * Return pdb output of selected atoms (if atoms from pdb input)
-         * 
-         * @function $3Dmol.GLViewer#pdbData  
+         *
+         * @function $3Dmol.GLViewer#pdbData
          * @param {Object=} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
          * @return {string} PDB string of selected atoms
          */
@@ -36135,11 +40728,11 @@ $3Dmol.GLViewer = (function() {
             }
             return ret;
         };
-        
+
 
         /**
          * Zoom current view by a constant factor
-         * 
+         *
          * @function $3Dmol.GLViewer#zoom
          * @param {number}
          *            [factor] - Magnification factor. Values greater than 1
@@ -36147,9 +40740,9 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @param {Boolean} [fixedPath] - if true animation is constrained to 
+         * @param {Boolean} [fixedPath] - if true animation is constrained to
          *      requested motion, overriding updates that happen during the animation
-         * @example   
+         * @example
     $.get('data/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
@@ -36157,7 +40750,7 @@ $3Dmol.GLViewer = (function() {
       viewer.zoom(2,1000);
       viewer.render();
     });
-    
+
              */
         this.zoom = function(factor,animationDuration,fixedPath) {
             factor = factor || 2;
@@ -36167,8 +40760,8 @@ $3Dmol.GLViewer = (function() {
 
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
-                        modelGroup.position, 
-                        adjustZoomToLimits(final_z), 
+                        modelGroup.position,
+                        adjustZoomToLimits(final_z),
                         rotationGroup.quaternion,
                         lookingAt);
             } else { //no animation
@@ -36177,24 +40770,24 @@ $3Dmol.GLViewer = (function() {
             }
             return this;
         };
-        
+
         /**
          * Translate current view by x,y screen coordinates
          * This pans the camera rather than translating the model.
-         * 
+         *
          * @function $3Dmol.GLViewer#translate
          * @param {number} x Relative change in view coordinates of camera
          * @param {number} y Relative change in view coordinates of camera
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @param {Boolean} [fixedPath] - if true animation is constrained to 
-         *      requested motion, overriding updates that happen during the animation         *            
+         * @param {Boolean} [fixedPath] - if true animation is constrained to
+         *      requested motion, overriding updates that happen during the animation         *
          * @example     $.get('data/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
-      viewer.translate(200,50);         
+      viewer.translate(200,50);
       viewer.rotate(90,'z');
       viewer.render(callback);
     });
@@ -36204,18 +40797,18 @@ $3Dmol.GLViewer = (function() {
             var dx = x/WIDTH;
             var dy = y/HEIGHT;
             var v = new $3Dmol.Vector3(0,0,-CAMERA_Z);
-            
+
             projector.projectVector(v, camera);
             v.x -= dx;
             v.y -= dy;
             projector.unprojectVector(v, camera);
-            v.z = 0;            
+            v.z = 0;
 
             var final_position=lookingAt.clone().add(v);
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
                         modelGroup.position,
-                        rotationGroup.position.z, 
+                        rotationGroup.position.z,
                         rotationGroup.quaternion,
                         final_position);
             } else { //no animation
@@ -36225,39 +40818,39 @@ $3Dmol.GLViewer = (function() {
             }
             return this;
         };
-        
+
         /**
          * Translate current models by x,y screen coordinates
          * This translates the models relative to the current view. It does
          * not change the center of rotation.
-         * 
+         *
          * @function $3Dmol.GLViewer#translateScene
          * @param {number} x Relative change in x screen coordinate
          * @param {number} y Relative change in y screen coordinate
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @param {Boolean} [fixedPath] - if true animation is constrained to 
-         *      requested motion, overriding updates that happen during the animation         *            
+         * @param {Boolean} [fixedPath] - if true animation is constrained to
+         *      requested motion, overriding updates that happen during the animation         *
          * @example     $.get('data/4csv.pdb', function(data) {
       viewer.addModel(data,'pdb');
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
-      viewer.translateScene(200,50);         
+      viewer.translateScene(200,50);
       viewer.rotate(90,'z'); // will no longer be around model center
       viewer.render(callback);
     });
          */
         this.translateScene = function(x, y, animationDuration, fixedPath) {
             animationDuration = animationDuration!==undefined ? animationDuration : 0;
-            
+
             var t = screenOffsetToModel(x,y);
             var final_position=modelGroup.position.clone().add(t);
-                
+
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
                         modelGroup.position,
-                        rotationGroup.position.z, 
+                        rotationGroup.position.z,
                         rotationGroup.quaternion,
                         lookingAt);
             } else { //no animation
@@ -36269,7 +40862,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Adjust slab to fully enclose selection (default everything).
-         * 
+         *
          * @function $3Dmol.GLViewer#fitSlab
          * @param {Object}
          *            [sel] - Selection specification specifying model and atom
@@ -36281,8 +40874,8 @@ $3Dmol.GLViewer = (function() {
             var tmp = $3Dmol.getExtent(atoms);
 
             // fit to bounding box
-            var x = tmp[1][0] - tmp[0][0], 
-                y = tmp[1][1] - tmp[0][1], 
+            var x = tmp[1][0] - tmp[0][0],
+                y = tmp[1][1] - tmp[0][1],
                 z = tmp[1][2] - tmp[0][2];
 
             var maxD = Math.sqrt(x * x + y * y + z * z);
@@ -36294,11 +40887,11 @@ $3Dmol.GLViewer = (function() {
             slabFar = maxD / 2;
 
             return this;
-        };        
-        
+        };
+
         /**
          * Re-center the viewer around the provided selection (unlike zoomTo, does not zoom).
-         * 
+         *
          * @function $3Dmol.GLViewer#center
          * @param {Object}
          *            [sel] - Selection specification specifying model and atom
@@ -36306,11 +40899,11 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @param {Boolean} [fixedPath] - if true animation is constrained to 
-         *      requested motion, overriding updates that happen during the animation         *            
-         * @example // if the user were to pass the animationDuration value to 
+         * @param {Boolean} [fixedPath] - if true animation is constrained to
+         *      requested motion, overriding updates that happen during the animation         *
+         * @example // if the user were to pass the animationDuration value to
          *           // the function like so viewer.zoomTo({resn:'STI'},1000);
-         *         //   the program would center on resn 'STI' over the course 
+         *         //   the program would center on resn 'STI' over the course
          *         //   of 1 second(1000 milleseconds).
          *  // Reposition to centroid of all atoms of all models in this
          * //viewer glviewer.center();
@@ -36380,7 +40973,7 @@ $3Dmol.GLViewer = (function() {
             maxD = Math.sqrt(x * x + y * y + z * z);
             if (maxD < 5)
                 maxD = 5;
-            
+
             //find the farthest atom from center to get max distance needed for view
             var maxDsq = 25;
             for (var i = 0; i < atoms.length; i++) {
@@ -36390,26 +40983,26 @@ $3Dmol.GLViewer = (function() {
                         maxDsq = dsq;
                 }
             }
-            
+
             maxD = Math.sqrt(maxDsq)*2;
             var finalpos = center.clone().multiplyScalar(-1);
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
-                        finalpos, 
-                        rotationGroup.position.z, 
+                        finalpos,
+                        rotationGroup.position.z,
                         rotationGroup.quaternion,
                         lookingAt);
-            } else { //no animation 
+            } else { //no animation
                 modelGroup.position = finalpos;
                 show();
             }
             return this;
         };
-        
+
         /**
          * Zoom to center of atom selection.  The slab will be set appropriately for
          * the selection, unless an empty selection is provided, in which case there will be no slab.
-         * 
+         *
          * @function $3Dmol.GLViewer#zoomTo
          * @param {Object}
          *            [sel] - Selection specification specifying model and atom
@@ -36417,10 +41010,10 @@ $3Dmol.GLViewer = (function() {
          * @param {number}
          *            [animationDuration] - an optional parameter that denotes
          *            the duration of a zoom animation
-         * @param {Boolean} [fixedPath] - if true animation is constrained to 
-         *      requested motion, overriding updates that happen during the animation         *            
-          * @example   
-    
+         * @param {Boolean} [fixedPath] - if true animation is constrained to
+         *      requested motion, overriding updates that happen during the animation         *
+          * @example
+
 
               $.get('data/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
@@ -36430,7 +41023,7 @@ $3Dmol.GLViewer = (function() {
                           voldata: new $3Dmol.VolumeData(volumedata, "cube"),
                           volscheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'charge'))
                       },{});
-                      
+
                   viewer.render();
                   });
                   viewer.zoomTo();
@@ -36452,7 +41045,7 @@ $3Dmol.GLViewer = (function() {
                     if(shape.boundingSphere.box) {
                         let box = shape.boundingSphere.box;
                         atoms.push(new $3Dmol.Vector3(box.min.x,box.min.y,box.min.z));
-                        atoms.push(new $3Dmol.Vector3(box.max.x,box.max.y,box.max.z));                        
+                        atoms.push(new $3Dmol.Vector3(box.max.x,box.max.y,box.max.z));
                     } else if(shape.boundingSphere.center) {
                         var c = shape.boundingSphere.center;
                         var r = shape.boundingSphere.radius;
@@ -36473,17 +41066,17 @@ $3Dmol.GLViewer = (function() {
                 allbox = $3Dmol.getExtent(atoms);
                 if(!natoms) { //if no atoms, use shapes for center
                     for(let i = 0; i < 3; i++) { //center of bounding box
-                        atombox[2][i] = (allbox[0][i]+allbox[1][i])/2; 
+                        atombox[2][i] = (allbox[0][i]+allbox[1][i])/2;
                      }
                 }
             } else { //include all atoms in slab calculation
                 let allatoms = getAtomsFromSel({});
-                allbox = $3Dmol.getExtent(allatoms);  
+                allbox = $3Dmol.getExtent(allatoms);
             }
 
             // use selection for center
             var center = new $3Dmol.Vector3(atombox[2][0], atombox[2][1], atombox[2][2]);
-            
+
             // but all for bounding box
             var x = allbox[1][0] - allbox[0][0], y = allbox[1][1]
                     - allbox[0][1], z = allbox[1][2] - allbox[0][2];
@@ -36495,11 +41088,12 @@ $3Dmol.GLViewer = (function() {
             // use full bounding box for slab/fog
             slabNear = -maxD / 1.9;
             slabFar = maxD / 2;
-            
-            //if we are selecting everything, do not slab
+
+            //if we are selecting everything, have ver permissive slab
+            //can't do "infinity" size since this will break orthographic
             if(Object.keys(sel).length === 0) {
-                slabNear = -999999;
-                slabFar = 999999;
+                slabNear = Math.min(-maxD*2,-50);
+                slabFar = Math.max(maxD*2,50);
             }
 
             // keep at least this much space in view
@@ -36508,10 +41102,10 @@ $3Dmol.GLViewer = (function() {
             x = atombox[1][0] - atombox[0][0];
             y = atombox[1][1] - atombox[0][1];
             z = atombox[1][2] - atombox[0][2];
-            maxD = Math.sqrt(x * x + y * y + z * z);           
+            maxD = Math.sqrt(x * x + y * y + z * z);
             if (maxD < MAXD)
                 maxD = MAXD;
-            
+
             //find the farthest atom from center to get max distance needed for view
             var maxDsq = MAXD*MAXD;
             for (var i = 0; i < atoms.length; i++) {
@@ -36521,32 +41115,32 @@ $3Dmol.GLViewer = (function() {
                         maxDsq = dsq;
                 }
             }
-            
+
             maxD = Math.sqrt(maxDsq)*2;
             var finalpos = center.clone().multiplyScalar(-1);
             var finalz =  -(maxD * 0.5
                     / Math.tan(Math.PI / 180.0 * camera.fov / 2) - CAMERA_Z);
-                    
+
             finalz = adjustZoomToLimits(finalz);
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
                         finalpos,
-                        finalz, 
+                        finalz,
                         rotationGroup.quaternion,
-                        lookingAt);                
+                        lookingAt);
             } else {
                 modelGroup.position = finalpos;
                 rotationGroup.position.z = finalz;
                 show();
             }
             return this;
-        
+
         };
 
         /**
          * Set slab of view (contents outside of slab are clipped).
          * Must call render to update.
-         * 
+         *
          * @function $3Dmol.GLViewer#setSlab
          * @param {number} near near clipping plane distance
          * @param {number} far far clipping plane distance
@@ -36555,10 +41149,10 @@ $3Dmol.GLViewer = (function() {
             slabNear = near;
             slabFar = far;
         };
-        
+
         /**
          * Get slab of view (contents outside of slab are clipped).
-         * 
+         *
          * @function $3Dmol.GLViewer#getSlab
          * @return {Object}
          *      @property {number} near - near clipping plane distance
@@ -36567,10 +41161,10 @@ $3Dmol.GLViewer = (function() {
         this.getSlab = function() {
             return {near: slabNear, far: slabFar};
         };
-                
+
         /**
          * Add label to viewer
-         * 
+         *
          * @function $3Dmol.GLViewer#addLabel
          * @param {string}
          *            text - Label text
@@ -36580,10 +41174,10 @@ $3Dmol.GLViewer = (function() {
          *            sel - Set position of label to center of this selection
          * @param {boolean} noshow - if true, do not immediately display label - when adding multiple labels this is more efficient
          * @return {$3Dmol.Label}
-         * 
+         *
          * @example
          *  $3Dmol.download("pdb:2EJ0",viewer,{},function(){
-                  
+
                   viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
                   viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
                                            borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
@@ -36600,12 +41194,12 @@ $3Dmol.GLViewer = (function() {
                   viewer.setStyle({chain:'E'},{cross:{hidden:false,
                                                       linewidth:1.0,
                                                       color:'black'}});
-                  
+
                   viewer.render();
 
-                  
+
                 });
-            
+
          */
         this.addLabel = function(text, options, sel, noshow) {
             options = options || {};
@@ -36623,25 +41217,25 @@ $3Dmol.GLViewer = (function() {
             if(!noshow) show();
             return label;
         };
-        
+
 
 
         /** Add residue labels.  This will generate one label per a
          * residue within the selected atoms.  The label will be at the
          * centroid of the atoms and styled according to the passed style.
          * The label text will be [resn][resi]
-         * 
+         *
          * @function $3Dmol.GLViewer#addResLabels
          * @param {Object} sel
          * @param {Object} style
          * @param {boolean} byframe - if true, create labels for every individual frame, not just current
-         * 
-         * * @example  
+         *
+         * * @example
              $3Dmol.download("mmtf:2ll5",viewer,{},function(){
                   viewer.setStyle({stick:{radius:0.15},cartoon:{}});
                   viewer.addResLabels({hetflag:false}, {font: 'Arial', fontColor:'black',showBackground:false, screenOffset: {x:0,y:0}});
                   viewer.zoomTo();
-                  viewer.render();                  
+                  viewer.render();
                 });
          */
         this.addResLabels = function(sel, style, byframe) {
@@ -36653,18 +41247,18 @@ $3Dmol.GLViewer = (function() {
 
         /** Add property labels.  This will generate one label per a selected
          * atom at the atom's coordinates with the property value as the label text.
-         * 
+         *
          * @function $3Dmol.GLViewer#addPropertyLabels
          * @param {string} prop - property name
          * @param {Object} sel
          * @param {Object} style
-         * 
-         * * @example  
+         *
+         * * @example
              $3Dmol.download("cid:5291",viewer,{},function(){
                   viewer.setStyle({stick: {radius:.2}});
                   viewer.addPropertyLabels("index",{not:{elem:'H'}}, {fontColor:'black',font: 'sans-serif', fontSize: 28, showBackground:false,alignment:'center'});
                   viewer.zoomTo();
-                  viewer.render();                  
+                  viewer.render();
                 });
          */
         this.addPropertyLabels = function(prop, sel, style) {
@@ -36672,15 +41266,15 @@ $3Dmol.GLViewer = (function() {
             show();
             return this;
         };
-        
+
         /**
          * Remove label from viewer
-         * 
+         *
          * @function $3Dmol.GLViewer#removeLabel
          * @param {$3Dmol.Label}
          *            label - $3Dmol label
-         * 
-         * @example // Remove labels created in 
+         *
+         * @example // Remove labels created in
          $3Dmol.download("pdb:2EJ0",viewer,{},function(){
                   var toremove = viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
                   viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
@@ -36689,7 +41283,7 @@ $3Dmol.GLViewer = (function() {
                   viewer.removeLabel(toremove);
                   viewer.render();
 
-                  
+
                 });
 
          */
@@ -36711,16 +41305,16 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Remove all labels from viewer
-         * 
+         *
          * @function $3Dmol.GLViewer#removeAllLabels
-         *         @example             
+         *         @example
         $3Dmol.download("pdb:1ubq",viewer,{},function(){
-                          
+
                viewer.addResLabels();
-               viewer.setStyle({},{stick:{}}); 
+               viewer.setStyle({},{stick:{}});
                viewer.render( ); //show labels
 
-               viewer.removeAllLabels();              
+               viewer.removeAllLabels();
                viewer.render(); //hide labels
         });
          */
@@ -36734,11 +41328,11 @@ $3Dmol.GLViewer = (function() {
             show();
             return this;
         };
-        
+
         // Modify label style
         /**
          * Modify existing label's style
-         * 
+         *
          * @function $3Dmol.GLViewer#setLabelStyle
          * @param {$3Dmol.Label}
          *            label - $3Dmol label
@@ -36760,7 +41354,7 @@ $3Dmol.GLViewer = (function() {
         // Change label text
         /**
          * Modify existing label's text
-         * 
+         *
          * @function $3Dmol.GLViewer#setLabelText
          * @param {$3Dmol.Label}
          *            label - $3Dmol label
@@ -36780,9 +41374,9 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * Add shape object to viewer 
+         * Add shape object to viewer
          * @see {@link $3Dmol.GLShape}
-         * 
+         *
          * @function $3Dmol.GLViewer#addShape
          * @param {ShapeSpec} shapeSpec - style specification for label
          * @return {$3Dmol.GLShape}
@@ -36814,7 +41408,7 @@ $3Dmol.GLViewer = (function() {
                 shapes.pop();
             return this;
         };
-        
+
         /**
          * Remove all shape objects from viewer
          * @function $3Dmol.GLViewer#removeAllShapes
@@ -36828,7 +41422,7 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
 
-        //gets the center of the selection 
+        //gets the center of the selection
         var getSelectionCenter = function(spec){
             if(spec.hasOwnProperty("x") && spec.hasOwnProperty("y") && spec.hasOwnProperty("z"))
                 return spec;
@@ -36841,16 +41435,16 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * Create and add sphere shape. This method provides a shorthand 
+         * Create and add sphere shape. This method provides a shorthand
          * way to create a spherical shape object
-         * 
+         *
          * @function $3Dmol.GLViewer#addSphere
          * @param {SphereShapeSpec} spec - Sphere shape style specification
          * @return {$3Dmol.GLShape}
          @example
-         
+
          viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
-         
+
          viewer.render();
          */
         this.addSphere = function(spec) {
@@ -36867,14 +41461,14 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * Create and add box shape. This method provides a shorthand 
+         * Create and add box shape. This method provides a shorthand
          * way to create a box shape object
-         * 
+         *
          * @function $3Dmol.GLViewer#addBox
          * @param {BoxSpec} spec - Box shape style specification
          * @return {$3Dmol.GLShape}
          @example
-         
+
          viewer.addLine({color:'red',start:{x:0,y:0,z:0},end:{x:5,y:0,z:0}});
          viewer.addLine({color:'blue',start:{x:0,y:0,z:0},end:{x:0,y:5,z:0}});
          viewer.addLine({color:'green',start:{x:0,y:0,z:0},end:{x:0,y:0,z:5}});
@@ -36902,10 +41496,10 @@ $3Dmol.GLViewer = (function() {
 
             return s;
         };
-        
+
         /**
          * Create and add arrow shape
-         * 
+         *
          * @function $3Dmol.GLViewer#addArrow
          * @param {ArrowSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
@@ -36930,10 +41524,10 @@ $3Dmol.GLViewer = (function() {
          */
         this.addArrow = function(spec) {
             spec = spec || {};
-            
+
             spec.start = getSelectionCenter(spec.start);
-            spec.end = getSelectionCenter(spec.end);      
-            
+            spec.end = getSelectionCenter(spec.end);
+
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addArrow(spec);
@@ -36942,10 +41536,10 @@ $3Dmol.GLViewer = (function() {
 
             return s;
         };
-        
+
         /**
          * Create and add cylinder shape
-         * 
+         *
          * @function $3Dmol.GLViewer#addCylinder
          * @param {CylinderSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
@@ -36998,7 +41592,7 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Create and add Curve shape
-         * 
+         *
          * @function $3Dmol.GLViewer#addCurve
          * @param {CurveSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
@@ -37009,19 +41603,19 @@ $3Dmol.GLViewer = (function() {
                                   smooth: 10,
                                   fromArrow:false,
                                   toArrow: true,
-                                  color:'orange',                                  
+                                  color:'orange',
                                   });
               viewer.addCurve({points: [{x:-1,y:0.0,z:0.0}, {x:-5.0,y:5.0,z:0.0}, {x:-2,y:10.0,z:0.0}],
                                   radius:1,
                                   fromArrow:true,
                                   toArrow: false,
-                                  color:'purple',                                  
+                                  color:'purple',
                                   });
               viewer.zoomTo();
               viewer.render();
          */
         this.addCurve = function(spec) {
-            spec = spec || {};            
+            spec = spec || {};
             var s = new $3Dmol.GLShape(spec);
             s.shapePosition = shapes.length;
             s.addCurve(spec);
@@ -37034,13 +41628,13 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Create and add line shape
-         * 
+         *
          * @function $3Dmol.GLViewer#addLine
          * @param {LineSpec} spec - Style specification, can specify dashed, dashLength, and gapLength
          * @return {$3Dmol.GLShape}
          @example
          $3Dmol.download("pdb:2ABJ",viewer,{},function(){
-                  
+
                   viewer.setViewStyle({style:"outline"});
                   viewer.setStyle({chain:'A'},{sphere:{hidden:true}});
                   viewer.setStyle({chain:'D'},{sphere:{radius:3.0}});
@@ -37069,9 +41663,9 @@ $3Dmol.GLViewer = (function() {
 
             return s;
         };
-        
+
         /**
-         * Unit Cell shape specification. 
+         * Unit Cell shape specification.
          * @typedef UnitCellStyleSpec
          * @prop {LineStyleSpec} box - line style used to draw box
          * @prop {ArrowSpec} astyle - arrow specification of "a" axis
@@ -37083,9 +41677,9 @@ $3Dmol.GLViewer = (function() {
          * @prop {LabelSpec} blabelstyle - label style for b axis
          * @prop {string} clabel - label for c axis
          * @prop {LabelSpec} clabelstyle - label style for c axis
-         
+
          */
-        
+
         /**
          * Create and add unit cell visualization.
          *
@@ -37099,12 +41693,12 @@ $3Dmol.GLViewer = (function() {
                   viewer.addUnitCell(m, {box:{color:'purple'},alabel:'X',blabel:'Y',clabel:'Z',alabelstyle: {fontColor: 'black',backgroundColor:'white',inFront:true,fontSize:40},astyle:{color:'darkred', radius:5,midpos: -10}});
                   viewer.zoomTo();
                   viewer.render();
-    });         
+    });
          */
         this.addUnitCell = function(model, spec) {
             model = this.getModel(model);
             spec = spec || {alabel: 'a', blabel: 'b', clabel: 'c'};
-            
+
             spec.box = spec.box || {};
             spec.astyle = spec.astyle || {color: 'red', radius: 0.1,midpos: -1};
             spec.bstyle = spec.bstyle || {color: 'green', radius: 0.1,midpos: -1};
@@ -37130,18 +41724,18 @@ $3Dmol.GLViewer = (function() {
                     alpha = alpha * Math.PI/180.0;
                     beta = beta * Math.PI/180.0;
                     gamma = gamma * Math.PI/180.0;
-            
+
                     var u, v, w;
-            
+
                     u = Math.cos(beta);
                     v = (Math.cos(alpha) - Math.cos(beta)*Math.cos(gamma))/Math.sin(gamma);
                     w = Math.sqrt(Math.max(0, 1-u*u-v*v));
-            
-                    matrix = new $3Dmol.Matrix3(a, b*Math.cos(gamma), c*u, 
+
+                    matrix = new $3Dmol.Matrix3(a, b*Math.cos(gamma), c*u,
                                                 0, b*Math.sin(gamma), c*v,
-                                                0, 0,                 c*w); 
-                }  
-         
+                                                0, 0,                 c*w);
+                }
+
                 var points = [  new $3Dmol.Vector3(0, 0, 0),
                                 new $3Dmol.Vector3(1, 0, 0),
                                 new $3Dmol.Vector3(0, 1, 0),
@@ -37150,7 +41744,8 @@ $3Dmol.GLViewer = (function() {
                                 new $3Dmol.Vector3(0, 1, 1),
                                 new $3Dmol.Vector3(1, 0, 1),
                                 new $3Dmol.Vector3(1, 1, 1)  ];
-                            
+
+                // console.log('Matrix4', data.matrix4, data.matrix);
                 if(data.matrix4) {
                     for (let i = 0; i < points.length; i++) {
                         if(data.size) points[i].multiplyVectors(points[i],data.size); //matrix is for unit vectors, not whole box
@@ -37161,34 +41756,34 @@ $3Dmol.GLViewer = (function() {
                         points[i] = points[i].applyMatrix3(matrix);
                     }
                 }
-            
+
                 //draw box
                 if(spec.box && !spec.box.hidden) {
                     spec.box.wireframe = true;
                     var s = new $3Dmol.GLShape(spec.box);
                     s.shapePosition = shapes.length;
-                
+
                     s.addLine({start: points[0], end: points[1]});
                     s.addLine({start: points[0], end: points[2]});
                     s.addLine({start: points[1], end: points[4]});
                     s.addLine({start: points[2], end: points[4]});
-                
+
                     s.addLine({start: points[0], end: points[3]});
                     s.addLine({start: points[3], end: points[5]});
                     s.addLine({start: points[2], end: points[5]});
-                
+
                     s.addLine({start: points[1], end: points[6]});
                     s.addLine({start: points[4], end: points[7]});
                     s.addLine({start: points[6], end: points[7]});
-                
+
                     s.addLine({start: points[3], end: points[6]});
                     s.addLine({start: points[5], end: points[7]});
-            
+
                     shapes.push(s);
                     model.unitCellObjects.shapes.push(s);
                     s.finalize(); //finalize shape for memory efficiency, assume shape won't be extended
                 }
-                
+
                 //draw arrows
                 if(!spec.astyle.hidden) {
                     spec.astyle.start = points[0];
@@ -37203,14 +41798,14 @@ $3Dmol.GLViewer = (function() {
                     let arrow = this.addArrow(spec.bstyle);
                     model.unitCellObjects.shapes.push(arrow);
                 }
-                
+
                 if(!spec.cstyle.hidden) {
                     spec.cstyle.start = points[0];
                     spec.cstyle.end = points[3];
                     let arrow = this.addArrow(spec.cstyle);
                     model.unitCellObjects.shapes.push(arrow);
                 }
-                
+
                 if(spec.alabel) {
                     spec.alabelstyle.position = points[1];
                     let label = this.addLabel(spec.alabel, spec.alabelstyle);
@@ -37229,9 +41824,9 @@ $3Dmol.GLViewer = (function() {
                 }
 
             }
-            
+
         };
-        
+
          /**
          * Remove unit cell visualization from model.
          *
@@ -37245,7 +41840,7 @@ $3Dmol.GLViewer = (function() {
                   viewer.zoomTo();
                   viewer.removeUnitCell();
                   viewer.render();
-            });                  
+            });
          */
         this.removeUnitCell = function(model) {
             model = this.getModel(model);
@@ -37256,7 +41851,7 @@ $3Dmol.GLViewer = (function() {
             }
             delete model.unitCellObjects;
         };
-        
+
          /**
          * Replicate atoms in model to form a super cell of the specified dimensions.
          * Original cell will be centered as much as possible.
@@ -37274,7 +41869,7 @@ $3Dmol.GLViewer = (function() {
                   viewer.zoomTo();
                   viewer.replicateUnitCell(3,2,1,m);
                   viewer.render();
-            });                  
+            });
          */
         this.replicateUnitCell = function(A,B,C,model) {
             model = this.getModel(model);
@@ -37297,7 +41892,7 @@ $3Dmol.GLViewer = (function() {
                             if(i == 0 && j == 0 && k == 0) continue; //actual unit cell
                             let offset = new $3Dmol.Vector3(makeoff(i),makeoff(j),makeoff(k));
                             offset.applyMatrix3(matrix);
-                            
+
                             let newatoms = [];
                             for(let a = 0; a < atoms.length; a++) {
                                 let newAtom = {};
@@ -37307,7 +41902,7 @@ $3Dmol.GLViewer = (function() {
                                 newAtom.x += offset.x;
                                 newAtom.y += offset.y;
                                 newAtom.z += offset.z;
-                                newatoms.push(newAtom);     
+                                newatoms.push(newAtom);
                             }
                             model.addAtoms(newatoms);
                          }
@@ -37321,12 +41916,12 @@ $3Dmol.GLViewer = (function() {
             spec.gapLength = spec.gapLength || 0.5;
             spec.start = spec.start || {};
             spec.end = spec.end || {};
-            
+
             var p1 = new $3Dmol.Vector3(spec.start.x || 0,
                     spec.start.y || 0, spec.start.z || 0);
             var p2 = new $3Dmol.Vector3(spec.end.x,
                     spec.end.y || 0, spec.end.z || 0);
-                    
+
             var dir = new $3Dmol.Vector3();
             var dash = new $3Dmol.Vector3();
             var gap = new $3Dmol.Vector3();
@@ -37345,13 +41940,13 @@ $3Dmol.GLViewer = (function() {
             gapAmt = gap.length();
 
             while (drawn < length) {
-                if ((drawn + dashAmt) > length) { 
+                if ((drawn + dashAmt) > length) {
                     spec.start = p1;
                     spec.end = p2;
                     s.addLine(spec);
                     break;
                 }
-                temp.addVectors(p1, dash); 
+                temp.addVectors(p1, dash);
                 spec.start = p1;
                 spec.end = temp;
                 s.addLine(spec);
@@ -37359,19 +41954,19 @@ $3Dmol.GLViewer = (function() {
                 drawn += dashAmt;
 
                 temp.addVectors(p1, gap);
-                p1 = temp.clone();   
+                p1 = temp.clone();
                 drawn += gapAmt;
             }
             s.finalize(); //finalize shape for memory efficiency, assume shape won't be extended
-                    
+
             return s;
         }
 
-        
+
 
         /**
          * Add custom shape component from user supplied function
-         * 
+         *
          * @function $3Dmol.GLViewer#addCustom
          * @param {CustomSpec} spec - Style specification
          * @return {$3Dmol.GLShape}
@@ -37385,17 +41980,17 @@ $3Dmol.GLViewer = (function() {
     vertices.push(new $3Dmol.Vector3(0,0,0));
     vertices.push(new $3Dmol.Vector3(r,0,0));
     vertices.push(new $3Dmol.Vector3(0,r,0));
-    
+
     normals.push(new $3Dmol.Vector3(0,0,1));
     normals.push(new $3Dmol.Vector3(0,0,1));
     normals.push(new $3Dmol.Vector3(0,0,1));
-    
+
     colors.push({r:1,g:0,b:0});
     colors.push({r:0,g:1,b:0});
     colors.push({r:0,g:0,b:1});
 
     var faces = [ 0,1,2 ];
-    
+
     var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
     viewer.addCustom(spec);
 }
@@ -37416,27 +42011,27 @@ $3Dmol.GLViewer = (function() {
         /**
          * Construct isosurface from volumetric data in gaussian cube format
          * @function $3Dmol.GLViewer#addVolumetricData
-         * @param {String} data - Input file contents 
-         * @param {String} format - Input file format 
+         * @param {String} data - Input file contents
+         * @param {String} format - Input file format
          * @param {IsoSurfaceSpec} or {VolumetricRenderSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
-         * 
+         *
          * @example
 
-    
+
     $.get('data/bohr.cube', function(data) {
-      
-      viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95}); 
+
+      viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95});
       viewer.setStyle({cartoon:{},stick:{}});
       viewer.zoomTo();
       viewer.render();
     });
 
-                
+
          */
         this.addVolumetricData = function(data, format, spec) {
             spec = spec || {};
-            
+
             var voldata = new $3Dmol.VolumeData(data, format);
             if(spec.transferfn) { //volumetric rendering
                 return this.addVolumetricRender(voldata, spec);
@@ -37444,7 +42039,7 @@ $3Dmol.GLViewer = (function() {
                 return this.addIsosurface(voldata, spec);
             }
         };
-        
+
         /**
          * Construct isosurface from volumetric data.  This is more flexible
      * than addVolumetricData, but can not be used with py3Dmol.
@@ -37452,8 +42047,8 @@ $3Dmol.GLViewer = (function() {
          * @param {$3Dmol.VolumeData} data - volumetric data
          * @param {IsoSurfaceSpec} spec - Shape style specification
          * @return {$3Dmol.GLShape}
-         * 
-         @example 
+         *
+         @example
          $.get('../test_structs/benzene-homo.cube', function(data){
                   var voldata = new $3Dmol.VolumeData(data, "cube");
                   viewer.addIsosurface(voldata, {isoval: 0.01,
@@ -37472,24 +42067,24 @@ $3Dmol.GLViewer = (function() {
             shapes.push(s);
             return s;
         };
-        
+
         /**
          * Create volumetric renderer for volumetricData
          * @function $3Dmol.GLViewer#addVolumetricRender
          * @param {$3Dmol.VolumeData} data - volumetric data
-         * @param {VolumetricRenderSpec} spec - specification of volumetric render 
-         * 
+         * @param {VolumetricRenderSpec} spec - specification of volumetric render
+         *
          * @return {$3Dmol.GLShape}
-         * 
+         *
          */
-        this.addVolumetricRender = function(data,  spec) {            
+        this.addVolumetricRender = function(data,  spec) {
             spec = spec || {};
             var s = new $3Dmol.GLVolumetricRender(data, spec);
-            s.shapePosition = shapes.length;     
+            s.shapePosition = shapes.length;
             shapes.push(s);
             return s;
         };
-        
+
         /**
          * Return true if volumetric rendering is supported (WebGL 2.0 required)
          *
@@ -37497,9 +42092,9 @@ $3Dmol.GLViewer = (function() {
          * @return {boolean}
          */
         this.hasVolumetricRender = function() {
-          return renderer.supportsVolumetric();  
+          return renderer.supportsVolumetric();
         };
-        
+
         /**
          * Enable/disable fog for content far from the camera
          *
@@ -37519,7 +42114,7 @@ $3Dmol.GLViewer = (function() {
          * Sets the atomlists of all models in the viewer to specified frame.
          * Shapes and labels can also be displayed by frame.
          * Sets to last frame if framenum out of range
-         * 
+         *
          * @function $3Dmol.GLViewer#setFrame
          * @param {number} framenum - fame index to use, starts at zero
          * @return {Promise}
@@ -37535,19 +42130,19 @@ $3Dmol.GLViewer = (function() {
                     .then(function() {resolve();});
             });
         };
-        
+
         /**
          * Gets the current viewer frame.
-         * 
+         *
          * @function $3Dmol.GLViewer#getFrame
          */
         this.getFrame = function () {
             return viewer_frame;
         };
-                
+
         /**
          * Returns the number of frames that the model with the most frames in the viewer has
-         * 
+         *
          * @function $3Dmol.GLViewer#getNumFrames
          * @return {number}
          */
@@ -37562,24 +42157,24 @@ $3Dmol.GLViewer = (function() {
                 if (shapes[i].frame && shapes[i].frame >= mostFrames) {
                     mostFrames = shapes[i].frame+1;
                 }
-            }         
+            }
             for (let i = 0; i < labels.length; i++) {
                 if (labels[i].frame && labels[i].frame >= mostFrames) {
                     mostFrames = labels[i].frame+1;
                 }
-            }                     
+            }
             return mostFrames;
         };
-        
+
 
         /**
          * Animate all models in viewer from their respective frames
          * @function $3Dmol.GLViewer#animate
          * @param {Object} options - can specify interval (speed of animation), loop (direction
          * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), and reps (numer of repetitions, 0 indicates infinite loop)
-         *      
+         *
          */
-         
+
         this.animate = function(options) {
             incAnim();
             var interval = 100;
@@ -37629,19 +42224,19 @@ $3Dmol.GLViewer = (function() {
                         currFrame += inc;
                         inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
                         resolve();
-                    });          
+                    });
                 }
-            };            
+            };
             resolve = function() {
                 that.render();
                 if(!that.getCanvas().isConnected && renderer.isLost()) {
                     //we no longer exist
-                    that.stopAnimate();                    
+                    that.stopAnimate();
                 }
                 else if (++displayCount == displayMax || !that.isAnimated()) {
                     clearTimeout(intervalID);
                     animationTimers.delete(intervalID);
-                    decAnim(); 
+                    decAnim();
                 }
                 else {
                     var newInterval = interval - (new Date() - time);
@@ -37656,7 +42251,7 @@ $3Dmol.GLViewer = (function() {
             animationTimers.add(intervalID);
             return this;
         };
-        
+
         /**
          * Stop animation of all models in viewer
          * @function $3Dmol.GLViewer#stopAnimate
@@ -37667,7 +42262,7 @@ $3Dmol.GLViewer = (function() {
             animationTimers = new Set();
             return this;
         };
-        
+
         /**
          * Return true if viewer is currently being animated, false otherwise
          * @function $3Dmol.GLViewer#isAnimated
@@ -37676,30 +42271,30 @@ $3Dmol.GLViewer = (function() {
         this.isAnimated = function() {
             return animated > 0;
         };
-        
+
 
         /**
-         * Create and add model to viewer, given molecular data and its format 
-         * 
+         * Create and add model to viewer, given molecular data and its format
+         *
          * @function $3Dmol.GLViewer#addModel
          * @param {string} data - Input data
          * @param {string} format - Input format ('pdb', 'sdf', 'xyz', 'pqr', or 'mol2')
          * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
          * @example
-         
+
 
               viewer.setViewStyle({style:"outline"});
               $.get('data/1fas.pqr', function(data){
                   viewer.addModel(data, "pqr");
                   $.get("data/1fas.cube",function(volumedata){
                       viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
-                      
+
                   viewer.render();
                   });
                   viewer.zoomTo();
               });
          *
-         * @return {$3Dmol.GLModel} 
+         * @return {$3Dmol.GLModel}
          */
         this.addModel =  function(data, format, options) {
             if(options && !options.defaultcolors) {
@@ -37714,11 +42309,11 @@ $3Dmol.GLViewer = (function() {
 
             return m;
         };
-        
+
         /**
          * Given multimodel file and its format, add atom data to the viewer as separate models
          * and return list of these models
-         * 
+         *
          * @function $3Dmol.GLViewer#addModels
          * @param {string} data - Input data
          * @param {string} format - Input format (see {@link FileFormats})
@@ -37741,20 +42336,20 @@ $3Dmol.GLViewer = (function() {
                 newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
                 models.push(newModel);
             }
-            
+
             return models;
         };
-        
+
         /**
-         * Create and add model to viewer. Given multimodel file and its format, 
+         * Create and add model to viewer. Given multimodel file and its format,
          * different atomlists are stored in model's frame
          * property and model's atoms are set to the 0th frame
-         * 
+         *
          * @function $3Dmol.GLViewer#addModelsAsFrames
          * @param {string} data - Input data
          * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
-         * 
+         *
          * @example
                 $.get('../test_structs/multiple2.xyz', function(data){
                   viewer.addModelsAsFrames(data, "xyz");
@@ -37774,17 +42369,17 @@ $3Dmol.GLViewer = (function() {
 
             return m;
         };
-        
+
         /**
          * Create and add model to viewer. Given multimodel file and its format,
          * all atoms are added to one model
-         * 
+         *
          * @function $3Dmol.GLViewer#addAsOneMolecule
          * @param {string} data - Input data
          * @param {string} format - Input format (see {@link FileFormats})
          * @return {$3Dmol.GLModel}
          @example
-          
+
 
               $.get('../test_structs/multiple.sdf', function(data){
                   viewer.addAsOneMolecule(data, "sdf");
@@ -37799,14 +42394,14 @@ $3Dmol.GLViewer = (function() {
             var m = new $3Dmol.GLModel(models.length, defaultcolors);
             m.addMolData(data, format, options);
             models.push(m);
-            
+
             return m;
         };
-        
+
 
         /**
          * Delete specified model from viewer
-         * 
+         *
          * @function $3Dmol.GLViewer#removeModel
          * @param {$3Dmol.GLModel} model
          */
@@ -37823,7 +42418,7 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
 
-        /** 
+        /**
          * Delete all existing models
          * @function $3Dmol.GLViewer#removeAllModels
          */
@@ -37871,11 +42466,11 @@ $3Dmol.GLViewer = (function() {
             modelGroup = savedmodelGroup;
             return ret;
         };
-        
+
         /**
          * Create a new model from atoms specified by sel.
-         * If extract, removes selected atoms from existing models 
-         * 
+         * If extract, removes selected atoms from existing models
+         *
          * @function $3Dmol.GLViewer#createModelFrom
          * @param {Object} sel - Atom selection specification
          * @param {boolean=} extract - If true, remove selected atoms from existing models
@@ -37896,7 +42491,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         function applyToModels(func, sel, value1, value2, value3, value4, value5) {
-            
+
             //apply func to all models that are selected by sel with value1 and 2
             var ms = getModelList(sel);
             for (var i = 0; i < ms.length; i++) {
@@ -37906,11 +42501,11 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Set style properties to all selected atoms
-         * 
+         *
          * @function $3Dmol.GLViewer#setStyle
          * @param {AtomSelectionSpec} sel - Atom selection specification
          * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
-         * 
+         *
          * @example
          viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
@@ -37931,19 +42526,19 @@ $3Dmol.GLViewer = (function() {
                 style = sel;
                 sel = {};
             }
-            
+
             applyToModels("setStyle", sel, style, false);
             return this;
         };
 
         /**
          * Add style properties to all selected atoms
-         * 
+         *
          * @function $3Dmol.GLViewer#addStyle
          * @param {AtomSelectionSpec} sel - Atom selection specification
          * @param {AtomStyleSpec} style - style spec to add to specified atoms
          @example
-         
+
        $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
        viewer.setStyle({cartoon:{}});
        //keep cartoon style, but show thick sticks for chain A
@@ -37965,16 +42560,16 @@ $3Dmol.GLViewer = (function() {
 
         /**
          * Set click-handling properties to all selected atomsthis.
-         * 
+         *
          * @function $3Dmol.GLViewer#setClickable
          * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
          * @param {boolean} clickable - whether click-handling is enabled for the selection
          * @param {function} callback - function called when an atom in the selection is clicked
-         * 
-         * @example       
+         *
+         * @example
             $3Dmol.download("cid:307900",viewer,{},function(){
-                              
-                   viewer.setStyle({},{sphere:{}});                
+
+                   viewer.setStyle({},{sphere:{}});
                    viewer.setClickable({},true,function(atom,viewer,event,container) {
                        viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 'darkgreen', backgroundOpacity: 0.8});
                    });
@@ -37986,28 +42581,28 @@ $3Dmol.GLViewer = (function() {
             return this;
         };
         /** Set hoverable and callback of selected atoms
-         * 
+         *
          * @function $3Dmol.GLViewer#setHoverable
          * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
          * @param {boolean} hoverable - whether hover-handling is enabled for the selection
          * @param {function} hover_callback - function called when an atom in the selection is hovered over
-         * @param {function} unhover_callback - function called when the mouse moves out of the hover area  
-        @example             
+         * @param {function} unhover_callback - function called when the mouse moves out of the hover area
+        @example
         $3Dmol.download("pdb:1ubq",viewer,{},function(){
-                          
+
                viewer.setHoverable({},true,function(atom,viewer,event,container) {
                    if(!atom.label) {
                     atom.label = viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 'mintcream', fontColor:'black'});
                    }
                },
-               function(atom) { 
+               function(atom) {
                    if(atom.label) {
                     viewer.removeLabel(atom.label);
                     delete atom.label;
                    }
                 }
                );
-               viewer.setStyle({},{stick:{}});               
+               viewer.setStyle({},{stick:{}});
                viewer.render();
         });
 
@@ -38016,11 +42611,23 @@ $3Dmol.GLViewer = (function() {
             applyToModels("setHoverable", sel,hoverable, hover_callback,unhover_callback);
             return this;
         };
-        
+
+        /** enable context menu and callback of selected atoms
+         *
+         * @function $3Dmol.GLViewer#enableContextMenu
+         * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+         * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
+
+         */
+        this.enableContextMenu = function(sel,contextMenuEnabled){
+            applyToModels("enableContextMenu", sel, contextMenuEnabled);
+            return this;
+        };
+
         /**
          * If  atoms have dx, dy, dz properties (in some xyz files), vibrate populates each model's frame property based on parameters.
          * Models can then be animated
-         * 
+         *
          * @function $3Dmol.GLViewer#vibrate
          * @param {number} numFrames - number of frames to be created, default to 10
          * @param {number} amplitude - amplitude of distortion, default to 1 (full)
@@ -38031,7 +42638,7 @@ $3Dmol.GLViewer = (function() {
             applyToModels("vibrate", numFrames, amplitude, bothways, this, arrowSpec);
             return this;
         };
-        
+
         /**
          * @function $3Dmol.GLViewer#setColorByProperty
          * @param {AtomSelectionSpec} sel
@@ -38054,7 +42661,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * 
+         *
          * @param {AtomSpec[]} atomlist
          * @param {Array}
          *            extent
@@ -38093,7 +42700,7 @@ $3Dmol.GLViewer = (function() {
          * are expanded by 4 angstroms on each side.
          */
         /**
-         * 
+         *
          * @param {Array}
          *            extent
          * @param {AtomSpec[]} atomlist
@@ -38107,7 +42714,7 @@ $3Dmol.GLViewer = (function() {
             for(var i = 0, n = atomlist.length; i < n; i++) {
                 index2atomlist[atomlist[i].index] = i;
             }
-            
+
             var atomsToListIndex = function(atoms) {
             //return a list of indices into atomlist
                 var ret = [];
@@ -38189,7 +42796,7 @@ $3Dmol.GLViewer = (function() {
         // create a mesh defined from the passed vertices and faces and material
         // Just create a single geometry chunk - broken up whether sync or not
         /**
-         * 
+         *
          * @param {AtomSpec[]} atoms
          * @param {{vertices:number,faces:number}}
          *            VandF
@@ -38214,7 +42821,7 @@ $3Dmol.GLViewer = (function() {
                         colors[i] = $3Dmol.CC.color(atom.color);
                 }
             }
-            
+
             var vertexArray = geoGroup.vertexArray;
 
             // reconstruct vertices and faces
@@ -38224,12 +42831,12 @@ $3Dmol.GLViewer = (function() {
                 vertexArray[offset] = v[i].x;
                 vertexArray[offset + 1] = v[i].y;
                 vertexArray[offset + 2] = v[i].z;
-                geoGroup.vertices++;                
+                geoGroup.vertices++;
             }
 
             //set colorArray of there are per-atom colors
             var colorArray = geoGroup.colorArray;
-            
+
             if(mat.voldata && mat.volscheme) {
                 //convert volumetric data into colors
                 var scheme = mat.volscheme;
@@ -38254,7 +42861,7 @@ $3Dmol.GLViewer = (function() {
                     colorArray[offsetA + 2] = colors[A].b;
                 }
             }
-            
+
             var faces = VandF.faces;
             geoGroup.faceidx = faces.length;// *3;
             geo.initTypedArrays();
@@ -38300,13 +42907,13 @@ $3Dmol.GLViewer = (function() {
             }
             geoGroup.faceArray = new Uint16Array(faces);
             var mesh = new $3Dmol.Mesh(geo, mat);
-            mesh.doubleSided = true;        
+            mesh.doubleSided = true;
             return mesh;
         };
 
         // do same thing as worker in main thread
         /**
-         * 
+         *
          * @param {$3Dmol.SurfaceType}
          *            type
          * @param {Array}
@@ -38354,7 +42961,7 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
-         * 
+         *
          * @param {matSpec}
          *            style
          * @return {$3Dmol.MeshLambertMaterial}
@@ -38379,7 +42986,7 @@ $3Dmol.GLViewer = (function() {
             return mat;
         }
 
-        
+
         /**
          * Adds an explicit mesh as a surface object.
          * @function $3Dmol.GLViewer#addMesh
@@ -38420,17 +43027,17 @@ $3Dmol.GLViewer = (function() {
             "SES":$3Dmol.SurfaceType.SES
         };
 
-        
+
         /**
          * Add surface representation to atoms
          * @function $3Dmol.GLViewer#addSurface
          * @param {$3Dmol.SurfaceType|string} type - Surface type (VDW, MS, SAS, or SES)
          * @param {SurfaceStyleSpec} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
          * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
-         * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel' 
+         * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel'
          * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
          * @param {function} surfacecallback - function to be called after setting the surface
-         * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.  Returns surfid immediately if surfacecallback is specified.  Returned promise has a surfid field for immediate access.
+         * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.  Returns surfid immediately if surfacecallback is specified.  Returned promise has a [surfid, GLViewer, style, atomsel, allsel, focus] fields for immediate access.
          */
         this.addSurface = function(type, style, atomsel, allsel, focus, surfacecallback) {
             // type 1: VDW 3: SAS 4: MS 2: SES
@@ -38443,7 +43050,7 @@ $3Dmol.GLViewer = (function() {
             // surfaces
             // of atomsToShow are displayed (e.g., for showing cavities)
             // if focusSele is specified, will start rending surface around the
-            
+
             //surfacecallback gets called when done
             var surfid = nextSurfID();
             var mat = null;
@@ -38452,7 +43059,7 @@ $3Dmol.GLViewer = (function() {
                     type = surfaceTypeMap[type];
                 else{
                     console.log("Surface type : " + type + " is not recognized");
-                } 
+                }
             }
             else if(type===undefined){
                 type = $3Dmol.SurfaceType.VDW; //default
@@ -38468,11 +43075,11 @@ $3Dmol.GLViewer = (function() {
             else {
                 atomlist = shallowCopy(getAtomsFromSel(allsel));
             }
-            
+
             $3Dmol.adjustVolumeStyle(style);
             var symmetries = false;
             var n;
-            for (n = 0; n < models.length; n++) { 
+            for (n = 0; n < models.length; n++) {
                 if(models[n]) {
                     var symMatrices = models[n].getSymmetries();
                     if (symMatrices.length > 1 || (symMatrices.length == 1 && !(symMatrices[0].isIdentity()))) {
@@ -38506,12 +43113,12 @@ $3Dmol.GLViewer = (function() {
                     style.colorscheme = {prop: prop, gradient: scheme};
 
                 }
-                
+
                 //cache surface color on each atom
                 for (let i = 0, il = atomlist.length; i < il; i++) {
                     atom = atomlist[i];
                     atom.surfaceColor = $3Dmol.getColorFromStyle(atom, style);
-                }                
+                }
 
                 var totalVol = volume(extent); // used to scale resolution
                 var extents = carveUpExtent(extent, atomlist, atomsToShow);
@@ -38564,7 +43171,7 @@ $3Dmol.GLViewer = (function() {
 
                     // to keep the browser from locking up, call through setTimeout
                     var callSyncHelper = function callSyncHelper(i) {
-                        return new Promise(function(resolve) { 
+                        return new Promise(function(resolve) {
                             var VandF = generateMeshSyncHelper(type, extents[i].extent,
                                     extents[i].atoms, extents[i].toshow, reducedAtoms,
                                     totalVol);
@@ -38572,7 +43179,7 @@ $3Dmol.GLViewer = (function() {
                             var VandFs = $3Dmol.splitMesh({vertexArr:VandF.vertices, faceArr:VandF.faces});
                             for(var vi=0,vl=VandFs.length;vi<vl;vi++){
                                 VandF={vertices:VandFs[vi].vertexArr,
-                                        faces:VandFs[vi].faceArr};                            
+                                        faces:VandFs[vi].faceArr};
                                 var mesh = generateSurfaceMesh(atomlist, VandF, mat);
                                 $3Dmol.mergeGeos(surfobj.geo, mesh);
                             }
@@ -38606,9 +43213,18 @@ $3Dmol.GLViewer = (function() {
                             'volume' : totalVol
                         });
                     }
-                    
+
                     return new Promise(function(resolve,reject) {
                         var cnt = 0;
+
+                        var releaseMemory = function () {
+                            if (!workers || !workers.length) return;
+                            workers.forEach(function (worker) {
+                                if (worker && worker.terminate) {
+                                    worker.terminate();
+                                }
+                            });
+                        };
 
                         var rfunction = function(event) {
                             var VandFs = $3Dmol.splitMesh({vertexArr:event.data.vertices,
@@ -38625,11 +43241,13 @@ $3Dmol.GLViewer = (function() {
                             cnt++;
                             if (cnt == extents.length) {
                                 surfobj.done = true;
+                                releaseMemory();
                                 resolve(surfid); //caller of helper will resolve callback if present
                             }
                         };
 
                         var efunction = function(event) {
+                            releaseMemory();
                             console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
                             reject(event);
                         };
@@ -38648,12 +43266,17 @@ $3Dmol.GLViewer = (function() {
                             });
                         }
                     });
-                }                
+                }
             };
-            
+
             style = style || {};
             mat = getMatWithStyle(style);
             var surfobj = [];
+            //save configuration of surface
+            surfobj.style = style;
+            surfobj.atomsel = atomsel;
+            surfobj.allsel = allsel;
+            surfobj.focus = focus;
             var promise = null;
             if (symmetries) { //do preprocessing
                 var modelsAtomList = {};
@@ -38679,7 +43302,7 @@ $3Dmol.GLViewer = (function() {
                             symmetries : models[n].getSymmetries()
                         // also webgl initialized
                         });
-                        promises.push(addSurfaceHelper(surfobj[n], modelsAtomList[n], modelsAtomsToShow[n]));
+                        promises.push(addSurfaceHelper(surfobj[surfobj.length-1], modelsAtomList[n], modelsAtomsToShow[n]));
                     }
                 }
                 promise = Promise.all(promises);
@@ -38696,6 +43319,7 @@ $3Dmol.GLViewer = (function() {
             }
             surfaces[surfid] = surfobj;
             promise.surfid = surfid;
+
             if(surfacecallback && typeof(surfacecallback) == "function") {
                 promise.then(function(surfid) {
                     surfacecallback(surfid);
@@ -38720,11 +43344,12 @@ $3Dmol.GLViewer = (function() {
                 viewer.render();
                 });
            });
-         */ 
+         */
         this.setSurfaceMaterialStyle = function(surf, style) {
             $3Dmol.adjustVolumeStyle(style);
             if (surfaces[surf]) {
                 var surfArr = surfaces[surf];
+                surfArr.style = style;
                 for (var i = 0; i < surfArr.length; i++) {
                     var mat = surfArr[i].mat = getMatWithStyle(style);
                     surfArr[i].mat.side = $3Dmol.FrontSide;
@@ -38753,6 +43378,15 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
+         * Return surface object
+         * @function $3Dmol.GLViewer#getSurface
+         * @param {number} surf - surface id
+         */
+        this.getSurface = function(surf) {
+            return surfaces[surf];
+        };
+
+        /**
          * Remove surface with given ID
          * @function $3Dmol.GLViewer#removeSurface
          * @param {number} surf - surface id
@@ -38772,7 +43406,7 @@ $3Dmol.GLViewer = (function() {
             show();
             return this;
         };
-        
+
         /** Remove all surfaces.
          * @function $3Dmol.GLViewer#removeAllSurfaces */
         this.removeAllSurfaces = function() {
@@ -38813,7 +43447,7 @@ $3Dmol.GLViewer = (function() {
             return ret;
         };
 
-        /** Clear scene of all objects 
+        /** Clear scene of all objects
          * @function $3Dmol.GLViewer#clear
          * */
         this.clear = function() {
@@ -38832,7 +43466,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#mapAtomProperties
          * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
          * @param {AtomSelectionSpec} sel  - subset of atoms to work on - model selection must be specified here
-             @example 
+             @example
              $.get('../test_structs/b.sdf', function(data){
                       viewer.addModel(data,'sdf');
                       let props = [];
@@ -38844,12 +43478,12 @@ $3Dmol.GLViewer = (function() {
                       viewer.setStyle({sphere:{colorscheme:{gradient:'roygb',prop:'x',min:0,max:8}}});
                       viewer.zoomTo();
                       viewer.render();
-                    });         
+                    });
          */
         this.mapAtomProperties = function(props, sel) {
             sel = sel || {};
             var atoms = getAtomsFromSel(sel);
-            
+
             if(typeof(props) == "function") {
                 for (let a = 0, numa = atoms.length; a < numa; a++) {
                     let atom = atoms[a];
@@ -38885,13 +43519,13 @@ $3Dmol.GLViewer = (function() {
          * When the viewpoint of this viewer changes, the other viewer will
          * be set to this viewer's view.
          * @function $3Dmol.GLViewer#linkViewer
-         * @param {$3Dmol.GLViewer} otherview 
+         * @param {$3Dmol.GLViewer} otherview
          */
         this.linkViewer = function(otherviewer) {
            linkedViewers.push(otherviewer);
            return this;
         };
-        
+
 
         try {
             if (typeof (callback) === "function")
@@ -38924,7 +43558,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#setAutoEyeSeparation
          * @return {number} camera x position
          */
-        this.setAutoEyeSeparation = function(isright, x) {          
+        this.setAutoEyeSeparation = function(isright, x) {
             var dist = this.getPerceivedDistance();
             if(!x) x = 5.0;
             if (isright || camera.position.x > 0) //setting a value of dist*tan(x)
@@ -38934,15 +43568,59 @@ $3Dmol.GLViewer = (function() {
             camera.lookAt(new $3Dmol.Vector3(0,0,rotationGroup.position.z));
             return camera.position.x;
         };
-        
+
         /**
          * Set the default cartoon quality for newly created models.  Default is 5.
          * Current models are not affected.
          * @number quality, higher results in higher resolution renders
-         * @function $3Dmol.GLViewer#setDefaultCartoonQuality
+         * @function $3Dmol.GLViewer#ui.setDefaultCartoonQuality
          */
         this.setDefaultCartoonQuality = function(val) {
             config.cartoonQuality = val;
+        };
+
+        this.ui = {};
+
+        // State Management function
+        /**
+         * Calls StateManager to add selection and style on the ui
+         * @function $3Dmol.GLViewer#ui.loadSelectionStyle
+         * @param {AtomSelectionSpec} sel Atom Selection spec
+         * @param {AtomStyleSpec} style Atom Style spec
+         */
+        this.ui.loadSelectionStyle = function(sel, style){
+            _stateManager.createSelectionAndStyle(sel, style);
+        };
+
+        /**
+         * Calls StateManager to add surface and selection on the ui
+         *
+         * @function $3Dmol.GLViewer#ui.loadSurface
+         * @param {String} surfaceType Name of the surface type
+         * @param {AtomSelectionSpec} sel Atom Selection Spec
+         * @param {AtomStyleSpec} style Atom Style Spec
+         * @param {Number} sid Id of the surface that is already added
+         */
+        this.ui.loadSurface = function(surfaceType, sel, style, sid){
+            _stateManager.createSurface(surfaceType, sel, style, sid);
+        };
+
+        /**
+         * Sets the name of the file as title in the ui
+         *
+         * @function $3Dmol.GlViewer#ui.setModelTitle
+         * @param {String} title Name of file loaded
+         */
+        this.ui.setModelTitle = function(title){
+            _stateManager.setModelTitle(title);
+        };
+
+        /**
+         * Calls StateManager to start the
+         * @function $3Dmol.GLViewer#ui.initiateUI
+         */
+        this.ui.initiateUI = function(){
+            _stateManager.initiateUI();
         };
 
     }
@@ -38952,7 +43630,6 @@ $3Dmol.GLViewer = (function() {
 })();
 
 $3Dmol.glmolViewer = $3Dmol.GLViewer;
-
 
 //color scheme mappings
 var $3Dmol = $3Dmol || {};
@@ -39052,15 +43729,17 @@ $3Dmol.Gradient.RWB = function(min, max, mid) {
         var scale, color;
 
         //scale bottom from red to white
-        if (val <= middle) {
+        if (val < middle) {
             scale = Math.floor(255 * Math.sqrt((val - lo) / (middle - lo)));
             color = 0xff0000 + 0x100 * scale + scale;
             return color;
         }
-        else { //form white to blue
+        else if(val > middle){ //form white to blue
             scale = Math.floor(255 * Math.sqrt((1 - (val - middle) / (hi - middle))));
             color = 0x10000 * scale + 0x100 * scale + 0xff;
             return color;
+        } else { //val == middle
+            return 0xffffff;
         }
     };
 
@@ -39214,7 +43893,9 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
 //map from names to gradient constructors
 $3Dmol.Gradient.builtinGradients = {
     'rwb': $3Dmol.Gradient.RWB,
+    'RWB':  $3Dmol.Gradient.RWB, 
     'roygb': $3Dmol.Gradient.ROYGB,
+    'ROYGB': $3Dmol.Gradient.ROYGB,
     'sinebow': $3Dmol.Gradient.Sinebow
 };
 
@@ -39405,6 +44086,25 @@ $3Dmol.Label.prototype = {
             this.context.strokeStyle = "rgba(" + borderColor.r + ","
                     + borderColor.g + "," + borderColor.b + ","
                     + borderColor.a + ")";
+                    
+            if(style.backgroundGradient) {
+               let gradient = this.context.createLinearGradient(0,height/2, width,height/2);
+               let g = $3Dmol.Gradient.getGradient(style.backgroundGradient);
+               let minmax = g.range();
+               let min = -1;
+               let max = 1;
+               if(minmax) {
+                 min = minmax[0];
+                 max = minmax[1];
+               }
+               let d = max-min;
+               for(let i = 0; i < 1.01; i += 0.1) {
+                 let c = getColor(g.valueToHex(min+d*i));
+                 let cname = "rgba("+c.r+","+c.g+","+c.b+","+c.a+")";
+                 gradient.addColorStop(i, cname);
+               }
+               this.context.fillStyle = gradient;
+            }
 
             this.context.lineWidth = borderThickness;
             if(showBackground) {
@@ -40685,7 +45385,7 @@ $3Dmol.Parsers = (function() {
       var atoms = [[]];
       var lattice = {};
 
-      var lines = str.replace(/^\s+/, "").split(/[\n\r]/);
+      var lines = str.replace(/^\s+/, "").split(/\r?\n/);
 
       if (lines.length < 3){
         return atoms;
@@ -43179,7 +47879,7 @@ $3Dmol.applyPartialCharges = function(atom, keepexisting) {
 /**
  * $3Dmol.VolumeData stores volumetric data. This includes file parsing
  * functionality.
- * 
+ *
  * @class
  * @param {string} str - volumetric data
  * @param {string} format - format of supplied data (cube, dx, vasp); append .gz if compressed
@@ -43207,7 +47907,7 @@ $3Dmol.VolumeData = function(str, format, options) {
 
     this.matrix = null; //if set must transform data
     format = format.toLowerCase();
-    
+
     if(/\.gz$/.test(format)) {
         //unzip gzipped files
         format = format.replace(/\.gz$/,'');
@@ -43226,14 +47926,14 @@ $3Dmol.VolumeData = function(str, format, options) {
             console.log(err);
         }
     }
-    
+
     if (this[format]) {
         if(this[format].isbinary && typeof(str) == "string") {
             str = $3Dmol.base64ToArray(str);
         }
         this[format](str);
     }
-    
+
     if(options) {
         if(options.negate) {
             for(let i = 0, n = this.data.length; i < n; i++) {
@@ -43268,7 +47968,7 @@ $3Dmol.VolumeData = function(str, format, options) {
  * @returns - index into flat array closest to provided coordinate; -1 if invalid
  */
 $3Dmol.VolumeData.prototype.getIndex = function(x,y,z) {
-    
+
     if(this.matrix) {
         //all transformation is done through matrix multiply
         if(!this.inversematrix) {
@@ -43278,12 +47978,12 @@ $3Dmol.VolumeData.prototype.getIndex = function(x,y,z) {
         pt = pt.applyMatrix4(this.inversematrix);
         x = pt.x;
         y = pt.y;
-        z = pt.z;        
-    } else { //use simple origin/unit transform            
+        z = pt.z;
+    } else { //use simple origin/unit transform
         x -= this.origin.x;
         y -= this.origin.y;
         z -= this.origin.z;
-        
+
         x /= this.unit.x;
         y /= this.unit.y;
         z /= this.unit.z;
@@ -43291,12 +47991,12 @@ $3Dmol.VolumeData.prototype.getIndex = function(x,y,z) {
     x = Math.round(x);
     y = Math.round(y);
     z = Math.round(z);
-    
+
     if(x < 0 || x >= this.size.x) return -1;
     if(y < 0 || y >= this.size.y) return -1;
     if(z < 0 || z >= this.size.z) return -1;
-    
-    return x*this.size.y*this.size.z + y*this.size.z + z;    
+
+    return x*this.size.y*this.size.z + y*this.size.z + z;
 };
 
 /**
@@ -43307,11 +48007,11 @@ $3Dmol.VolumeData.prototype.getIndex = function(x,y,z) {
 $3Dmol.VolumeData.prototype.getVal = function(x,y,z) {
     let i = this.getIndex(x,y,z);
     if(i < 0) return 0;
-    return this.data[i];   
+    return this.data[i];
 };
 
 $3Dmol.VolumeData.prototype.getCoordinates = function(index){
-    
+
     var x = index/(this.size.y*this.size.z);
     var y = index % (this.size.y*this.size.z);
     var z = index % this.size.z;
@@ -43348,7 +48048,7 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
 
 
 
-    // Assume atomic units 
+    // Assume atomic units
 //    var unittype = "bohr/hartree";
     var l_units = 1.889725992;
     var e_units = 0.036749309;
@@ -43374,7 +48074,7 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
     var vol_scale = 1.0/(vol); //This Only for CHGCAR files
 
     // We splice the structure information
-    // 2 (header) + 3 (vectors) + 2 (atoms) + 1 (vaspMode) + natoms (coords) + 1 (blank line) 
+    // 2 (header) + 3 (vectors) + 2 (atoms) + 1 (vaspMode) + natoms (coords) + 1 (blank line)
     lines.splice(0,2+3+2+1+natoms+1);
 
 
@@ -43399,7 +48099,7 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
         //need a transformation matrix
         this.matrix =  new $3Dmol.Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
         //include translation in matrix
-        this.matrix = this.matrix.multiplyMatrices(this.matrix, 
+        this.matrix = this.matrix.multiplyMatrices(this.matrix,
                 new $3Dmol.Matrix4().makeTranslation(origin.x, origin.y, origin.z));
         //all translation and scaling done by matrix, so reset origin and unit
         this.origin = new $3Dmol.Vector3(0,0,0);
@@ -43407,7 +48107,7 @@ $3Dmol.VolumeData.prototype.vasp = function(str) {
     }
 
 
-    lines.splice(0,1); //Remove the dimension line 
+    lines.splice(0,1); //Remove the dimension line
     var raw = lines.join(" ");
 
     raw = raw.replace(/^\s+/,'');
@@ -43440,7 +48140,7 @@ $3Dmol.VolumeData.prototype.dx = function(str) {
     var reorig = /^origin\s+(\S+)\s+(\S+)\s+(\S+)/;
     var redelta = /^delta\s+(\S+)\s+(\S+)\s+(\S+)/;
     var follows = /data follows/;
-        
+
     for(i = 0; i < lines.length; i++) {
         var line = lines[i];
         if((m = recounts.exec(line)) ) {
@@ -43461,12 +48161,12 @@ $3Dmol.VolumeData.prototype.dx = function(str) {
                 console.log("Parse error in dx delta matrix");
                 return;
             }
-            
+
             var yunit = parseFloat(m[2]);
             if(parseFloat(m[1]) != 0 || parseFloat(m[3]) != 0) {
                 console.log("Non-orthogonal delta matrix not currently supported in dx format");
             }
-            
+
             i += 1;
             line = lines[i];
             m = redelta.exec(line);
@@ -43474,12 +48174,12 @@ $3Dmol.VolumeData.prototype.dx = function(str) {
                 console.log("Parse error in dx delta matrix");
                 return;
             }
-            
+
             var zunit = parseFloat(m[3]);
             if(parseFloat(m[1]) != 0 || parseFloat(m[2]) != 0) {
                 console.log("Non-orthogonal delta matrix not currently supported in dx format");
-            }    
-            this.unit = new $3Dmol.Vector3(xunit,yunit,zunit);        
+            }
+            this.unit = new $3Dmol.Vector3(xunit,yunit,zunit);
         }
         else if((m = reorig.exec(line))) {
             var xorig = parseFloat(m[1]);
@@ -43508,7 +48208,7 @@ $3Dmol.VolumeData.prototype.cube = function(str) {
         return;
 
     var cryst = $3Dmol.Parsers.cube(str).modelData[0].cryst;
-    
+
     var lineArr = lines[2].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
 
     var atomsnum = parseFloat(lineArr[0]); //includes sign, which indicates presence of oribital line in header
@@ -43538,7 +48238,7 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
     var intView = new Int32Array( bin.buffer, 0, 56 );
     var floatView = new Float32Array( bin.buffer, 0, 56 );
     var dv = new DataView( bin.buffer );
-    
+
 
     // 53  MAP         Character string 'MAP ' to identify file type
     header.MAP = String.fromCharCode(
@@ -43699,15 +48399,17 @@ $3Dmol.VolumeData.prototype.ccp4 = function(bin) {
           0, 0, 0, 1
 
       );
-      //include translation in matrix
-      this.matrix = this.matrix.multiplyMatrices(this.matrix, 
+      //include translation in matrix, NXSTART etc are an offset in grid space
+      this.matrix = this.matrix.multiplyMatrices(
+               this.matrix,
               new $3Dmol.Matrix4().makeTranslation(
                       h.NXSTART + h.originX,
                       h.NYSTART + h.originY,
-                      h.NZSTART + h.originZ));
+                      h.NZSTART + h.originZ)
+                      );
       //all translation and scaling done by matrix, so reset origin and unit
       this.origin = new $3Dmol.Vector3(0,0,0);
-      this.unit = new $3Dmol.Vector3(1,1,1); 
+      this.unit = new $3Dmol.Vector3(1,1,1);
       this.size = {x:header.NX, y:header.NY, z:header.NZ};
       this.dimensionorder = [header.MAPC, header.MAPR, header.MAPS];
       var data = new Float32Array(bin.buffer, 1024 + header.NSYMBT);
@@ -43729,7 +48431,7 @@ $3Dmol.VolumeData.prototype.ccp4.isbinary = true;
 
 
 
-$3Dmol.GLVolumetricRender = (function() {  
+$3Dmol.GLVolumetricRender = (function() {
 
     // interpolation function used from http://hevi.info/do-it-yourself/interpolating-and-array-to-fit-another-size/
     function interpolateArray(data, fitCount) {
@@ -43749,18 +48451,18 @@ $3Dmol.GLVolumetricRender = (function() {
         newData[fitCount - 1] = data[data.length - 1]; // for new allocation
         return newData;
     }
-    
+
     /**
      * A GLVolumetricRender is a "shape" for representing volumetric data as a density distribution.
-     * 
+     *
      * @constructor $3Dmol.GLVolumetricRender
-     * 
+     *
      * @param {$3Dmol.VolumeData} data - volumetric data
-     * @param {VolumetricRenderSpec} spec - specification of volumetric render 
+     * @param {VolumetricRenderSpec} spec - specification of volumetric render
      * @returns {$3Dmol.GLShape}
      */
     function GLVolumetricRender(data, spec) {
-       
+
         spec = spec || {};
         var transferfn = Object.assign([],spec.transferfn);
         var shapeObj = null;
@@ -43779,13 +48481,13 @@ $3Dmol.GLVolumetricRender = (function() {
         // create and fill an array of interpolated values per 2 colors
         var pos1, pos2, color1, color2, R, G, B, A, alpha1, alpha2;
         for (let i = 0; i < transferfn.length-1; i++){
-            color1 = $3Dmol.CC.color(transferfn[i].color); 
+            color1 = $3Dmol.CC.color(transferfn[i].color);
             color2 = $3Dmol.CC.color(transferfn[i+1].color);
             alpha1 = transferfn[i].opacity;
             alpha2 = transferfn[i+1].opacity;
             pos1 = Math.floor( (transferfn[i].value - min) * TRANSFER_BUFFER_SIZE / (max - min) );
             pos2 = Math.floor( (transferfn[i+1].value-min) * TRANSFER_BUFFER_SIZE / (max - min) );
-            if (pos1 == pos2) 
+            if (pos1 == pos2)
                 continue;
             R = interpolateArray([color1.r*255, color2.r*255], pos2-pos1);
             G = interpolateArray([color1.g*255, color2.g*255], pos2-pos1);
@@ -43798,69 +48500,146 @@ $3Dmol.GLVolumetricRender = (function() {
                 transferfunctionbuffer.push(B[j]);
                 transferfunctionbuffer.push(A[j]); // opacity will be added later
             }
-        }        
+        }
 
         transferfunctionbuffer = new Uint8ClampedArray(transferfunctionbuffer);
 
-        var texmatrix = new $3Dmol.Matrix4().identity();
-        var xoff = data.unit.x*data.size.x;
-        var yoff = data.unit.y*data.size.y;
-        var zoff = data.unit.z*data.size.z;
-        //scale doesn't apply to the translation vector, so preapply it
-        texmatrix.makeTranslation(-data.origin.x/xoff,-data.origin.y/yoff,-data.origin.z/zoff);
-        texmatrix.scale({x:1.0/xoff, y:1.0/yoff, z:1.0/zoff});
-        var minunit = Math.min(Math.min(data.unit.x,data.unit.y),data.unit.z);
-            
-        //need the bounding box so we can intersect with rays
-        var extent = [ [data.origin.x,data.origin.y,data.origin.z], 
-            [data.origin.x+xoff,data.origin.y+yoff,data.origin.z+zoff]];
-            
-        var maxdepth = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff);
-        //use GLShape to construct box
-        var shape = new $3Dmol.GLShape();
-        
         //need to create transformation matrix that maps model points into
         //texture space
-        //TODO: support non-orthnombic boxes
-        if(data.matrix) {
-          console.log("ERROR: Non-orthonombic boxes (or file formats that specify transformation matrices) are not supported with volumetric rendering yet.");         
-        } else {
-            shape.addBox({corner: data.origin, dimensions: {w: xoff, h: yoff, d: zoff}});
-        }
-        var geo = shape.finalize();
+        // need extent (bounding box dimensions), maxdepth (box diagonal), 
+        // texmatrix (conversion from model to texture coords), minunit,
+        var texmatrix, extent, maxdepth, minunit;
+        // possibly non-orthnormal basis if matrix
+        if(data.matrix){
+            //figure out bounding box of transformed grid
+            let start = new $3Dmol.Vector3(0,0,0);
+            let end = new $3Dmol.Vector3(data.size.x, data.size.y, data.size.z);
+            let unit = new $3Dmol.Vector3(1,1,1);
+            
+            start.applyMatrix4(data.matrix);
+            end.applyMatrix4(data.matrix);
+            unit.applyMatrix4(data.matrix).sub(start);
+            
+            extent = [ [start.x,start.y,start.z], [end.x,end.y,end.z]];
+            
+            //check all corners, these may not be the farthest apart
+            for(let i = 1; i < 7; i++) {
+                end.x = (i&1) ? data.size.x : 0;
+                end.y = (i&2) ? data.size.y : 0;
+                end.z = (i&4) ? data.size.z : 0;
+                end.applyMatrix4(data.matrix);
+                extent[0][0] = Math.min(extent[0][0],end.x);
+                extent[0][1] = Math.min(extent[0][1],end.y);
+                extent[0][2] = Math.min(extent[0][2],end.z);
+                extent[1][0] = Math.max(extent[1][0],end.x);
+                extent[1][1] = Math.max(extent[1][1],end.y);
+                extent[1][2] = Math.max(extent[1][2],end.z);                
+            }
+    
+            let xoff = end.x-start.x;
+            let yoff = end.y-start.y;
+            let zoff = end.z-start.z;
+            maxdepth = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff);
+            
+            minunit = Math.min(Math.min(unit.x,unit.y),unit.z);
+            
+            //invert onto grid, then scale by grid dimensions to get
+            //normalized texture coordinates
+            texmatrix = new $3Dmol.Matrix4().identity().scale({x:data.size.x, y:data.size.y, z:data.size.z});
+            texmatrix = texmatrix.multiplyMatrices(data.matrix, texmatrix);
+            
+            texmatrix = texmatrix.getInverse(texmatrix);
 
+        } else {
+            texmatrix = new $3Dmol.Matrix4().identity();
+            let xoff = data.unit.x*data.size.x;
+            let yoff = data.unit.y*data.size.y;
+            let zoff = data.unit.z*data.size.z;
+           //scale doesn't apply to the translation vector, so preapply it
+            texmatrix.makeTranslation(-data.origin.x/xoff,-data.origin.y/yoff,-data.origin.z/zoff);
+            texmatrix.scale({x:1.0/xoff, y:1.0/yoff, z:1.0/zoff});
+            minunit = Math.min(Math.min(data.unit.x,data.unit.y),data.unit.z);
+    
+            //need the bounding box so we can intersect with rays
+            extent = [ [data.origin.x,data.origin.y,data.origin.z],
+                [data.origin.x+xoff,data.origin.y+yoff,data.origin.z+zoff]];
+    
+            maxdepth = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff);            
+        }
+ 
+        //use GLShape to construct box
+        var shape = new $3Dmol.GLShape();
+        shape.addBox({corner: {x: extent[0][0], y: extent[0][1], z: extent[0][2]}, 
+                      dimensions: {w: extent[1][0]-extent[0][0], 
+                                   h: extent[1][1]-extent[0][1], 
+                                   d: extent[1][2]-extent[0][2]}});
+
+        var geo = shape.finalize();
         this.boundingSphere = new $3Dmol.Sphere();
-        this.boundingSphere.center = {x: data.origin.x+xoff/2.0, y: data.origin.y+yoff/2.0, z: data.origin.z+zoff/2.0};
-        this.boundingSphere.radius = Math.sqrt(xoff*xoff+yoff*yoff+zoff*zoff)/2.0;
-        
+        this.boundingSphere.center = {x: (extent[0][0]+extent[1][0])/2.0, 
+                                      y: (extent[0][1]+extent[1][1])/2.0, 
+                                      z: (extent[0][2]+extent[1][2])/2.0};
+        this.boundingSphere.radius = maxdepth/2;
+
         // volume selectivity based on given coords and distance
         if (spec.coords !== undefined && spec.seldist !== undefined){
-            //TODO: create mask buffer
+            let mask = new Uint8Array(data.data.length);
+            //for each coordinate
+            let d = spec.seldist;
+            let d2 = d*d;
+            for(let i = 0, n = spec.coords.length; i < n; i++) {
+                let c = spec.coords[i];
+                let minx = c.x-d, miny = c.y-d, minz = c.z-d;
+                let maxx = c.x+d, maxy = c.y+d, maxz = c.z+d;
+                if(data.getIndex(minx,miny,minz) >= 0 || data.getIndex(maxx,maxy,maxz) >= 0) {
+                    //bounding box overlaps grid
+                    //iterate over the grid points in the seldist bounding box
+                    //minunit may be inefficient if axes have very different units. oh well.
+                    for(let x = minx; x < maxx; x += minunit) {
+                        for(let y = miny; y < maxy; y += minunit) {
+                            for(let z = minz; z < maxz; z += minunit) {
+                                let idx = data.getIndex(x,y,z);
+                                if(idx >= 0 && !mask[idx]) {
+                                    //if not already masked, check distance
+                                    let distsq = (x-c.x)*(x-c.x)+(y-c.y)*(y-c.y)+(z-c.z)*(z-c.z);
+                                    if(distsq < d2) {
+                                        mask[idx] = 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }                                        
+            }
+            //any place mask is zero, make infinite in data
+            for(let i = 0, n = data.data.length; i < n; i++) {
+                if(mask[i] == 0) data.data[i] = Infinity;
+            }
         }
-        
+
         /**
          * Initialize webgl objects for rendering
          * @param {$3Dmol.Object3D} group
-         * 
-         */  
+         *
+         */
         this.globj = function(group) {
 
             if (renderedShapeObj) {
                 group.remove(renderedShapeObj);
                 renderedShapeObj = null;
             }
-            
+
             if(this.hidden)
                 return;
-            
+
             shapeObj = new $3Dmol.Object3D();
             var material = null;
 
             var texture = new $3Dmol.Texture(data, true);
             var transfertexture = new $3Dmol.Texture(transferfunctionbuffer, false);
-            texture.needsUpdate = true; 
+            texture.needsUpdate = true;
             transfertexture.needsUpdate = true;
-            transfertexture.flipY = false;          
+            transfertexture.flipY = false;
 
             material = new $3Dmol.VolumetricMaterial({
                 transferfn: transfertexture,
@@ -43871,11 +48650,11 @@ $3Dmol.GLVolumetricRender = (function() {
                 maxdepth: maxdepth,
                 texmatrix: texmatrix,
                 unit: minunit,
-                subsamples: subsamples
-            });                         
-            
+                subsamples: subsamples,
+            });
+
             var mesh = new $3Dmol.Mesh(geo, material);
-            shapeObj.add(mesh);            
+            shapeObj.add(mesh);
 
             renderedShapeObj = shapeObj.clone();
             group.add(renderedShapeObj);
@@ -43932,7 +48711,6 @@ $3Dmol.GLVolumetricRender = (function() {
 
 }());
 
-
 //Hackish way to create webworker (independent of $3Dmol namespace) within minified file
 $3Dmol.workerString = function(){
 
@@ -43971,3 +48749,5141 @@ $3Dmol.SurfaceWorker = window.URL ? window.URL.createObjectURL(new Blob([$3Dmol.
 
 $3Dmol.workerString = $3Dmol.workerString;
 $3Dmol.SurfaceWorker = $3Dmol.SurfaceWorker;
+
+/**
+ * $3Dmol.UI - UI creates panels in the viewer to assist control of the viewport
+ * @constructor 
+ * @param {$3Dmol.StateManager} stateManager StateManager is required to have interaction between glviewer and the ui. 
+ * @param {Object} config Loads the user defined parameters to generate the ui
+ * @param {Object} parentElement Refers the parent division used to hold the canvas for 3Dmol.js 
+ */
+  $3Dmol.UI = (function(){
+    function UI(stateManager, config, parentElement){
+      config = config || {}
+
+      // Extract the viewer and then render it
+      var icons =new $3Dmol.UI.Icons();
+      var body = $('body');
+      
+      var mainParent = $(parentElement[0]);
+      // Generates the necessary UI elements
+      var HEIGHT = config.height;
+      var WIDTH = config.width;
+      var uiElements = this.tools = generateUI(config);
+      
+      /**
+       * Creates all the jquery object of different UI features
+       * @param  {Object} config
+       */
+      function generateUI(config){
+        var modelToolBar = new ModelToolbar();
+        mainParent.append(modelToolBar.ui);
+        setLocation(mainParent, modelToolBar.ui, 'left', 'top');
+        // modelToolBar.updateInputLength();
+
+        var contextMenu = new ContextMenu();
+        mainParent.append(contextMenu.ui);
+        setPosition(contextMenu.ui, 100, 100)
+        
+        var surfaceMenu = new SurfaceMenu();
+        mainParent.append(surfaceMenu.ui);
+        setLocation(mainParent, surfaceMenu.ui, 'right', 'top', 0, modelToolBar.ui.height() + 5 );
+        
+
+        var selectionBox = new SelectionBox(icons.select);
+        mainParent.append(selectionBox.ui);
+        setLocation(mainParent, selectionBox.ui, 'left', 'top',  0, modelToolBar.ui.height() + 5);
+
+        // Fixing Context Menu Behaviour
+        selectionBox.ui.on('mousedown', ()=>{
+          stateManager.exitContextMenu();
+        });
+
+        surfaceMenu.ui.on('mousedown', ()=>{
+          stateManager.exitContextMenu();
+        });
+
+        return {
+          modelToolBar : modelToolBar,
+          selectionBox : selectionBox,
+          contextMenu : contextMenu,
+          surfaceMenu : surfaceMenu
+        } 
+      }
+
+      /**
+       * Resize the panel with respect to the new viewport
+       * 
+       * @function $3Dmol.UI#resize
+       */
+      this.resize = function(){
+        var selectionBox = this.tools.selectionBox;
+        var surfaceMenu = this.tools.surfaceMenu;
+        var modelToolBar = this.tools.modelToolBar;
+        var HEIGHT = mainParent.height();
+
+        setLocation(mainParent, modelToolBar.ui, 'left', 'top');
+        // modelToolBar.updateInputLength();
+        setLocation(mainParent, selectionBox.ui, 'left', 'top',  0, modelToolBar.ui.height() + 5);
+        selectionBox.updateScrollBox(HEIGHT);
+        setLocation(mainParent, surfaceMenu.ui, 'right', 'top',  0, modelToolBar.ui.height() + 5);
+        surfaceMenu.updateScrollBox(HEIGHT);
+      }
+
+      /**
+       * ModelToolbar is part of $3Dmol.UI to edit or change the model loaded into the viewer
+       * 
+       * @function ModelToolbar
+       */
+      function ModelToolbar(){
+        var boundingBox = this.ui = $('<div></div>');
+
+        boundingBox.css({
+          'position' : 'relative',
+          'min-width' : '150px'
+        });
+
+        
+        var modelButton = new button(icons.molecule, 20, {tooltip : 'Toggle Model Selection Bar'} );
+        boundingBox.append(modelButton.ui);
+
+        modelButton.ui.css({
+          'display' : 'inline-block',
+          'top':'3px',
+        });
+
+        var control = {
+          urlType : {
+            active : true,
+            value : null,
+            key : 'Model type'
+          },
+
+          url : {
+            active : true,
+            value : null,
+            key : 'Url'
+          },
+        };
+
+        var surroundingBox = $('<div></div>');
+
+        surroundingBox.css({
+          'display' : 'inline-block',
+          'background' : '#e4e4e4',
+          'padding' : '2px',
+          'border-radius' : '3px',
+          // 'width' : '90%'
+        });
+
+        boundingBox.append(surroundingBox);
+
+        var currentModelBox = $('<div></div>');
+        currentModelBox.css({
+          
+        });
+
+        var currentModel = $('<div></div>');
+        currentModel.css({
+          'display' : 'inline-block',
+          'font-family':'Arial',
+          'font-size':'12px',
+          'font-weight': 'bold',
+          // 'padding' : '3px'
+        });
+
+        currentModelBox.append(currentModel);
+
+        var changeButton = new button(icons.change, 16, { tooltip : 'Change Model', backgroundColor : 'white', bfr : 0.5});
+        changeButton.ui.css({
+          'display' : 'inline-block',
+          'margin-left' : '4px',
+        });
+        currentModelBox.append(changeButton.ui);
+
+        currentModelBox.hide();
+        surroundingBox.append(currentModelBox);
+
+        var formBox = $('<div></div>');
+        surroundingBox.append(formBox);
+
+        var dbs = 'pdb,mmtf,cid'.split(',');
+        var list = this.list = new $3Dmol.UI.Form.ListInput(control.urlType, dbs);
+        list.showAlertBox = false;
+
+        list.ui.css({
+          'display' : 'inline-block',
+        })
+
+        formBox.append(list.ui);
+
+        var input = this.url = new $3Dmol.UI.Form.Input(control.url);
+        formBox.append(input.ui);
+
+        input.ui.css({
+          'display' : 'inline-block',
+          'width' : '125px'
+        });
+
+        // input.setWidth(125);
+
+        var submitButton = new button(icons.tick, 16, { bfr : 0.5, backgroundColor : 'lightgreen', tooltip : 'Add Model'});
+        submitButton.ui.css({
+          'margin' : '0px'
+        })
+        formBox.append(submitButton.ui);
+
+        this.updateInputLength = function(){
+          // var width = parentElement.width()*0.3;
+          // boundingBox.width(width);
+          // input.setWidth(width - 12);
+        }
+
+        modelButton.ui.on('click', ()=>{
+          surroundingBox.toggle();
+        });
+
+        submitButton.ui.on('click', function(){
+          var validateDb = list.validate();
+          var validateId = input.validate();
+
+          if(validateId && validateDb){
+            stateManager.addModel(control);
+          }
+          else {
+          }
+        });
+
+        /**
+         * Sets the title in the ui with specified value
+         * 
+         * @function ModelToolbar#setModel 
+         * @param {String} heading Name of the molecule that is to be displayed on the title
+         */
+        this.setModel = function(heading){
+          currentModel.text(heading);
+          currentModelBox.show();
+          formBox.hide();
+        }
+
+        changeButton.ui.on('click', function(){
+          currentModelBox.hide();
+          formBox.show();
+          input.setValue('');
+        });
+
+        boundingBox.on('keypress', function(e){
+          if(e.key == 'Enter' || e.key == 'Return'){
+            submitButton.ui.trigger('click')
+          }
+        });
+      }
+
+
+      /**
+       * Selection box creates the UI panel to manipulate selections and style that are drawn 
+       * on the viewport
+       * 
+       * @function SelectionBox  
+       * @param {$3Dmol.UI.Icons} icon takes the svg code for the icon that is to be used to display
+       * selection box
+       * @return {Object}  Jquery element of div
+       */
+      function SelectionBox(icon, side='left') {
+        var selectionBox = this.ui = $('<div></div>');
+        _editingForm = false;
+        var selectionObjects = [];
+
+        var selections = $('<div></div>');
+        var scrollBox = $('<div></div>');
+
+        selections.css('opacity', '0.9');
+        
+        var showArea = $('<div></div>');
+        var addArea = $('<div></div>');
+        var plusButton = new button(icons.plus, 20, { tooltip : 'Add New Selection'});
+        plusButton.ui.css('margin','0px');
+        
+        var hideButton = new button(icon, 20, { tooltip : 'Toggle Selection Menu'});
+        this.selectionObjects = [];
+
+        // Content
+        selectionBox.append(hideButton.ui);
+        selectionBox.append(showArea);
+        selectionBox.css('position', 'absolute');
+        
+        scrollBox.append(selections);
+        showArea.append(scrollBox);
+        addArea.append(plusButton.ui);
+
+        var alertBox = new AlertBox();
+        showArea.append(alertBox.ui);
+        showArea.append(addArea);
+        alertBox.ui.css('width', 162);
+        
+        // CSS
+        if(side == 'left'){
+          selectionBox.css('text-align', 'left');
+        }
+        else if(side == 'right') {
+          selectionBox.css('text-align', 'right');
+        }
+        else {
+          // Add alert box code
+          selectionBox.css('text-align', 'right');
+        }
+
+        showArea.css('box-sizing', 'border-box');
+        showArea.css('padding', '3px');
+        // showArea.css('width', '162px');
+
+        scrollBox.css('max-height', HEIGHT*0.8);
+        scrollBox.css('overflow-y', 'auto');
+        scrollBox.css('overflow-x', 'visible');
+        
+        selections.css('box-sizing', 'content-box');
+
+        this.updateScrollBox = function(height){
+          scrollBox.css('max-height', height*0.8);
+        }
+
+        // Action
+        var hidden = true;
+        showArea.hide();
+
+        hideButton.ui.click(toggleHide);
+
+        function toggleHide(){
+          if(hidden){
+            showArea.show(100);
+          }
+          else {
+            showArea.hide(100);
+          }
+          hidden = !hidden;
+        }
+
+        /**
+         * Card for manipulation of a selection form and related styles
+         * 
+         * @function Selection
+         */
+        function Selection(){
+          var boundingBox = this.ui = $('<div></div>');
+          var sid = this.id = null;
+          selectionObjects.push(this);
+          boundingBox.css({
+            'background' : '#e8e8e8',
+            'padding' : '4px 4px 2px 4px',
+            'border-radius' : '6px',
+            'margin-bottom' : '3px',
+            'position':'relative',
+            'width':'156px'
+          });
+
+          var header = $('<div></div>');
+          boundingBox.append(header);
+          var heading = $('<div></div>');
+          var controls = $('<div></div>');
+
+          header.append(heading, controls);
+          heading.css({
+            'font-family' : 'Arial',
+            'font-weight': 'bold',
+            'font-size':'12px',
+            'display':'inline-block',
+            'width' : '60px'
+          });
+
+          controls.css({
+            'display' : 'inline-block'
+          });
+
+          header.hide();
+          controls.editMode = false;
+
+          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f', tooltip : 'Remove Selection'});
+          var editButton = new button(icons.pencil, 16, { tooltip : 'Edit Selection'});
+          var visibleButton = new button(icons.visible, 16, { tooltip : 'Show / Hide Selection'});
+
+          controls.append(removeButton.ui)
+          controls.append(editButton.ui);
+          controls.append(visibleButton.ui);
+
+          var parameters = $('<div></div>');
+          boundingBox.append(parameters);
+
+          var styleHolder = $('<div></div>');
+          
+          removeButton.ui.on('click', function(){
+            stateManager.removeSelection(sid);
+            boundingBox.detach();
+            //delete this;
+          });
+
+          editButton.ui.on('click', function(){
+            parameters.toggle();
+          });
+
+          var hidden = false;
+          visibleButton.ui.on('click', ()=>{
+            stateManager.toggleHide(sid);
+            if(hidden){
+              hidden = false;
+              visibleButton.setSVG(icons.visible);
+            }
+            else {
+              hidden = true;
+              visibleButton.setSVG(icons.invisible);
+            }
+          });
+
+          var styleBox = new StyleBox();
+
+          var showStyle = false;
+          styleHolder.append(styleBox.ui);
+          styleBox.ui.css({
+            'position' : 'static',
+            // 'left' : '0',
+            'width' : 'px',
+            'border-radius' : '4px'
+          });
+
+          styleBox.ui.hide();
+
+          var allControl = this.allSelector = {
+            key : 'Select All Atom',
+            value : null,
+            active : true
+          }
+
+          var allCheckBox = new $3Dmol.UI.Form.Checkbox(allControl);
+          parameters.append(allCheckBox.ui);
+
+
+          var selectionFormControl = this.selectionValue = {
+            key : 'Selection Spec',
+            value : null,
+            active : true
+          }
+          
+          var selectionSpecForm = new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, selectionFormControl);
+          parameters.append(selectionSpecForm.ui);
+
+          var submitControls = $('<div></div>');
+          var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen', tooltip : 'Submit'});
+          var cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral', tooltip : 'Cancel'});
+          submitControls.append(submit.ui, cancel.ui);
+
+          
+          var alertBox = new AlertBox();
+          parameters.append(alertBox.ui);
+          
+          parameters.append(submitControls);
+          boundingBox.append(styleHolder);
+          
+          allCheckBox.update = function(){
+            selectionSpecForm.ui.toggle();
+          }
+
+          function finalizeSelection(id){
+            header.show();
+            controls.editMode = true;
+            sid = this.id = id;
+            heading.text('Sel#' + id);
+            boundingBox.attr('data-id', id);
+            parameters.hide();
+            showStyle = true;
+            styleBox.setSid(id);
+            styleBox.ui.show();
+          }
+
+          function checkAndAddSelection(sid = null){
+            var validate = selectionSpecForm.validate();
+            if(validate){
+              selectionSpecForm.getValue();
+              var checkAtoms = stateManager.checkAtoms(selectionFormControl.value);
+
+              if(Object.keys(selectionFormControl.value).length == 0){
+                alertBox.error('Please enter some input');
+              }
+              else{
+                if(checkAtoms){
+                  var id = stateManager.addSelection(selectionFormControl.value, sid);
+                  finalizeSelection(id);
+                  if(sid == null ) _editingForm = false;
+                }
+                else {
+                  alertBox.error('No atom selected');
+                }
+              }
+            }
+            else {
+              alertBox.error('Invalid Input');
+            }
+          }
+
+          function removeSelf(selection){
+            var selectionToRemove = selectionObjects.find((sel)=>{
+              if(selection == sel){
+                console.log('Selection found', selection);
+                return true;
+              }
+            });
+
+            // delete selectionToRemove;
+          }
+
+          submit.ui.on('click', ()=>{
+            if(controls.editMode == false){
+              if(allControl.value){
+                var id = stateManager.addSelection({});
+                finalizeSelection(id);
+                _editingForm = false;
+              }
+              else{
+                checkAndAddSelection(); 
+              }
+
+            }
+            else {
+              if(allControl.value){
+                var id = sid
+                stateManager.addSelection({}, id);
+                finalizeSelection(id);
+              }
+              else{
+                var id = sid;
+                checkAndAddSelection(id);
+              }
+            }
+          });
+
+          var self = this;
+
+          cancel.ui.on('click', ()=>{
+            if(controls.editMode){
+              parameters.hide();
+            }
+            else {
+              boundingBox.detach();
+              removeSelf(self);
+              _editingForm = false;
+            }
+          });
+
+
+          boundingBox.on('keyup', (e)=>{
+            if(e.key == 'Enter'){
+              submit.ui.trigger('click');
+            }
+          });
+
+          /**
+           * @function Selection#setProperty
+           * @param {string} id Id of the selection created in StateManager 
+           * @param {Object} specs Defination of the selection that will be used to set default 
+           * values in the form
+           */
+          this.setProperty = function(id, specs){            
+            // check for all selection
+            if(Object.keys(specs).length == 0){
+              allCheckBox.setValue(true)
+            }else{
+              selectionSpecForm.setValue(specs);
+            }
+
+            // finalize the selection 
+            finalizeSelection(id);
+          }
+
+          /**
+           * Adds style to the given selection 
+           * 
+           * @function Selection#addStyle 
+           * @param {String} selId Id of the selection to inititate the StyleBox
+           * @param {String} styleId Id of the style that is created through StateManager
+           * @param {AtomStyleSpecs} styleSpecs 
+           */
+          this.addStyle = function(selId, styleId, styleSpecs){
+            styleBox.addStyle(selId, styleId, styleSpecs);
+          }
+        }
+
+        plusButton.ui.on('click', ()=>{
+          if(!_editingForm){
+            var newSelection = new Selection();
+            selections.append(newSelection.ui);
+            _editingForm = true;
+          }else {
+            alertBox.warning('Please complete the previous form');
+          }
+          
+        });
+
+
+        /**
+         * Remove all the selection card from the ui
+         */
+        this.empty = function(){
+          selections.empty();
+          _editingForm = false;
+        }
+
+        /**
+         * Adds or create new selection card
+         * 
+         * @function SelectionBox#editSelection
+         * @param {String} id Id created in StateManager and passed down to this function during call
+         * @param {AtomSelectionSpec} selSpec Selection spec that is used to generate the selection form
+         * @param {String} styleId Id of style created in StateManager
+         * @param {AtomStyleSpecs} styleSpec Style spec if specified add the selection to the current selection 
+         */
+        this.editSelection = function(id, selSpec, styleId, styleSpec){
+          // if selection does not exist create new 
+
+          // This thing works but I am not sure how!
+
+          // Search selection with id 
+          var selectionUI = selections.children('[data-id='+ id +']');
+
+          if(selectionUI.length != 0) {
+            
+          }
+          else {
+            selection = new Selection();
+            selection.setProperty(id, selSpec);
+            selections.append(selection.ui);
+          }
+
+          if(styleId != null){
+            selection.addStyle(id, styleId, styleSpec);
+          }
+
+        }
+      }
+   
+      /**
+       * 
+       * @param {Object} Jquery dom object
+       */
+      /**
+       * Creates StyleBox for listing out different styles inside the selection
+       * 
+       * @function StyleBox 
+       * @param {String} selId Id of the selection for which the style box is created 
+       * @param {String} side Alignment of text inside the box
+       */
+       function StyleBox(selId, side='left') {
+        var styleBox = this.ui = $('<div></div>');
+        _editingForm = false;
+        var sid = this.sid = selId; // selection id
+
+        this.setSid = function(id){
+          sid = this.sid = id;
+        }
+
+        var styles = $('<div></div>');
+        var scrollBox = $('<div></div>');
+
+        styles.css('opacity', '0.9');
+        
+        var showArea = $('<div></div>');
+        var addArea = $('<div></div>');
+        addArea.css('text-align' , 'center');
+        var plusButton = new button(icons.plus, 20, { tooltip : 'Add New Style'});
+        plusButton.ui.css('margin','0px');
+      
+        this.selectionObjects = [];
+
+        // Content
+        styleBox.append(showArea);
+        styleBox.css('position', 'absolute');
+        
+        scrollBox.append(styles);
+        showArea.append(scrollBox);
+
+        var alertBox = new AlertBox();
+        showArea.append(alertBox.ui);
+        
+        addArea.append(plusButton.ui);
+        showArea.append(addArea);
+
+        // CSS
+        if(side == 'left'){
+          styleBox.css('text-align', 'left');
+        }
+        else if(side == 'right') {
+          styleBox.css('text-align', 'right');
+        }
+        else {
+          // Add alert box code
+          styleBox.css('text-align', 'right');
+        }
+
+        showArea.css('box-sizing', 'border-box');
+        showArea.css('padding', '3px');
+        // showArea.css('width', '162px');
+        showArea.css('background-color', '#a4a4a4')
+        showArea.css('border-radius', '4px');
+
+        // scrollBox.css('max-height', HEIGHT*0.8);
+        scrollBox.css('overflow', 'hidden');
+        
+        // styles.css('max-height', HEIGHT*0.8);
+        // styles.css('overflow', 'auto');
+        styles.css('box-sizing', 'content-box');
+
+
+        /**
+         * Style card to define the value of the style 
+         * 
+         * @param {string} sid Id of the selction for which the style box is created
+         * and this stye will be added under that selection
+         */
+        function Style(sid){
+          var boundingBox = this.ui = $('<div></div>');
+          var stid = this.id = null; // style id 
+          boundingBox.css({
+            'background' : '#e8e8e8',
+            'padding' : '4px 4px 2px 4px',
+            'border-radius' : '6px',
+            'margin-bottom' : '3px',
+            'position':'relative'
+          });
+
+          var header = $('<div></div>');
+          boundingBox.append(header);
+          var heading = $('<div></div>');
+          var controls = $('<div></div>');
+
+          header.append(heading, controls);
+          heading.css({
+            'font-family' : 'Arial',
+            'font-weight': 'bold',
+            'font-size':'12px',
+            'display':'inline-block',
+            'width' : '60px'
+          });
+
+          controls.css({
+            'display' : 'inline-block'
+          });
+
+          header.hide();
+          controls.editMode = false;
+
+          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f', tooltip : 'Remove Style'});
+          var editButton = new button(icons.pencil, 16, { tooltip : 'Edit Style'});
+          var visibleButton = new button(icons.visible, 16, { tooltip : 'Show / Hide Style'});
+
+          controls.append(removeButton.ui)
+          controls.append(editButton.ui);
+          controls.append(visibleButton.ui);
+
+          var parameters = $('<div></div>');
+          boundingBox.append(parameters);
+
+          removeButton.ui.on('click', { parent: this, stid : stid }, function(e){
+            stateManager.removeStyle(sid, stid);
+            boundingBox.detach();
+            //delete this;
+          });
+
+          editButton.ui.on('click', function(){
+            parameters.toggle();
+          });
+
+          var hidden = false;
+          visibleButton.ui.on('click', ()=>{
+            stateManager.toggleHideStyle(sid, stid);
+            if(hidden){
+              hidden = false;
+              visibleButton.setSVG(icons.visible);
+            }
+            else {
+              hidden = true;
+              visibleButton.setSVG(icons.invisible);
+            }
+          });
+
+          var styleFormControl = this.selectionValue = {
+            key : 'Style Spec',
+            value : null,
+            active : true
+          }
+          
+          var styleSpecForm = new $3Dmol.UI.Form($3Dmol.GLModel.validAtomStyleSpecs, styleFormControl);
+          parameters.append(styleSpecForm.ui);
+
+          var submitControls = $('<div></div>');
+          var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen', tooltip : 'Submit'});
+          var cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral', tooltip : 'Cancel'});
+          submitControls.append(submit.ui, cancel.ui);
+
+          
+          var alertBox = new AlertBox();
+          parameters.append(alertBox.ui);
+          
+          parameters.append(submitControls);
+
+          function finalizeStyle(id){
+            header.show();
+            controls.editMode = true;
+            stid = id;
+            heading.text('Sty#' + id);
+            parameters.hide();
+          }
+
+          function checkAndAddStyle(stid = null){
+            var validate = styleSpecForm.validate();
+            if(validate){
+              styleSpecForm.getValue();
+              
+              if(Object.keys(styleFormControl.value).length == 0){
+                
+                alertBox.error('Please enter some value');
+              }
+              else{  
+                var id = stateManager.addStyle(styleFormControl.value, sid, stid);
+                finalizeStyle(id);
+                if(stid == null) _editingForm = false;
+              }
+
+            }
+            else {
+              alertBox.error('Invalid Input');
+            }
+          }
+
+          submit.ui.on('click', ()=>{
+            if(controls.editMode == false){
+              checkAndAddStyle(); 
+            }
+            else {
+              var id = stid
+              styleSpecForm.getValue();
+
+              if(Object.keys(styleFormControl.value).length == 0){
+                alertBox.error('Please enter some value');
+              }
+              else{
+                checkAndAddStyle(id);
+              }
+
+            }
+          });
+
+          cancel.ui.on('click', ()=>{
+            if(controls.editMode){
+              parameters.hide();
+            }
+            else {
+              boundingBox.detach();
+              //delete this;
+            }
+          });
+
+          boundingBox.on('keyup', (e)=>{
+            if(e.key == 'Enter'){
+              submit.ui.trigger('click');
+            }
+          });
+
+          /**
+           * @function Style#updateStyle 
+           * @param {String} styleId Id of the style created by StateManager 
+           * @param {AtomStyleSpecs} styleSpec Specs for defining the style and setting default values
+           */
+          this.updateStyle = function(styleId, styleSpec){
+            styleSpecForm.setValue(styleSpec);
+            
+            finalizeStyle(styleId);
+          }
+
+        }
+
+        plusButton.ui.on('click', ()=>{
+          if( !_editingForm){
+            var newStyle = new Style(sid);
+            styles.append(newStyle.ui);
+            _editingForm = true;
+          }
+          else {
+            alertBox.warning('Please complete editing the current form');
+          }
+        });   
+
+        /**
+         * @function StyleBox#addStyle
+         * @param {String} selectionId Id of the selection for which styles will be created   
+         * @param {String} styleId Id of the style part of the selection 
+         * @param {AtomStyleSpecs} styleSpecs Style specs that will be used to create 
+         * style for the specified selection and set default values in the Style card
+         */
+        this.addStyle = function(selectionId, styleId, styleSpecs){
+          var style = new Style(selectionId);
+          styles.append(style.ui);
+          style.updateStyle(styleId, styleSpecs);
+        }
+      }
+
+
+      /**
+       * Add alert messages to different panels 
+       * 
+       * @function AlertBox
+       * @param {Object} config Configuraiton for alert box display
+       */
+      function AlertBox(config){
+        var boundingBox = this.ui = $('<div></div>');
+        config = config || {}
+        var delay = config.delay || 5000;
+        var autohide = (config.autohide == undefined )? true : config.autohide;
+
+        boundingBox.css({
+          'font-family' : 'Arial',
+          'font-size' : '14px',
+          'padding' : '3px',
+          'border-radius' : '4px',
+          'margin-top' : '2px',
+          'margin-bottm' : '2px',
+          'font-weight' : 'bold',
+          'text-align' : 'center',
+        });
+
+        boundingBox.hide();
+
+        function hide(){
+          if(autohide){
+            setTimeout(()=>{
+              boundingBox.hide();
+            }, delay);
+          }
+        }
+
+        /**
+         * Generate Internal alert message  
+         * @param {String} msg Error Message 
+         */
+        this.error = function(msg){
+          boundingBox.css({
+            'background' : 'lightcoral',
+            'color' : 'darkred',
+            'border' : '1px solid darkred'
+          });
+
+          boundingBox.text(msg);
+          boundingBox.show();
+
+          hide();
+        }
+
+        /**
+         * Generates Internal warning message
+         * @param {String} msg Warming message 
+         */
+        this.warning = function(msg){
+          boundingBox.css({
+            'background' : '#fff3cd',
+            'color' : '#856409',
+            'border' : '1px solid #856409'
+          });
+
+          boundingBox.text(msg);
+          boundingBox.show();
+          
+          hide();
+        }
+
+        /**
+         * Generates Internal Info message 
+         * @param {String} msg Info message
+         */
+        this.message = function(msg){
+          boundingBox.css({
+            'background' : 'lightgreen',
+            'color' : 'green',
+            'border' : '1px solid green'
+          });
+
+          boundingBox.text(msg);
+          boundingBox.show();
+
+          hide();
+        }
+      }
+
+      /**
+       * Creates the panel for manipulation of labels on the viewport
+       * 
+       * @function ContextMenu
+       */
+      function ContextMenu(){
+        var boundingBox = this.ui = $('<div></div>');
+
+        boundingBox.css('position', 'absolute');
+        // boundingBox.css('border', '1px solid black');
+        boundingBox.css('border-radius', '3px');
+        boundingBox.css('background', '#f1f1f1');
+        boundingBox.css('z-index', 99);
+        var contentBox = $('<div></div>');
+        contentBox.css('position', 'relative');
+        boundingBox.css('opacity', '0.85');
+
+        boundingBox.append(contentBox);
+        contentBox.css({
+          'background':  '#f1f1f1',
+          'border-radius': '4px',
+          'padding': '4px',
+          'width':'140px'
+        });
+        // Context Box
+        // Remove Label Button 
+        
+        var labelMenuStyle = {
+          'background' : '#d3e2ee',
+          'padding' : '2px',
+          'font-family':'Arial',
+          'font-weight':'bold',
+          'font-size':'12px',
+          'border-radius':'2px',
+          // 'margin-top':'3px'
+        }
+
+        var removeLabelMenu = $('<div></div>');
+        removeLabelMenu.text('Remove Label');
+        removeLabelMenu.css(labelMenuStyle);
+        removeLabelMenu.css('margin-bottom', '3px');
+
+        contentBox.append(removeLabelMenu);
+        removeLabelMenu.hide();
+
+        // Label Property List 
+        var propertyKeys = Object.keys($3Dmol.GLModel.validAtomSpecs);
+        var propertyList = [];
+        var propertyObjectList = [];
+
+        propertyKeys.forEach((prop)=>{
+          var propObj = $3Dmol.GLModel.validAtomSpecs;
+          if(propObj[prop].prop === true){
+            propertyList.push(prop);
+          }
+        });
+
+        // Property Menu 
+        var propertyMenu = $('<div></div>');
+        contentBox.append(propertyMenu);
+        
+        /**
+         * Property object used in property menu 
+         * 
+         * @function Property 
+         * @param {String} key Name of the atom property
+         * @param {*} value Value of the property 
+         */
+        function Property(key, value){
+          this.row = $('<tr></tr>');
+          var propLabelValue = this.control = {
+            key : '',
+            value : null,
+            active : true,
+            name : key,
+          }
+
+          this.key = key;
+          this.value = value;
+
+          var checkbox = new $3Dmol.UI.Form.Checkbox(propLabelValue);
+          var checkboxHolder = $('<td></td>');
+          checkboxHolder.append(checkbox.ui); 
+          var keyHolder = $('<td></td>');
+          var separatorHolder = $('<td></td>').text(':');
+          var valueHolder = $('<td></td>');
+
+          this.row.append(checkboxHolder, keyHolder, separatorHolder, valueHolder);
+
+          keyHolder.text(key);
+
+          if(typeof(value) == "number"){
+            valueHolder.text(value.toFixed(2));
+          }else {
+            valueHolder.text(value.replace(/\^/g, ''));
+          }
+
+          console.log('Type of value', typeof(value), value);
+        }
+
+        /**
+         * @param {AtomSpec} atom Value of different property of the atom, if the atom has prop : true
+         * then that option is made visible in the context menu
+         */
+        function setProperties(atom){        
+          propertyMenu.empty();
+          propertyObjectList = [];
+          
+          var propertyTable = $('<table></table>');
+          
+          propertyList.forEach((prop)=>{
+            var propObj = new Property(prop, atom[prop]);
+            propertyTable.append(propObj.row);
+            propertyObjectList.push(propObj);
+          });
+
+          propertyMenu.append(propertyTable);
+
+          var labelStyle = {
+            value : null,
+            key : 'Atom Label Style'
+          }
+          
+          var labelStyleHolder = $('<div><div>');
+
+          var labelStyle = $('<div><div>');
+          labelStyle.text('Style');
+          labelStyle.css({
+            'display' : 'inline-block',
+            'font-family' : 'Arial',
+            'font-size' : '14px',
+            'margin-right' : '6px',
+            'margin-left' : '6px'
+          });
+
+          var stylesForLabel = new $3Dmol.UI.Form.ListInput(labelStyle, Object.keys($3Dmol.labelStyles));
+          stylesForLabel.ui.css({
+            'display' : 'inline-block'
+          });
+        
+          stylesForLabel.setValue('milk');
+
+          labelStyleHolder.append(labelStyle, stylesForLabel.ui);
+          propertyMenu.append(labelStyleHolder);
+          
+          var submit = new button(icons.tick, 18, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
+          var cancel = new button(icons.cross, 18, { backgroundColor: 'lightcoral', tooltip : 'Cancel'});
+
+          var controlButtons = $('<div></div>');
+          controlButtons.append(submit.ui, cancel.ui);
+          // controlButtons.css('text-align', 'center');
+
+          var alertBox = new AlertBox();
+          propertyMenu.append(alertBox.ui);   
+
+          propertyMenu.append(controlButtons);
+
+
+          submit.ui.on('click', ()=>{
+            var props = processPropertyList();
+            var labelStyleValidation = stylesForLabel.validate();
+
+            if(props !=null){
+              if(labelStyleValidation){
+                stateManager.addAtomLabel(props, atom, stylesForLabel.getValue().value);
+                stateManager.exitContextMenu(false);
+              }
+              else {
+                alertBox.error('Select style for label');
+              }
+            }
+            else {
+              alertBox.error('No value selected for label');
+            }
+          });
+
+          cancel.ui.on('click', ()=>{
+            stateManager.exitContextMenu();
+          });
+        }
+
+        // Previous Labels 
+        var labelHolder = $('<div></div>');
+        contentBox.append(labelHolder);
+
+        // Add Menu 
+        var addMenu = $('<div></div>');
+        contentBox.append(addMenu);
+        addMenu.css('width', '100%');
+
+        var addLabelMenu = $('<div></div>');
+        addMenu.append(addLabelMenu);
+
+
+        addLabelMenu.text('Add Label');
+        addLabelMenu.css(labelMenuStyle);
+        addLabelMenu.css('margin-bottom', '3px');
+        addLabelMenu.hide();
+
+        // Edit Menu
+        var editMenu = $('<div></div>');
+        contentBox.append(editMenu);
+
+        contentBox.css({
+          'position' : 'relative',
+        });
+
+        editMenu.css({
+          'background':'#dfdfdf',
+          'border-radius':'3px',
+          'font-family':'Arial',
+          'font-weight':'bold',
+          'font-size':'12px',
+          // 'position': 'absolute',
+          // 'left' : '105%',
+          // 'top' : '0',,
+          'box-sizing' : 'border-box',
+          'width' : '100%',
+          
+        });
+        editMenu.hide();
+
+        var alertBox = new AlertBox({ autohide : false });
+        contentBox.append(alertBox.ui);
+
+        // Add Label Inputs 
+
+        /**
+         * Generate input elements that are used as form values in the context menu under addLabelForm
+         * @returns {Object} that holds different input elements
+         */
+        function generateAddLabelForm(){
+          var addLabelForm = $('<div></div>');
+
+          var addLabelValue = {
+            text : {
+              key : 'Label Text',
+              value : null,
+              active : true,
+            },
+  
+            style : {
+              key : 'Style',
+              value : null,
+              active : true,
+            },
+  
+            sel : {
+              key : 'Selection',
+              value : null,
+              active : true,
+            }
+          }
+          var formModifierControl = $('<div></div>');
+          var removeButton = new button(icons.minus, 16);
+          var tick = new button(icons.tick, 16, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
+          var cross = new button(icons.cross, 16,  { backgroundColor: 'lightcoral', tooltip : 'Cancel'});
+          formModifierControl.append(removeButton.ui, tick.ui, cross.ui);
+          removeButton.ui.hide();
+          addLabelForm.append(formModifierControl);
+  
+          var addLabelTextBox = $('<div></div>');
+          var lt = $('<div></div>').text('Label Text');
+          var addLabelTextInput = new $3Dmol.UI.Form.Input(addLabelValue.text);
+          addLabelTextBox.append(lt, addLabelTextInput.ui);
+          var width = 126//editMenu.innerWidth()*0.8;
+          addLabelTextInput.setWidth(width);
+          addLabelForm.append(addLabelTextBox);
+
+          var addLabelStyleBox = $('<div></div>');
+          var ls = $('<div></div>').text('Label Style');
+          var addLabelStyleInput = new $3Dmol.UI.Form.ListInput(addLabelValue.style, Object.keys($3Dmol.labelStyles));
+          addLabelStyleInput.setValue('milk');
+          addLabelStyleBox.append(ls, addLabelStyleInput.ui);
+          addLabelForm.append(addLabelStyleBox);
+
+          var selectionList = stateManager.getSelectionList();
+          
+          var addLabelSelectionBox = $('<div></div>');
+          var lsl = $('<div></div>').text('Label Selection');
+          var addLabelSelectionInput = new $3Dmol.UI.Form.ListInput(addLabelValue.sel, selectionList);
+          addLabelSelectionBox.append(lsl, addLabelSelectionInput.ui);
+          addLabelForm.append(addLabelSelectionBox);
+
+          // CSS 
+          addLabelForm.css({
+            'padding' : '2px',
+            
+          });
+
+          tick.ui.on('click', ()=>{
+            var validate = true;
+
+            if(!addLabelStyleInput.validate())
+              validate = false;
+            
+            if(!addLabelTextInput.validate())
+              validate = false;
+            
+            if(!addLabelSelectionInput.validate())
+              validate = false;
+            
+            if(validate){
+              stateManager.addLabel(addLabelValue);
+            } else {
+
+            }       
+          });
+
+          cross.ui.on('click', ()=>{
+            stateManager.exitContextMenu();
+          });
+
+          removeButton.ui.on('click', ()=>{
+            stateManager.removeLabel()
+          });
+
+          addLabelForm.on('keyup', (e)=>{
+            if(e.key == 'Enter'){
+              tick.ui.trigger('click');
+            }
+          });
+      
+          return {
+            boundingBox : addLabelForm,
+            text : addLabelTextInput,
+            style : addLabelStyleInput,
+            selection: addLabelSelectionInput,
+            editMode : function(){
+              removeButton.ui.show();
+            }
+          }
+        }
+
+
+        function processPropertyList(){
+          var propsForLabel = {};
+          
+          propertyObjectList.forEach((propObj)=>{
+            if(propObj.control.value === true){
+              propsForLabel[propObj.key] = propObj.value;
+            }
+          });
+
+          if(Object.keys(propsForLabel).length != 0){
+            return propsForLabel
+          }
+          else{
+            return null;
+          }
+        }
+
+        // Context Menu UI Funciton 
+        boundingBox.hide();
+        this.hidden = true;
+        this.atom = null;
+
+        removeLabelMenu.on('click', { atom : this.atom }, function(e){
+          stateManager.removeAtomLabel(removeLabelMenu.atom);
+        });
+
+
+        /**
+         * Shows the context menu 
+         * 
+         * @function ContextMenu#show 
+         * 
+         * @param {Number} x x coordinate of the mouse
+         * @param {Number} y y coordinate of the mouse in the viewport in pixels
+         * @param {AtomSpec} atom Value of the atoms that is selected 
+         * @param {Boolean} atomExist if atom label is previously added it is set true else false
+         */
+        this.show = function(x, y, atom, atomExist){
+
+          if(atomExist){
+            removeLabelMenu.show();
+            removeLabelMenu.atom = atom;
+          }
+          else {
+            removeLabelMenu.hide();
+            removeLabelMenu.atom = null;
+          }
+
+          alertBox.ui.hide();
+          addLabelMenu.hide();
+
+          if( stateManager.getSelectionList().length == 0){
+            alertBox.message('Please create selections before adding label');
+          } else {
+            addLabelMenu.show();
+          }
+
+          unsetForm();
+          setPosition(boundingBox, x, y);
+          boundingBox.show();
+          this.hidden = false;
+          
+          if(atom){
+            setProperties(atom);
+            this.atom = atom;
+          }
+          else{
+            propertyMenu.empty();
+          }
+        }
+        
+        /**
+         * Hides the context menu and if needed process the propertyMenu
+         * 
+         * @function ContextMenu#hide
+         * @param {Boolean} processContextMenu If true then submission of the property to add label is executed
+         */
+
+        this.hide = function(processContextMenu){
+          if(processContextMenu){
+            var propsForLabel = processPropertyList();
+            if(propsForLabel != null){
+              stateManager.addAtomLabel(propsForLabel, this.atom);
+            }
+          }
+
+          boundingBox.hide();
+          this.hidden = true;
+          unsetForm();
+        }
+
+        addLabelMenu.on('click', function(){
+          var addLabelMenuForm = generateAddLabelForm();
+          setForm(addLabelMenuForm);
+        });
+
+        function setForm(form){
+          editMenu.children().detach();
+          editMenu.append(form.boundingBox);
+          editMenu.show();
+        }
+
+        function unsetForm(){
+          editMenu.children().detach();
+          editMenu.hide();
+        }
+      }
+
+      /**
+       * Creates UI panel for surface manipulations
+       * 
+       * @function SurfaceMenu 
+       */
+      function SurfaceMenu(){
+        var boundingBox = this.ui = $('<div></div>');
+        var _editingForm = false;
+        // Selection Layout
+
+        boundingBox.css({
+          'position': 'absolute',
+          'width': '140px',
+          'text-align': 'right'   
+        });
+        
+        var surfaceButton = new button(icons.surface, 20, { tooltip : 'Toggle Surface Menu'});
+
+        boundingBox.append(surfaceButton.ui);
+
+
+        var displayBox = $('<div></div>');
+        boundingBox.append(displayBox);
+
+        // Overflow fix 
+        boundingBox.css({
+          'overflow':'visible',
+        });
+
+        var newSurfaceSpace = $('<div></div>');
+        newSurfaceSpace.css({
+          'max-height' : HEIGHT*0.8,
+          'overflow-y': 'auto',
+          'overflow-x' : 'hidden'
+        });
+
+        this.updateScrollBox = function(height){
+          newSurfaceSpace.css('max-height', height*0.8);
+        }
+        // newSurfaceSpace.append(controlButton);
+        // controlButton.hide();
+
+        displayBox.append(newSurfaceSpace);
+
+        var alertBox = new AlertBox();
+        displayBox.append(alertBox.ui);
+
+        var addArea = $('<div></div>');
+        var addButton = new button(icons.plus, 20, { tooltip : 'Add New Surface'});
+        addArea.append(addButton.ui);
+        displayBox.append(addArea);
+        displayBox.hide();
+
+        var surfaces = this.surfaces = [];
+
+        /**
+         * Creates cards for manipulation of surface
+         * 
+         * @function Surface 
+         */
+        function Surface(){
+          var control = {
+            surfaceType: {
+              key : 'Surface Type',
+              value : null
+            },
+            surfaceStyle: {
+              key: 'Surface Style',
+              value: null
+            },
+            surfaceFor: {
+              key: 'Selection Atoms',
+              value: null
+            },
+            surfaceOf: {
+              key: 'Surface Generating Atoms',
+              value: null,
+            },
+          };
+  
+          var surfaceBox = this.ui = $('<div></div>');
+          surfaceBox.css({
+            'margin-top':'3px',
+            'padding':'6px',
+            'border-radius':'3px',
+            'background-color': '#e8e8e8',
+            // 'position':'relative',
+            'width':'100%',
+            'box-sizing':'border-box',
+            // 'left': "-100%",
+            'opacity' : 0.9,
+            'text-align':'left'
+          });
+        
+          var heading = this.heading = $('<div></div>');
+          var header = $('<div></div>');
+
+          header.css({
+            'text-align' : 'right'
+          })
+
+          // Control Buttons
+          var toolButtons = $('<div></div>');
+          
+          var editButton = new button(icons.pencil, 16, { tooltip : 'Edit Surface'});
+          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
+          
+          toolButtons.append(removeButton.ui);
+          toolButtons.append(editButton.ui);
+
+          toolButtons.editButton = editButton;
+          toolButtons.removeButton = removeButton;
+          toolButtons.editMode = false;
+          
+          var defaultTextStyle = {
+            'font-weight': 'bold',
+            'font-family' : 'Arial',
+            'font-size' : '12px'
+          }
+          
+          heading.css('display', 'inline-block');
+          heading.css(defaultTextStyle);
+          
+          toolButtons.css('display', 'inline-block');
+          header.hide();
+          
+          header.append(heading, toolButtons);
+          surfaceBox.append(header);
+
+          // toolButtons.hide();
+          var surfacePropertyBox = $('<div></div>');
+          surfaceBox.append(surfacePropertyBox);
+
+          // Surface Type
+          var surfaceType = $('<div></div>');
+
+          var labelSurfaceType = $('<div></div>');
+          labelSurfaceType.text('Surface Type');
+          labelSurfaceType.css(defaultTextStyle);
+
+          var listSurfaceType =new $3Dmol.UI.Form.ListInput(control.surfaceType, Object.keys($3Dmol.SurfaceType));
+          
+
+          surfaceType.append(labelSurfaceType, listSurfaceType.ui);
+          surfacePropertyBox.append(surfaceType);
+          
+          listSurfaceType.setValue(Object.keys($3Dmol.SurfaceType)[0]);
+          // Surface Style
+          var surfaceStyle = $('<div></div>');
+
+          var labelSurfaceStyle = $('<div></div>');
+          // labelSurfaceStyle.text('Surface Style');
+
+          var formSurfaceStyle = new $3Dmol.UI.Form($3Dmol.GLModel.validSurfaceSpecs, control.surfaceStyle);
+
+          surfaceStyle.append(labelSurfaceStyle, formSurfaceStyle.ui);
+          surfacePropertyBox.append(surfaceStyle);
+          
+          // Surface Of
+          var surfaceOf = $('<div></div>');
+          
+          var labelSurfaceOf = $('<div></div>');
+          labelSurfaceOf.text('Surface Atoms');
+          labelSurfaceOf.css(defaultTextStyle);
+          
+          var surfaceGeneratorAtomType = ['self', 'all'];
+          var surfaceGeneratorDesc = {
+            'self' : 'Atoms in the selections will be used to generate the surface',
+            'all' : 'All the atoms will be used to generate the surface'
+          }
+          
+          var listSurfaceOf = new $3Dmol.UI.Form.ListInput(control.surfaceOf, surfaceGeneratorAtomType);
+          
+          var hintbox = $('<div></div>');
+          hintbox.css({
+            'background-color' : '#e4e4e4',
+            'border' : '1px solid grey',
+            'color' : 'grey',
+            'padding' : '2px',
+            'border-radius' : '3px',
+            'font-family' : 'Arial',
+            'font-size' : '12px',
+            'font-weight' : 'bold',
+            'margin-top' : '3px'
+          });
+
+          hintbox.hide();
+
+          listSurfaceOf.update = function(control){
+            if(control.value == 'self'){
+              hintbox.show();
+              hintbox.text(surfaceGeneratorDesc['self']);
+            }
+            else if( control.value == 'all'){
+              hintbox.show();
+              hintbox.text(surfaceGeneratorDesc['all']);
+            }
+            else {
+              hintbox.hide();
+            }
+          }
+
+          listSurfaceOf.setValue('all');
+
+          surfaceOf.append(labelSurfaceOf, listSurfaceOf.ui, hintbox);
+          surfacePropertyBox.append(surfaceOf);
+          
+          // Surface For
+          var selectionListElement = ['all'].concat(stateManager.getSelectionList());
+          var surfaceFor = $('<div></div>');
+          
+          var labelSurfaceFor = $('<div></div>');
+          labelSurfaceFor.text('Show Atoms');
+          labelSurfaceFor.css(defaultTextStyle);
+
+          var listSurfaceFor = new $3Dmol.UI.Form.ListInput(control.surfaceFor, selectionListElement);
+          listSurfaceFor.setValue('all');
+
+          surfaceFor.append(labelSurfaceFor, listSurfaceFor.ui);
+          surfacePropertyBox.append(surfaceFor);
+          
+          var alertBox = new AlertBox();
+          surfacePropertyBox.append(alertBox.ui);
+
+          // Control Button
+          var controlButton = $('<div></div>');
+          var submit = new button(icons.tick, 16, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
+          var cancel = new button(icons.cross, 16, { backgroundColor: 'lightcoral', tooltip: 'Cancel'});
+          controlButton.append(submit.ui);
+          controlButton.append(cancel.ui);
+          surfacePropertyBox.append(controlButton);
+
+          // Functionality 
+          removeButton.ui.on('click', { surfaceBox : surfaceBox }, function(e){
+            var id = e.data.surfaceBox.data('surf-id');
+            surfaceBox.remove();
+            stateManager.removeSurface(id);
+          });
+
+          editButton.ui.on('click', function(){
+            surfacePropertyBox.toggle();
+            
+            // After creation of the surface box all the changes will be edit to the surfaces so on first submit toolButtons.editMode == true;
+          });
+
+          // Form Validation 
+
+          var validateInput = this.validateInput = function(){
+            var validated = true;
+            
+            if( !listSurfaceFor.validate()){
+              validated = false;
+            }
+
+            if( !listSurfaceOf.validate()){
+              validated = false;
+            }
+
+            if( !listSurfaceType.validate()){
+              validated = false;
+            }
+
+            if( !formSurfaceStyle.validate()){
+              validated = false;
+            }
+
+            return validated;
+          }
+        
+          // edit this code to add on edit selection option to work
+          // boundingBox.on('mouseenter', function(){
+          //   selections = stateManager.getSelectionList();
+          //   selectionListElement = selections.map( (m)=>{
+          //     return m.id;
+          //   });
+          //   listSurfaceFor.updateList(selectionListElement);
+          //   listSurfaceOf.updateList(selectionListElement);
+          // });
+
+          function finalize(id){
+            // element properties
+            surfaceBox.data('surf-id', id);
+            heading.text('surf#' + id);
+
+            header.show();
+            toolButtons.editMode = true;
+            surfacePropertyBox.hide();
+          }
+
+          // Submit 
+          submit.ui.on('click', {}, function(){
+            listSurfaceFor.getValue();
+            listSurfaceOf.getValue();
+            listSurfaceType.getValue();
+            formSurfaceStyle.getValue();
+
+            if(validateInput()){ 
+              if(toolButtons.editMode === false){
+                var id = stateManager.addSurface(control);
+                control.id = id;
+
+                finalize(id);
+
+                surfaces.push(this);
+                _editingForm = false;
+              }
+              else{
+                formSurfaceStyle.getValue();
+                control.id = surfaceBox.data('surf-id');
+                console.log('Edit surface called')
+                stateManager.editSurface(control); // -> add updateSurface funciton to surfaceMenu
+                surfacePropertyBox.hide();
+              }
+            }
+            else {
+              alertBox.error('Invalid Input');
+            }
+          });
+
+          // Cancel Edit
+          cancel.ui.on('click', {}, function(){
+            if(toolButtons.editMode == false){
+              surfaceBox.detach();
+              surfaceBox.remove();
+              _editingForm = false;
+            }
+            else {
+              surfacePropertyBox.hide();
+              toolButtons.editMode = false;
+            }
+          });
+
+          surfaceBox.on('keyup', (e)=>{
+            if(e.key == 'Enter'){
+              submit.ui.trigger('click');
+            }
+          });
+
+          /**
+           * Finalizes the surface card with value specified in the surfaceSpec
+           * 
+           * @function Surface#editSurface 
+           * @param {String} id Id of the surface generated by StateManager
+           * @param {Object} surfaceSpec Different value of the surface menu
+           */
+          this.editSurface = function(id, surfaceSpec){
+            finalize(id);
+            listSurfaceType.setValue(surfaceSpec.surfaceType.value);
+            formSurfaceStyle.setValue(surfaceSpec.surfaceStyle.value);
+            listSurfaceOf.setValue(surfaceSpec.surfaceOf.value);
+            listSurfaceFor.setValue(surfaceSpec.surfaceFor.value);
+
+            listSurfaceFor.getValue();
+            listSurfaceOf.getValue();
+            listSurfaceType.getValue();
+            formSurfaceStyle.getValue();
+
+          }
+
+        }
+
+        // Functionality
+
+        // Surface addition
+
+        addButton.ui.on('click', { surfaces: this }, function(e){
+          
+          if(!_editingForm){
+            var newSurface = new Surface();
+            newSurfaceSpace.append(newSurface.ui);
+            _editingForm = true;
+          }else {
+            alertBox.warning('Please complete the previous form first');
+          }
+          
+          
+        });
+
+        surfaceButton.ui.on('click', ()=>{
+          displayBox.toggle();
+        });
+
+        /**
+         * Clear all the surface cards 
+         * @function SurfaceMenu#empty
+         */
+
+        this.empty = function(){
+          newSurfaceSpace.empty();
+          _editingForm = false;
+        }
+
+        /**
+         * Add Surface in the Surface Menu 
+         * 
+         * @function SurfaceMenu#addSurface
+         * @param {String} id Id of the surface generated in the StateManager
+         * @param {Object} surfaceSpec Values of different property required for setting values in surface menu
+         */
+        this.addSurface = function(id, surfaceSpec){          
+          var newSurface = new Surface();
+          newSurfaceSpace.append(newSurface.ui);
+
+          newSurface.editSurface(id, surfaceSpec);
+        }
+      }
+
+      /**
+       * Sets the css position property left and top for the element
+       * 
+       * @function setPosition
+       * 
+       * @param {object} jquery html element
+       * @param {number} left : css left property
+       * @param {number} top : css top peroperty
+       */
+      function setPosition(ele, left, top){
+        ele.css('left', left);
+        ele.css('top', top);
+      }
+
+
+      /**
+        * Sets the location of the element relative to the parseInt
+        * as per position types
+        * @function setLocation
+        * 
+        * @param  {Object} parent jquery object
+        * @param  {Object} child  jquery object
+        * @param  {String} x_type 'left|right'
+        * @param  {String} y_type 'top|bottom'
+        * @param  {Number} x_offset Offset x values in pixels
+        * @param  {Number} y_offset Offset y values in pixels 
+        */
+      function setLocation(parent, child, x_type='left', y_type='top', x_offset=0, y_offset=0){
+
+        // p_ stands for parent
+        child.css('z-index', 99);
+
+
+        var p_position = parent.position();
+        var p_width = getWidth(parent);
+        var p_height = getHeight(parent);
+
+        // c_ stand for child
+        var c_width = child.outerWidth(); // includes padding and margin
+        var c_height = child.outerHeight(); // includes padding and margin
+
+        var padding = parseInt(parent.css('padding').replace('px', ''));
+        padding = (padding)? padding: 0;
+        var p_top = getTop(parent) + parseInt(parent.css('margin-top').replace('px',''));
+        var p_left = getLeft(parent) + parseInt(parent.css('margin-left').replace('px',''));
+
+
+        // Setting position
+        var c_position = {
+          left: 0,
+          top: 0
+        };
+
+        if(x_type == 'left'){
+          c_position.left = padding + x_offset;
+        }
+        else if(x_type == 'center'){
+          c_position.left = p_width/2 - c_width/2 + x_offset;
+        }
+        else if(x_type == 'right'){
+          c_position.left = p_width  - c_width - padding + x_offset;
+        }
+        else {
+          c_position.left = x_offset + padding;
+        }
+
+        if(y_type == 'top'){
+          c_position.top = y_offset + padding;
+        }
+        else if(y_type == 'center'){
+          c_position.top = p_height/2 - c_height/2 + y_offset;
+        }
+        else if(y_type == 'bottom'){
+          c_position.top = p_height - c_height - y_offset - padding;
+        }
+        else {
+          c_position.top = y_offset + padding;
+        }
+
+        setPosition(child, c_position.left, c_position.top);
+      }
+
+      // Copied from glviewer.js
+      function getRect(container) {
+        let div = container[0];
+        let rect = div.getBoundingClientRect();
+        if(rect.width == 0 && rect.height == 0 && div.style.display === 'none' ) {
+          let oldpos = div.style.position;
+          let oldvis = div.style.visibility;
+          div.style.display = 'block';
+          div.style.visibility = 'hidden';
+          div.style.position = 'absolute';
+          rect = div.getBoundingClientRect();
+          div.style.display = 'none';
+          div.style.visibility = oldvis;
+          div.style.position = oldpos;
+        }
+        return rect;
+      };
+
+      function getTop(container) {
+        return container.offset().top;
+      }
+
+      function getLeft(container) {
+        return container.offset().left;
+      }
+
+      function getHeight(container) {
+        return getRect(container).height;
+      }
+
+      function getWidth(container) {
+        return getRect(container).width;
+      }
+
+      /**
+        * button - generates button with the given markup as contents
+        * @param {String} svg SVG markup string that contains the content of the button
+        * @param {Number} height Height of the content
+        * @param {Object} config Various properties to define the button 
+        * 
+        */
+      function button(svg, height, config){
+        config = config || {};
+        var borderRadius = config.bfr*height || (height/4); // body radius factor
+        var bgColor = config.backgroundColor || 'rgb(177, 194, 203)';
+        var color = config.color || 'black'; 
+        var hoverable = config.hoverable || 'true';
+        var tooltipText = config.tooltip || null;
+
+        // Button instance
+        var button = this.ui = $('<div></div>');
+        var innerButton = $('<div></div>');
+        button.append(innerButton);
+
+        // CSS
+        button.css('box-sizing', 'border-box');
+        button.css('display', 'inline-block');
+        button.css('margin', '3px');
+        button.css('height', height);
+        button.css('width', height);
+        button.css('border-radius', borderRadius + 'px');
+        
+        //  button.css('padding', '3px');
+        button.css('color', color);
+        button.css('background', bgColor);
+
+        innerButton.css('display', 'flex');
+        innerButton.css('justify-content','center');
+        innerButton.css('align-items', 'center');
+        innerButton.css('padding', '2px');
+        
+        // content
+        this.setSVG = function(svg){
+          innerButton.empty();
+          var formatted_content = $(svg);
+          innerButton.append(formatted_content);
+
+        }
+
+        this.setSVG(svg);
+
+        // Hover
+        
+        // Setting up tool tip
+        button.css({
+          'position' : 'relative'
+        });
+
+
+        // setting up tool tip
+        if(tooltipText != null ){
+          button.attr('title', tooltipText);
+        }
+
+        if(hoverable == 'true'){
+          button.on('mouseenter',
+            ()=>{
+              button.css('box-shadow', '0px 0px 3px black');
+              
+            }).on('mouseleave', 
+            ()=>{
+              button.css('box-shadow', 'none');
+              
+            }
+          );
+            
+          var longPressTime = 0;
+          var mouseX = 0;
+          var mouseY = 0;
+
+          // click
+          button.on('mousedown', (e)=>{
+            button.css('box-shadow', '0px 0px 1px black');
+          });
+  
+          button.on('mouseup', ()=>{
+            button.css('box-shadow', '0px 0px 3px black');
+          });
+
+          button.on('mousemove', (e)=>{
+            // mouseX = e.clientX;
+            // mouseY = e.clientY;
+          });
+
+        }
+      }
+    }
+
+    return UI;
+  })();
+
+
+/**
+ * $3Dmol.StateManager - StateManager creates the space to preserve the state of the ui and sync it with the GLViewer
+ * @constructor 
+ * @param {$3Dmol.GLViewer} glviewer StateManager is required to have interaction between glviewer and the ui. 
+ * @param {Object} config Loads the user defined parameters to generate the ui and handle state
+ */
+$3Dmol.StateManager = (function(){
+
+  function States(glviewer, config){
+    config = config || {};
+    config.ui = config.ui || false;
+
+    var canvas = $(glviewer.getRenderer().domElement);
+    var parentElement = glviewer.container;
+
+    var height = parentElement.height();
+    var width = parentElement.width();
+    var offset = canvas.offset();
+    var stateManager = this;
+
+    var uiOverlayConfig = {
+      height : height,
+      width : width,
+      offset : offset,
+      ui : config.ui || undefined
+    }
+
+    // Selection Handlers
+    var selections = {};
+
+    // Surface handlers
+    var surfaces = {};
+
+    // Label Handlers
+    var labels = {};
+
+    var atomLabel = {};
+
+    /**
+     * Add Selection from the ui to glviewer
+     * 
+     * @function $3Dmol.StateManager#addSelection
+     * @param {Object} spec Object that contains the output from the form 
+     * @param {String} sid If surface id being edited then sid is set to some string
+     * @returns String
+     */
+    this.addSelection = function(spec, sid = null){
+
+      var id = sid || makeid(4);
+
+      var selectionSpec = {
+        spec : spec,
+        styles : {},
+        hidden : false
+      };
+
+      if(sid == null)
+        selections[id] = selectionSpec;
+      else 
+        selections[id].spec = selectionSpec.spec;
+
+      render();
+      return id;
+    }
+
+    /**
+     * Return true if the selections contain at least one atom
+     * 
+     * @function $3Dmol.StateManager#checkAtoms
+     * @param {AtomSelectionSpec} sel Atom selection spec
+     * @returns Boolean
+     */
+    this.checkAtoms = function(sel){
+      var atoms = glviewer.selectedAtoms(sel);
+      if( atoms.length > 0)
+        return true
+
+      return false;
+    }
+
+    /**
+     * Toggle the hidden property of the selection 
+     * @function $3Dmol.StateManager#toggleHide
+     * @param {String} sid Selection id
+     */
+    this.toggleHide = function(sid){
+      selections[sid].hidden = !selections[sid].hidden;
+      render();
+    }
+
+    /**
+     * Removes the selection
+     * @param {String} id Selection id
+     */
+    this.removeSelection = function(id) {
+      delete selections[id];
+      render();
+    }
+
+    /**
+     * Add style and renders it into the viewport
+     * 
+     * @function $3Dmol.StateManager#addStyle 
+     * @param {String} spec Output object of style form 
+     * @param {String} sid Selection Id
+     * @param {String} stid Style Id
+     * @returns String
+     */
+    this.addStyle = function( spec, sid, stid = null){
+      var selection = selections[sid];
+      
+      
+      var styleSpec = {
+        spec : spec,
+        hidden : false
+      }
+      
+      var id = null; 
+      
+      if(stid == null) {
+        id = makeid(4);
+        selection.styles[id] = styleSpec
+      }
+      else {
+        id = stid;
+        selection.styles[id].spec = spec;
+      }
+      
+      render();
+
+      return id;
+    }
+
+    
+    /**
+     * Removes the style specified by stid
+     * 
+     * @function $3Dmol.StateManager#removeStyle 
+     * @param {String} sid Selection id
+     * @param {String} stid Style Id
+     */
+    this.removeStyle = function(sid, stid){
+      delete selections[sid].styles[stid];
+      render();
+    }
+
+
+    /**
+     * Toggle hidden property of a style 
+     * 
+     * @function $3Dmol.StateManager#toggleHideStyle
+     * @param {String} sid Selection Id
+     * @param {String} stid Style Id 
+     */
+    this.toggleHideStyle = function(sid, stid){
+      selections[sid].styles[stid].hidden = !selections[sid].styles[stid].hidden;
+      render();
+    }
+
+    /**
+     * Adds surface to the viewport
+     * 
+     * @function $3Dmol.StateManager#addSurface
+     * @param {Object} property Surface output object
+     * @param {Function} callback callback
+     * @returns String
+     */
+    this.addSurface = function(property, callback){
+      var id = makeid(4);
+      property.id = id;
+
+      var style = property.surfaceStyle.value;
+      if(style == null)
+        style = {};
+
+      var sel = (property.surfaceFor.value == 'all') ? { spec : {} } : selections[property.surfaceFor.value];
+
+      var generatorAtom = (property.surfaceOf.value == 'self')? sel.spec : {};
+
+
+      glviewer.addSurface(
+        $3Dmol.SurfaceType[property.surfaceType.value],
+        style,
+        sel.spec,
+        generatorAtom
+      ).then((surfParam)=>{
+        surfaces[id] = surfParam[0];
+
+        if(callback != undefined)
+          callback(id, surfParam[0]);
+      }, (err)=>{
+
+      });
+
+      return id;
+    }
+
+    /**
+     * Removes surface from the viewport 
+     * @function $3Dmol.StateManager#removeSurface
+     * @param {String} id Surface Id
+     */
+    this.removeSurface = function(id){
+      glviewer.removeSurface(surfaces[id])
+
+      delete surfaces[id];
+
+    }
+
+    /**
+     * Edit the exisiting surface in the viewport
+     * 
+     * @function $3Dmol.StateManager#editSurface
+     * @param {Object} surfaceProperty Surface Style
+     */
+    this.editSurface = function(surfaceProperty){
+      var style = surfaceProperty.surfaceStyle.value || {}
+
+      var sel = (surfaceProperty.surfaceFor.value == 'all') ? { spec : {} } : selections[surfaceProperty.surfaceFor.value];
+      var generatorAtom = (surfaceProperty.surfaceOf.value == 'self')? sel.spec : {};
+
+      glviewer.removeSurface(surfaces[surfaceProperty.id]);
+
+      console.log(surfaceProperty);
+      glviewer.addSurface(
+        $3Dmol.SurfaceType[surfaceProperty.surfaceType.value],
+        style,
+        sel.spec,
+        generatorAtom
+      ).then((surfId)=>{
+        surfaces[surfaceProperty.id] = surfId[0];
+      });
+    }
+
+    /**
+     * Returns the list of ids of selections that are created so far
+     * @function $3Dmol.StateManager#getSelectionList
+     * @returns <Array of selection ids>
+     */
+    this.getSelectionList = function(){
+      return Object.keys(selections);
+    }
+
+    /**
+     * Opens context menu when called from glviewer
+     * 
+     * @function $3Dmol.StateManager#openContextMenu
+     * @param {AtomSpec} atom Atom spec obtained from context menu event
+     * @param {Number} x x coordinate of mouse on viewport
+     * @param {Number} y y coordinate of mouse on the viewport
+     */
+    this.openContextMenu = function(atom, x, y){ 
+      var atomExist = false;
+
+      if(atom){
+        atomExist = Object.keys(atomLabel).find((i)=>{
+          if (i == atom.index)
+            return true;
+          else 
+            return false;
+        });
+  
+        if(atomExist != undefined )
+          atomExist = true;
+        else 
+          atomExist = false;
+        
+      }
+
+      if(this.ui) this.ui.tools.contextMenu.show(x, y, atom, atomExist);    
+    }
+
+    /**
+     * Adds Label to the viewport specific to the selection
+     * @function $3Dmol.StateManager#addLabel
+     * @param {Object} labelValue Output object from label form of Context Menu
+     */
+    this.addLabel = function(labelValue){
+      labels[labelValue.sel.value] = labels[labelValue.sel.value] || [];
+
+      var labelProp = $3Dmol.labelStyles[labelValue.style.value];
+      var selection = selections[labelValue.sel.value];
+
+      var offset = labels[labelValue.sel.value].length;
+      labelProp['screenOffset'] = new $3Dmol.Vector2(0, -1*offset*35);
+
+      labels[labelValue.sel.value].push(glviewer.addLabel(labelValue.text.value, labelProp, selection.spec));
+
+      this.ui.tools.contextMenu.hide();
+    }
+
+    /**
+     * Adds atom label to the viewport
+     * 
+     * @function $3Dmol.StateManager#addAtomLabel
+     * @param {Object} labelValue Output object from propertyMenu form of Context Menu
+     * @param {AtomSpec} atom Atom spec that are to be added in the label 
+     */
+    this.addAtomLabel = function(labelValue, atom, styleName='milk'){
+      var atomExist = Object.keys(atomLabel).find((i)=>{
+        if (i == atom.index)
+          return true;
+        else 
+          return false;
+      });
+
+      if(atomExist != undefined )
+        atomExist = true;
+      else 
+        atomExist = false;
+
+
+      if(atomExist){
+        this.removeAtomLabel(atom);
+      }
+
+      
+      atomLabel[atom.index] = atomLabel[atom.index] || null;
+      
+      var labelProp = $3Dmol.deepCopy($3Dmol.labelStyles[styleName]);
+      labelProp.position = {
+        x : atom.x, y : atom.y, z : atom.z
+      }
+
+      var labelText = [];
+      for ( key in labelValue){
+        labelText.push(`${key} : ${labelValue[key]}`);
+      }
+      labelText = labelText.join('\n');
+
+      atomLabel[atom.index] = glviewer.addLabel(labelText, labelProp);
+      
+    }
+
+    /**
+     * Executes hide context menu and process the label if needed
+     * 
+     * @function $3Dmol.StateManager#exitContextMenu
+     * @param {Boolean} processContextMenu Specify the need to process the values in the context menu
+     */
+    this.exitContextMenu = function(processContextMenu = false){
+        if(this.ui) {
+            this.ui.tools.contextMenu.hide(processContextMenu);
+        }
+    }
+
+    /**
+     * Removes the label specific to the selection 
+     * 
+     * (under development)
+     */
+    this.removeLabel = function(){
+      // Add code to remove label 
+      this.ui.tools.contextMenu.hide();
+    }
+
+    /**
+     * Removes the atom label from the viewpoer 
+     * @function $3Dmol.StateManager#removeAtomLabel
+     * @param {AtomSpec} atom Atom spec
+     */
+    this.removeAtomLabel = function(atom){
+      var label = atomLabel[atom.index];
+      glviewer.removeLabel(label);
+      delete atomLabel[atom.index]; 
+      
+      this.ui.tools.contextMenu.hide();
+    }
+
+    /**
+     * Add model to the viewport
+     * @function $3Dmol.StateManager#addModel
+     * @param {Object} modelDesc Model Toolbar output
+     */
+    this.addModel = function(modelDesc){
+      glviewer.removeAllModels();
+      glviewer.removeAllSurfaces();
+      glviewer.removeAllLabels();
+      glviewer.removeAllShapes();
+
+      var query = modelDesc.urlType.value + ':' + modelDesc.url.value;
+      $3Dmol.download(query, glviewer, {}, ()=>{
+        this.ui.tools.modelToolBar.setModel(modelDesc.url.value.toUpperCase());
+      });
+
+      // Remove all Selections
+      selections = {};
+      surfaces = {};
+      atomLabel = {};
+      labels = {};
+
+      // Reset UI
+      this.ui.tools.selectionBox.empty();
+      this.ui.tools.surfaceMenu.empty();
+    }
+
+    // State Management helper function 
+    function findSelectionBySpec(spec){
+      var ids = Object.keys(selections);
+      var matchingObjectIds = null;
+      for(var i = 0; i < ids.length; i++){
+        var lookSelection = selections[ids[i]].spec;
+
+        var match = true;
+        
+        // looking for same parameters length 
+        var parameters = Object.keys(spec);
+
+        if( Object.keys(lookSelection).length == parameters.length){
+          for(var j = 0; j < parameters.length; j++){
+            if( lookSelection[parameters[j]] != spec[parameters[j]]){
+              match = false;
+              break;
+            }
+          }
+        } else {
+          match = false;
+        }
+
+        if(match){
+          matchingObjectIds = ids[i];
+          break;
+        }
+      }
+
+      return matchingObjectIds;
+    }
+
+    // State managment function 
+
+    /**
+     * Updates the state variable for selections and styles and trigger ui to show the 
+     * ui elements for these selections and styles.
+     * 
+     * @function $3Dmol.StateManager#createSelectionAndStyle
+     * @param {AtomSelectionSpec} selSpec Atom Selection Spec
+     * @param {AtomStyleSpec} styleSpec Atom Style Spec
+     */
+    this.createSelectionAndStyle = function(selSpec, styleSpec){
+
+      var selId = findSelectionBySpec(selSpec);
+
+      if(selId == null){
+        selId = this.addSelection(selSpec);
+      }
+
+      var styleId = null;
+
+      if(Object.keys(styleSpec).length != 0){
+        styleId = this.addStyle(styleSpec, selId);
+      }
+
+      this.ui.tools.selectionBox.editSelection(selId, selSpec, styleId, styleSpec);
+      
+    };
+
+    /**
+     * Creates selection and add surface with reference to that selection 
+     * and triggers updates in the ui
+     * @function $3Dmol.StateManager#createSurface
+     * @param {String} surfaceType Type of surface to be created
+     * @param {AtomSelectionSpec} sel Atom selection spec
+     * @param {AtomStyleSpec} style Atom style spec
+     * @param {String} sid selection id
+     */
+    this.createSurface = function(surfaceType, sel, style, sid){
+      var selId = findSelectionBySpec(sel);
+      
+      if(selId == null){
+        selId = this.addSelection(selSpec);
+
+      }
+      this.ui.tools.selectionBox.editSelection(selId, sel, null);
+
+      var surfaceType = Object.keys(style)[0];
+
+      var surfaceInput = {
+        surfaceType : {
+          value : surfaceType
+        },
+
+        surfaceStyle : {
+          value : style[surfaceType],
+        },
+
+        surfaceOf : {
+          value : 'self'
+        },
+
+        surfaceFor : {
+          value : selId
+        }
+      }
+
+      var surfId = makeid(4);
+      surfaces[surfId] = sid;
+
+      this.ui.tools.surfaceMenu.addSurface(surfId, surfaceInput);
+
+      // Create Surface UI
+    };
+
+    /**
+     * Sets the value of title in ModelToolBar
+     * @function $3Dmol.StateManager#setModelTitle
+     * @param {String} title Model title
+     */
+    this.setModelTitle = function(title){
+      this.ui.tools.modelToolBar.setModel(title);
+    }
+
+    canvas.on('click', ()=>{
+      if(this.ui && this.ui.tools.contextMenu.hidden == false){
+        this.ui.tools.contextMenu.hide();
+      }
+    });
+    
+    // Setting up UI generation 
+    /**
+     * Generates the ui and returns its reference
+     * @returns $3Dmol.UI
+     */
+    this.showUI = function(){
+      var ui = new $3Dmol.UI(this, uiOverlayConfig, parentElement);  
+      return ui;
+    };
+
+    if(config.ui == true){
+     this.ui = this.showUI(); 
+    };
+
+    this.initiateUI = function(){
+      this.ui = new $3Dmol.UI(this, uiOverlayConfig, parentElement);
+      render();
+    }
+    /**
+     * Updates the UI on viewport change 
+     * 
+     * @function $3Dmol.StateManager#updateUI
+     */
+    this.updateUI = function(){
+      if(this.ui){
+        this.ui.resize();
+      }
+    };
+    
+    // UI changes
+
+    function render(){
+      // glviewer.();
+      glviewer.setStyle({});
+
+      let selList = Object.keys(selections);
+
+      selList.forEach( (selKey) =>{
+        var sel = selections[selKey];
+
+        if( !sel.hidden ) {
+          var styleList = Object.keys(sel.styles);
+          
+          styleList.forEach((styleKey)=>{
+            var style = sel.styles[styleKey];
+
+            if( !style.hidden){
+              glviewer.addStyle(sel.spec, style.spec);
+            }
+          });
+
+          glviewer.setClickable(sel.spec, true, ()=>{});
+          glviewer.enableContextMenu(sel.spec, true);
+        }
+        else {
+          glviewer.setClickable(sel.spec, false, ()=>{});
+          glviewer.enableContextMenu(sel.spec, false);
+        }
+
+      })
+
+      glviewer.render();
+    }
+
+    function makeid(length) {
+      var result           = '';
+      var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      var charactersLength = characters.length;
+      for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+     }
+     return result;
+    }
+  }
+
+  return States;
+})()
+
+/**
+ * Generates the object to hold different icons present Icons : move, rotate, pencil, listArrow, option, minus, plus, painbrush, select, movie.play, move.pause, movie.stop, movie.next, move.previous, tick, cross, edit, remove, list, style, visible, invisible, mouse, nomouse, label, surface, molecule, change
+ * @function $3Dmol.UI#Icons
+ * 
+ * 
+ */
+$3Dmol.UI.Icons = (function () {
+  function Icons() {
+    this.move = `<svg  id="Layer_1" style="enable-background:new 0 0 32 32;" version="1.1" viewBox="0 0 32 32"  xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <path d="M31.338,14.538L27.38,10.58C26.994,10.193,26.531,10,26,10c-1.188,0-2,1.016-2,2c0,0.516,0.186,0.986,0.58,1.38L25.2,14H18  V6.8l0.62,0.62C19.014,7.814,19.484,8,20,8c0.984,0,2-0.813,2-2c0-0.531-0.193-0.994-0.58-1.38l-3.973-3.974  C17.08,0.279,16.729,0,16,0s-1.135,0.334-1.463,0.662L10.58,4.62C10.193,5.006,10,5.469,10,6c0,1.188,1.016,2,2,2  c0.516,0,0.986-0.186,1.38-0.58L14,6.8V14H6.8l0.62-0.62C7.814,12.986,8,12.516,8,12c0-0.984-0.813-2-2-2  c-0.531,0-0.994,0.193-1.38,0.58l-3.958,3.958C0.334,14.866,0,15.271,0,16s0.279,1.08,0.646,1.447L4.62,21.42  C5.006,21.807,5.469,22,6,22c1.188,0,2-1.016,2-2c0-0.516-0.186-0.986-0.58-1.38L6.8,18H14v7.2l-0.62-0.62  C12.986,24.186,12.516,24,12,24c-0.984,0-2,0.813-2,2c0,0.531,0.193,0.994,0.58,1.38l3.957,3.958C14.865,31.666,15.271,32,16,32  s1.08-0.279,1.447-0.646l3.973-3.974C21.807,26.994,22,26.531,22,26c0-1.188-1.016-2-2-2c-0.516,0-0.986,0.186-1.38,0.58L18,25.2V18  h7.2l-0.62,0.62C24.186,19.014,24,19.484,24,20c0,0.984,0.813,2,2,2c0.531,0,0.994-0.193,1.38-0.58l3.974-3.973  C31.721,17.08,32,16.729,32,16S31.666,14.866,31.338,14.538z"/>
+    </svg>
+    `;
+
+
+    this.rotate = `<svg version="1.1" id="Icons" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    viewBox="0 0 32 32" style="enable-background:new 0 0 32 32;" xml:space="preserve">
+    <style type="text/css">
+    .st0{fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+    </style>
+    <polyline class="st0" points="19,19 24,19 24,24 "/>
+    <polyline class="st0" points="6,23 11,23 11,18 "/>
+    <path class="st0" d="M24,19.4c-0.7,0.8-1.4,1.6-2.2,2.4c-7,7-15.3,10.2-18.5,7s-0.1-11.5,7-18.5s15.3-10.2,18.5-7
+    c1.4,1.4,1.6,3.6,0.8,6.3"/>
+    <path class="st0" d="M11,22.5c-0.3-0.2-0.5-0.5-0.8-0.8c-7-7-10.2-15.3-7-18.5s11.5-0.1,18.5,7s10.2,15.3,7,18.5
+    c-1.7,1.7-4.8,1.6-8.4,0.1"/>
+    </svg>`;
+
+    this.pencil = `
+    <svg
+   viewBox="0 0 7.4083332 7.4083335"
+   version="1.1"
+   id="svg46458"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   sodipodi:docname="pencil.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview46460"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="px"
+     inkscape:zoom="11.859035"
+     inkscape:cx="39.252773"
+     inkscape:cy="-0.54810532"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs46455" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g46369"
+       style="opacity:0.883991"
+       transform="matrix(1.4892662,-0.15686655,0.15686655,1.4892662,-53.265394,-119.92352)">
+      <g
+         id="g49150"
+         transform="matrix(0.91743541,0,0,0.91743541,23.648257,-4.2024208)"
+         style="opacity:0.883991">
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           d="m 3.8020268,100.20944 0.4890573,-1.325191 3.1552092,-2.461061 0.8203543,1.009666 -3.2340893,2.476838 z"
+           id="path47163"
+           sodipodi:nodetypes="cccccc" />
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           d="m 4.7012611,98.537178 -0.2738716,0.535677 0.5184006,-0.125499 -0.1893126,0.512722 0.5048334,-0.102546 -0.2287526,0.55216"
+           id="path47167"
+           sodipodi:nodetypes="cccccc" />
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.288395px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           d="m 4.0143928,99.803763 0.189158,0.257937 -0.4015317,0.14774 z"
+           id="path46061" />
+      </g>
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 29.910684,84.806844 0.691621,0.847804"
+         id="path46176" />
+    </g>
+  </g>
+</svg>
+
+    `;
+
+    this.listArrow = `
+    <svg
+    viewBox="0 0 7.4083332 7.4083335"
+    version="1.1"
+    id="svg41603"
+    inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+    sodipodi:docname="listArrow.svg"
+    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview
+      id="namedview41605"
+      pagecolor="#ffffff"
+      bordercolor="#666666"
+      borderopacity="1.0"
+      inkscape:pageshadow="2"
+      inkscape:pageopacity="0.0"
+      inkscape:pagecheckerboard="0"
+      inkscape:document-units="mm"
+      showgrid="false"
+      units="px"
+      inkscape:zoom="16.771208"
+      inkscape:cx="16.635653"
+      inkscape:cy="11.120248"
+      inkscape:window-width="1920"
+      inkscape:window-height="1017"
+      inkscape:window-x="-8"
+      inkscape:window-y="-8"
+      inkscape:window-maximized="1"
+      inkscape:current-layer="layer1" />
+   <defs
+      id="defs41600" />
+   <g
+      inkscape:label="Layer 1"
+      inkscape:groupmode="layer"
+      id="layer1">
+     <path
+        style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+        d="M 1.991198,0.89301893 5.7166459,3.7041667 1.991198,6.5153145 Z"
+        id="path42297"
+        sodipodi:nodetypes="cccc" />
+   </g>
+ </svg>
+ 
+    `;
+
+    this.option = ` <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24"><defs><style>.cls-1{fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px;}</style></defs><title>69.option</title><g id="_69.option" data-name="69.option"><rect class="cls-1" x="1" y="1" width="9" height="9" rx="2" ry="2"/><rect class="cls-1" x="14" y="1" width="9" height="9" rx="2" ry="2"/><rect class="cls-1" x="14" y="14" width="9" height="9" rx="2" ry="2"/><rect class="cls-1" x="1" y="14" width="9" height="9" rx="2" ry="2"/></g></svg>`;
+
+    this.minus = `<svg xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+
+    this.plus = `<svg xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+
+    this.paintbrush = `<?xml version="1.0" encoding="iso-8859-1"?>
+    <!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+    <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    viewBox="0 0 444.892 444.892" style="enable-background:new 0 0 444.892 444.892;" xml:space="preserve">
+    <g id="XMLID_476_">
+    <path id="XMLID_503_" d="M440.498,173.103c5.858-5.857,5.858-15.355,0-21.213l-22.511-22.511c-5.091-5.091-13.084-5.846-19.038-1.8
+    l-47.332,32.17l31.975-47.652c3.993-5.951,3.219-13.897-1.85-18.964l-48.83-48.83c-4.508-4.508-11.372-5.675-17.114-2.908
+    l-8.443,4.065l4.043-8.97c2.563-5.685,1.341-12.361-3.068-16.771L293.002,4.393c-5.857-5.857-15.355-5.857-21.213,0
+    l-119.06,119.059l168.71,168.71L440.498,173.103z"/>
+    <path id="XMLID_1199_" d="M130.56,145.622l-34.466,34.466c-2.813,2.813-4.394,6.628-4.394,10.606s1.58,7.794,4.394,10.606
+    l32.694,32.694c6.299,6.299,9.354,14.992,8.382,23.849c-0.971,8.851-5.843,16.677-13.366,21.473
+    C27.736,340.554,18.781,349.51,15.839,352.453c-21.119,21.118-21.119,55.48,0,76.6c21.14,21.14,55.504,21.098,76.6,0
+    c2.944-2.943,11.902-11.902,73.136-107.965c4.784-7.505,12.607-12.366,21.462-13.339c8.883-0.969,17.575,2.071,23.859,8.354
+    l32.694,32.694c5.857,5.857,15.356,5.857,21.213,0l34.467-34.467L130.56,145.622z M70.05,404.825c-8.28,8.28-21.704,8.28-29.983,0
+    c-8.28-8.28-8.28-21.704,0-29.983c8.28-8.28,21.704-8.28,29.983,0C78.33,383.121,78.33,396.545,70.05,404.825z"/>
+    </g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg>
+    `;
+
+    this.select = `
+    <?xml version="1.0" encoding="iso-8859-1"?>
+    <!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+    <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+    <g>
+    <g>
+    <path d="M416,149.333c-8.768,0-16.939,2.667-23.723,7.211C386.432,139.947,370.581,128,352,128
+    c-8.768,0-16.939,2.667-23.723,7.211c-5.845-16.597-21.696-28.544-40.277-28.544c-7.765,0-15.061,2.091-21.333,5.739V42.667
+    C266.667,19.136,247.531,0,224,0s-42.667,19.136-42.667,42.667v249.408l-58.645-29.333C113.856,258.325,103.957,256,94.08,256
+    c-22.485,0-40.747,18.283-40.747,40.875c0,10.901,4.245,21.12,11.947,28.821l137.941,137.941C234.389,494.827,275.883,512,320,512
+    c76.459,0,138.667-62.208,138.667-138.667V192C458.667,168.469,439.531,149.333,416,149.333z M437.333,373.333
+    c0,64.704-52.651,117.333-117.355,117.333c-38.421,0-74.517-14.955-101.653-42.133L80.363,310.592
+    c-3.669-3.648-5.696-8.533-5.696-13.845c0-10.709,8.704-19.413,19.413-19.413c6.592,0,13.163,1.557,19.072,4.501l74.091,37.035
+    c3.307,1.643,7.253,1.472,10.368-0.469c3.136-1.941,5.056-5.376,5.056-9.067V42.667c0-11.755,9.557-21.333,21.333-21.333
+    s21.333,9.579,21.333,21.333v202.667c0,5.888,4.779,10.667,10.667,10.667c5.888,0,10.667-4.779,10.667-10.667v-96
+    c0-11.755,9.557-21.333,21.333-21.333s21.333,9.579,21.333,21.333v96c0,5.888,4.779,10.667,10.667,10.667
+    s10.667-4.779,10.667-10.667v-74.667c0-11.755,9.557-21.333,21.333-21.333s21.333,9.579,21.333,21.333v74.667
+    c0,5.888,4.779,10.667,10.667,10.667c5.888,0,10.667-4.779,10.667-10.667V192c0-11.755,9.557-21.333,21.333-21.333
+    s21.333,9.579,21.333,21.333V373.333z"/>
+    </g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg>`;
+
+    this.movie = {};
+    this.movie.play = `
+    <?xml version="1.0" encoding="iso-8859-1"?>
+    <!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    viewBox="0 0 330 330" style="enable-background:new 0 0 330 330;" xml:space="preserve">
+    <g id="XMLID_228_">
+    <path id="XMLID_229_" d="M236.95,152.281l-108-67.501c-4.624-2.89-10.453-3.044-15.222-0.4C108.959,87.024,106,92.047,106,97.5v135
+    c0,5.453,2.959,10.476,7.728,13.12c2.266,1.256,4.77,1.88,7.271,1.88c2.763,0,5.523-0.763,7.95-2.28l108-67.499
+    c4.386-2.741,7.05-7.548,7.05-12.72C244,159.829,241.336,155.022,236.95,152.281z"/>
+    <path id="XMLID_230_" d="M165,0C74.019,0,0,74.019,0,165s74.019,165,165,165s165-74.019,165-165S255.981,0,165,0z M165,300
+    c-74.44,0-135-60.561-135-135S90.56,30,165,30s135,60.561,135,135S239.439,300,165,300z"/>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    </svg>
+    `;
+
+    this.movie.stop = `
+    <?xml version="1.0" encoding="iso-8859-1"?>
+    <!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    viewBox="0 0 330 330" style="enable-background:new 0 0 330 330;" xml:space="preserve">
+    <g id="XMLID_223_">
+    <path id="XMLID_224_" d="M225.75,89.25h-121.5c-8.284,0-15,6.716-15,15v121.5c0,8.284,6.716,15,15,15h121.5c8.284,0,15-6.716,15-15
+    v-121.5C240.75,95.966,234.034,89.25,225.75,89.25z"/>
+    <path id="XMLID_225_" d="M165,0C74.019,0,0,74.019,0,165s74.019,165,165,165s165-74.019,165-165S255.981,0,165,0z M165,300
+    c-74.439,0-135-60.561-135-135S90.561,30,165,30s135,60.561,135,135S239.439,300,165,300z"/>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    </svg>
+    `;
+
+    this.movie.pause = `
+    <?xml version="1.0" encoding="iso-8859-1"?>
+    <!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+    <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    viewBox="0 0 271.953 271.953" style="enable-background:new 0 0 271.953 271.953;" xml:space="preserve">
+    <g>
+    <g>
+    <path style="fill:#010002;" d="M135.977,271.953c75.097,0,135.977-60.879,135.977-135.977S211.074,0,135.977,0S0,60.879,0,135.977
+    S60.879,271.953,135.977,271.953z M135.977,21.756c62.979,0,114.22,51.241,114.22,114.22s-51.241,114.22-114.22,114.22
+    s-114.22-51.241-114.22-114.22S72.992,21.756,135.977,21.756z"/>
+    <path style="fill:#010002;" d="M110.707,200.114c7.511,0,13.598-6.086,13.598-13.598V83.174c0-7.511-6.086-13.598-13.598-13.598
+    c-7.511,0-13.598,6.086-13.598,13.598v103.342C97.109,194.028,103.195,200.114,110.707,200.114z"/>
+    <path style="fill:#010002;" d="M165.097,200.114c7.511,0,13.598-6.086,13.598-13.598V83.174c0-7.511-6.086-13.598-13.598-13.598
+    S151.5,75.663,151.5,83.174v103.342C151.5,194.028,157.586,200.114,165.097,200.114z"/>
+    </g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    </svg>
+    `;
+    this.movie.next = `
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+    <svg
+    version="1.1"
+    id="Capa_1"
+    x="0px"
+    y="0px"
+    viewBox="0 0 30.05 30.05"
+    style="enable-background:new 0 0 30.05 30.05;"
+    xml:space="preserve"
+    sodipodi:docname="next.svg"
+    inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:svg="http://www.w3.org/2000/svg"><defs
+    id="defs73" /><sodipodi:namedview
+    id="namedview71"
+    pagecolor="#ffffff"
+    bordercolor="#666666"
+    borderopacity="1.0"
+    inkscape:pageshadow="2"
+    inkscape:pageopacity="0.0"
+    inkscape:pagecheckerboard="0"
+    showgrid="false"
+    inkscape:zoom="19.851347"
+    inkscape:cx="11.938737"
+    inkscape:cy="15.79238"
+    inkscape:window-width="1920"
+    inkscape:window-height="1017"
+    inkscape:window-x="-8"
+    inkscape:window-y="-8"
+    inkscape:window-maximized="1"
+    inkscape:current-layer="Capa_1" />
+    <g
+    id="g38"
+    transform="rotate(180,15.025,15.025)">
+    <path
+    d="m 20.814,11 c -0.193,-0.102 -0.43,-0.086 -0.604,0.041 l -2.383,1.73 v -1.258 c 0,-0.217 -0.121,-0.42 -0.32,-0.514 -0.191,-0.102 -0.424,-0.086 -0.602,0.041 l -4.834,3.512 c -0.15,0.109 -0.242,0.287 -0.242,0.473 0,0.184 0.092,0.357 0.242,0.471 l 4.834,3.508 c 0.102,0.076 0.221,0.111 0.342,0.111 0.088,0 0.18,-0.018 0.26,-0.066 0.199,-0.1 0.32,-0.295 0.32,-0.516 v -1.26 l 2.383,1.73 c 0.098,0.076 0.221,0.111 0.34,0.111 0.094,0 0.182,-0.018 0.264,-0.066 0.197,-0.1 0.318,-0.295 0.318,-0.516 v -7.02 C 21.133,11.297 21.012,11.094 20.814,11 Z"
+    id="path2" />
+    <path
+    d="M 15.027,0 C 6.729,0 0,6.729 0,15.025 0,23.326 6.729,30.05 15.027,30.05 23.325,30.05 30.05,23.325 30.05,15.025 30.051,6.729 23.326,0 15.027,0 Z m 0,27.539 C 8.115,27.539 2.509,21.935 2.509,15.025 2.509,8.115 8.115,2.51 15.027,2.51 c 6.914,0 12.516,5.605 12.516,12.516 0,6.911 -5.602,12.513 -12.516,12.513 z"
+    id="path4" />
+    <path
+    d="M 10.617,11.146 H 9.225 c -0.168,0 -0.305,0.137 -0.305,0.305 v 7.146 c 0,0.168 0.137,0.309 0.305,0.309 h 1.393 c 0.17,0 0.307,-0.141 0.307,-0.309 v -7.146 c -0.001,-0.168 -0.138,-0.305 -0.308,-0.305 z"
+    id="path6" />
+    <g
+    id="g8">
+    </g>
+    <g
+    id="g10">
+    </g>
+    <g
+    id="g12">
+    </g>
+    <g
+    id="g14">
+    </g>
+    <g
+    id="g16">
+    </g>
+    <g
+    id="g18">
+    </g>
+    <g
+    id="g20">
+    </g>
+    <g
+    id="g22">
+    </g>
+    <g
+    id="g24">
+    </g>
+    <g
+    id="g26">
+    </g>
+    <g
+    id="g28">
+    </g>
+    <g
+    id="g30">
+    </g>
+    <g
+    id="g32">
+    </g>
+    <g
+    id="g34">
+    </g>
+    <g
+    id="g36">
+    </g>
+    </g>
+    <g
+    id="g40"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g42"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g44"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g46"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g48"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g50"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g52"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g54"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g56"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g58"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g60"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g62"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g64"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g66"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    <g
+    id="g68"
+    transform="rotate(180,15.025,15.025)">
+    </g>
+    </svg>
+    `;
+    this.movie.previous = `
+    <?xml version="1.0" encoding="iso-8859-1"?>
+    <!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+    <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    viewBox="0 0 30.05 30.05" style="enable-background:new 0 0 30.05 30.05;" xml:space="preserve">
+    <g>
+    <path d="M20.814,11c-0.193-0.102-0.43-0.086-0.604,0.041l-2.383,1.73v-1.258c0-0.217-0.121-0.42-0.32-0.514
+    c-0.191-0.102-0.424-0.086-0.602,0.041l-4.834,3.512c-0.15,0.109-0.242,0.287-0.242,0.473c0,0.184,0.092,0.357,0.242,0.471
+    l4.834,3.508c0.102,0.076,0.221,0.111,0.342,0.111c0.088,0,0.18-0.018,0.26-0.066c0.199-0.1,0.32-0.295,0.32-0.516v-1.26
+    l2.383,1.73c0.098,0.076,0.221,0.111,0.34,0.111c0.094,0,0.182-0.018,0.264-0.066c0.197-0.1,0.318-0.295,0.318-0.516v-7.02
+    C21.133,11.297,21.012,11.094,20.814,11z"/>
+    <path d="M15.027,0C6.729,0,0,6.729,0,15.025C0,23.326,6.729,30.05,15.027,30.05S30.05,23.325,30.05,15.025
+    C30.051,6.729,23.326,0,15.027,0z M15.027,27.539c-6.912,0-12.518-5.604-12.518-12.514S8.115,2.51,15.027,2.51
+    c6.914,0,12.516,5.605,12.516,12.516S21.941,27.539,15.027,27.539z"/>
+    <path d="M10.617,11.146H9.225c-0.168,0-0.305,0.137-0.305,0.305v7.146c0,0.168,0.137,0.309,0.305,0.309h1.393
+    c0.17,0,0.307-0.141,0.307-0.309v-7.146C10.924,11.283,10.787,11.146,10.617,11.146z"/>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    </svg>
+    `;
+
+
+    this.tick = `
+    <?xml version="1.0" encoding="iso-8859-1"?>
+    <!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+       viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+    <g>
+      <g>
+        <path d="M256,0C114.615,0,0,114.615,0,256s114.615,256,256,256s256-114.615,256-256S397.385,0,256,0z M386.594,226.664
+          L252.747,360.511c-7.551,7.551-17.795,11.794-28.475,11.794s-20.923-4.243-28.475-11.795l-70.388-70.389
+          c-15.726-15.726-15.726-41.223,0.001-56.95c15.727-15.725,41.224-15.726,56.95,0.001l41.913,41.915l105.371-105.371
+          c15.727-15.726,41.223-15.726,56.951,0.001C402.319,185.44,402.319,210.938,386.594,226.664z"/>
+      </g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    </svg>
+    `;
+
+    this.cross = `
+    <?xml version="1.0" encoding="iso-8859-1"?>
+    <!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+       viewBox="0 0 455 455" style="enable-background:new 0 0 455 455;" xml:space="preserve">
+    <g>
+      <g>
+        <path d="M227.5,0C101.761,0,0,101.75,0,227.5C0,353.239,101.75,455,227.5,455C353.239,455,455,353.25,455,227.5
+          C455.001,101.761,353.251,0,227.5,0z M310.759,268.333c11.715,11.716,11.715,30.711,0,42.427
+          c-5.858,5.858-13.536,8.787-21.213,8.787s-15.355-2.929-21.213-8.787L227.5,269.927l-40.832,40.832
+          c-5.858,5.858-13.536,8.787-21.213,8.787s-15.355-2.929-21.213-8.787c-11.715-11.716-11.715-30.711,0-42.427l40.832-40.832
+          l-40.832-40.832c-11.715-11.716-11.715-30.711,0-42.427c11.716-11.716,30.711-11.716,42.427,0l40.832,40.832l40.832-40.832
+          c11.716-11.716,30.711-11.716,42.427,0c11.715,11.716,11.715,30.711,0,42.427L269.927,227.5L310.759,268.333z"/>
+      </g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    </svg>
+    `;
+
+    this.edit = `
+    <?xml version="1.0" encoding="iso-8859-1"?>
+    <!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+    <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+       viewBox="0 0 490.008 490.008" style="enable-background:new 0 0 490.008 490.008;" xml:space="preserve">
+    <g>
+      <g>
+        <g>
+          <path d="M156.7,142.865h88.6c11.5,0,20.8-9.4,20.8-20.9s-9.4-20.9-20.8-20.9h-88.6c-11.5,0-20.8,9.4-20.8,20.9
+            C135.9,133.465,145.3,142.865,156.7,142.865z"/>
+          <path d="M266.1,223.165c0-11.5-9.4-20.9-20.8-20.9h-88.6c-11.5,0-20.8,9.4-20.8,20.9s9.4,20.9,20.8,20.9h88.6
+            C256.8,244.065,266.1,234.665,266.1,223.165z"/>
+          <ellipse cx="94.2" cy="122.065" rx="20.5" ry="20.5"/>
+          <ellipse cx="94.2" cy="223.165" rx="20.5" ry="20.5"/>
+        </g>
+        <path d="M483.7,258.965l-81.3-81.3c-8.3-8.3-20.8-8.3-29.2,0l-24.3,24.2v-168.5c0-18.4-14.9-33.3-33.3-33.3H33.3
+          c-18.4,0-33.3,15-33.3,33.3v281c0,18.4,14.9,33.3,33.3,33.3h169l-4.1,4c-2.1,3.1-4.2,6.3-5.2,10.4l-20.8,102.2
+          c-3.9,20.1,10.4,28.2,24,25l102.1-20.9c4.2,0,7.3-2.1,10.4-5.2l175-175.1C487.9,284.065,495.5,272.165,483.7,258.965z M40,307.765
+          v-267.7h269v201.5l-66.5,66.1H40V307.765z M283.7,428.965l-65.6,13.6l13.5-65.7l155.2-155.3l53.1,52.1L283.7,428.965z"/>
+      </g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    <g>
+    </g>
+    </svg>
+    `;
+
+    this.remove = `
+    
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 310.285 310.285" style="enable-background:new 0 0 310.285 310.285;" xml:space="preserve">
+<path d="M155.143,0.001C69.597,0.001,0,69.597,0,155.143c0,85.545,69.597,155.142,155.143,155.142s155.143-69.597,155.143-155.142
+	C310.285,69.597,240.689,0.001,155.143,0.001z M244.143,171.498c0,4.411-3.589,8-8,8h-163c-4.411,0-8-3.589-8-8v-32
+	c0-4.411,3.589-8,8-8h163c4.411,0,8,3.589,8,8V171.498z"/>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+</svg>
+
+    `;
+
+    this.list = `
+   <?xml version="1.0" encoding="iso-8859-1"?>
+   <!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+   <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+   <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      viewBox="0 0 458.18 458.18" style="enable-background:new 0 0 458.18 458.18;" xml:space="preserve">
+   <g>
+     <path d="M36.09,5.948c-18.803,0-34.052,15.248-34.052,34.051c0,18.803,15.249,34.052,34.052,34.052
+       c18.803,0,34.052-15.25,34.052-34.052C70.142,21.196,54.893,5.948,36.09,5.948z"/>
+     <path d="M147.537,80h268.604c22.092,0,40-17.908,40-40s-17.908-40-40-40H147.537c-22.092,0-40,17.908-40,40S125.445,80,147.537,80z
+       "/>
+     <path d="M36.09,132.008c-18.803,0-34.052,15.248-34.052,34.051s15.249,34.052,34.052,34.052c18.803,0,34.052-15.249,34.052-34.052
+       S54.893,132.008,36.09,132.008z"/>
+     <path d="M416.142,126.06H147.537c-22.092,0-40,17.908-40,40s17.908,40,40,40h268.604c22.092,0,40-17.908,40-40
+       S438.233,126.06,416.142,126.06z"/>
+     <path d="M36.09,258.068c-18.803,0-34.052,15.248-34.052,34.051c0,18.803,15.249,34.052,34.052,34.052
+       c18.803,0,34.052-15.249,34.052-34.052C70.142,273.316,54.893,258.068,36.09,258.068z"/>
+     <path d="M416.142,252.119H147.537c-22.092,0-40,17.908-40,40s17.908,40,40,40h268.604c22.092,0,40-17.908,40-40
+       S438.233,252.119,416.142,252.119z"/>
+     <path d="M36.09,384.128c-18.803,0-34.052,15.248-34.052,34.051s15.249,34.053,34.052,34.053c18.803,0,34.052-15.25,34.052-34.053
+       S54.893,384.128,36.09,384.128z"/>
+     <path d="M416.142,378.18H147.537c-22.092,0-40,17.908-40,40s17.908,40,40,40h268.604c22.092,0,40-17.908,40-40
+       S438.233,378.18,416.142,378.18z"/>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   <g>
+   </g>
+   </svg>
+   `;
+
+    this.style = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+   <path fill-rule="evenodd" clip-rule="evenodd" d="M13 21V13H21V21H13ZM15 15H19L19 19H15V15Z" fill="black"/>
+   <path fill-rule="evenodd" clip-rule="evenodd" d="M3 11L3 3L11 3V11H3ZM5 5L9 5V9L5 9L5 5Z" fill="black"/>
+   <path d="M18 6V12H16V8L12 8V6L18 6Z" fill="black"/>
+   <path d="M12 18H6L6 12H8L8 16H12V18Z" fill="black"/>
+   </svg>
+   `;
+
+
+    this.visible = `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+  viewBox="0 0 98.48 98.48" style="enable-background:new 0 0 98.48 98.48;" xml:space="preserve"
+ >
+<g>
+ <path d="M97.204,45.788c-0.865-1.02-21.537-24.945-47.963-24.945c-26.427,0-47.098,23.925-47.965,24.946
+   c-1.701,2-1.701,4.902,0.001,6.904c0.866,1.02,21.537,24.944,47.964,24.944c26.426,0,47.098-23.926,47.964-24.946
+   C98.906,50.691,98.906,47.789,97.204,45.788z M57.313,35.215c1.777-0.97,4.255,0.143,5.534,2.485
+   c1.279,2.343,0.875,5.029-0.902,5.999c-1.776,0.971-4.255-0.143-5.535-2.485C55.132,38.871,55.535,36.185,57.313,35.215z
+    M49.241,68.969c-18.46,0-33.995-14.177-39.372-19.729c3.631-3.75,11.898-11.429,22.567-16.021
+   c-2.081,3.166-3.301,6.949-3.301,11.021c0,11.104,9.001,20.105,20.105,20.105s20.106-9.001,20.106-20.105
+   c0-4.072-1.219-7.855-3.3-11.021C76.715,37.812,84.981,45.49,88.612,49.24C83.235,54.795,67.7,68.969,49.241,68.969z"/>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g></svg>`;
+
+    this.invisible = `<svg
+version="1.1"
+id="Capa_1"
+x="0px"
+y="0px"
+viewBox="0 0 98.48 98.481"
+style="enable-background:new 0 0 98.48 98.481;"
+xml:space="preserve"
+sodipodi:docname="invisible.svg"
+inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+xmlns="http://www.w3.org/2000/svg"
+xmlns:svg="http://www.w3.org/2000/svg"><defs
+id="defs45" /><sodipodi:namedview
+id="namedview43"
+pagecolor="#ffffff"
+bordercolor="#666666"
+borderopacity="1.0"
+inkscape:pageshadow="2"
+inkscape:pageopacity="0.0"
+inkscape:pagecheckerboard="0"
+showgrid="false"
+inkscape:zoom="2.9869357"
+inkscape:cx="4.8544735"
+inkscape:cy="41.346722"
+inkscape:window-width="1920"
+inkscape:window-height="1017"
+inkscape:window-x="-8"
+inkscape:window-y="-8"
+inkscape:window-maximized="1"
+inkscape:current-layer="g8" />
+<g
+id="g10">
+<g
+id="g8">
+ 
+ 
+ <g
+id="g843"><path
+  d="M69.322,44.716L49.715,64.323C60.438,64.072,69.071,55.438,69.322,44.716z"
+  id="path2" /><path
+  d="M97.204,45.789c-0.449-0.529-6.245-7.23-15.402-13.554l-6.2,6.2c5.99,3.954,10.559,8.275,13.011,10.806    C83.235,54.795,67.7,68.969,49.241,68.969c-1.334,0-2.651-0.082-3.952-0.222l-7.439,7.438c3.639,0.91,7.449,1.451,11.391,1.451    c26.426,0,47.098-23.927,47.964-24.946C98.906,50.692,98.906,47.79,97.204,45.789z"
+  id="path4" /><path
+  d="M90.651,15.901c0-0.266-0.104-0.52-0.293-0.707l-7.071-7.07c-0.391-0.391-1.022-0.391-1.414,0L66.045,23.952    c-5.202-1.893-10.855-3.108-16.804-3.108c-26.427,0-47.098,23.926-47.965,24.946c-1.701,2-1.701,4.902,0.001,6.903    c0.517,0.606,8.083,9.354,19.707,16.319l-12.86,12.86c-0.188,0.188-0.293,0.441-0.293,0.707c0,0.267,0.105,0.521,0.293,0.707    l7.071,7.07c0.195,0.194,0.451,0.293,0.707,0.293c0.256,0,0.512-0.099,0.707-0.293l73.75-73.75    C90.546,16.421,90.651,16.167,90.651,15.901z M9.869,49.241C13.5,45.49,21.767,37.812,32.436,33.22    c-2.081,3.166-3.301,6.949-3.301,11.021c0,4.665,1.601,8.945,4.27,12.352l-6.124,6.123C19.129,58.196,12.89,52.361,9.869,49.241z"
+  id="path6" /></g>
+</g>
+</g>
+<g
+id="g12">
+</g>
+<g
+id="g14">
+</g>
+<g
+id="g16">
+</g>
+<g
+id="g18">
+</g>
+<g
+id="g20">
+</g>
+<g
+id="g22">
+</g>
+<g
+id="g24">
+</g>
+<g
+id="g26">
+</g>
+<g
+id="g28">
+</g>
+<g
+id="g30">
+</g>
+<g
+id="g32">
+</g>
+<g
+id="g34">
+</g>
+<g
+id="g36">
+</g>
+<g
+id="g38">
+</g>
+<g
+id="g40">
+</g></svg>`;
+    this.mouse = `<svg
+  version="1.1"
+  id="Capa_1"
+  x="0px"
+  y="0px"
+  viewBox="0 0 260.366 260.366"
+  style="enable-background:new 0 0 260.366 260.366;"
+  xml:space="preserve"
+  sodipodi:docname="arrow-svgrepo-com.svg"
+  inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:svg="http://www.w3.org/2000/svg"><defs
+  id="defs37" /><sodipodi:namedview
+  id="namedview35"
+  pagecolor="#ffffff"
+  bordercolor="#666666"
+  borderopacity="1.0"
+  inkscape:pageshadow="2"
+  inkscape:pageopacity="0.0"
+  inkscape:pagecheckerboard="0"
+  showgrid="false"
+  inkscape:zoom="3.2339092"
+  inkscape:cx="130.183"
+  inkscape:cy="130.33761"
+  inkscape:window-width="1920"
+  inkscape:window-height="1027"
+  inkscape:window-x="-8"
+  inkscape:window-y="-8"
+  inkscape:window-maximized="1"
+  inkscape:current-layer="Capa_1" />
+  <path
+  d="M255.972,189.463l-47.347-47.348l41.082-41.082c3.675-3.675,5.186-8.989,3.993-14.047c-1.191-5.059-4.917-9.14-9.846-10.786  L19.754,1.316c-5.393-1.804-11.341-0.401-15.36,3.62c-4.021,4.021-5.422,9.968-3.62,15.36l74.885,224.101  c1.646,4.929,5.728,8.654,10.786,9.846c5.053,1.193,10.371-0.317,14.047-3.993l42.165-42.165l47.348,47.347  c2.929,2.929,6.768,4.394,10.606,4.394s7.678-1.465,10.606-4.394l44.755-44.755C261.83,204.819,261.83,195.321,255.972,189.463z   M200.611,223.612l-47.348-47.347c-2.929-2.929-6.768-4.394-10.606-4.394s-7.678,1.465-10.606,4.394l-35.624,35.624L38.752,39.294  l172.595,57.674l-34.541,34.541c-5.858,5.857-5.858,15.355,0,21.213l47.347,47.348L200.611,223.612z"
+  id="path2"
+  style="fill:#000000;fill-opacity:1" />
+  <g
+  id="g4">
+  </g>
+  <g
+  id="g6">
+  </g>
+  <g
+  id="g8">
+  </g>
+  <g
+  id="g10">
+  </g>
+  <g
+  id="g12">
+  </g>
+  <g
+  id="g14">
+  </g>
+  <g
+  id="g16">
+  </g>
+  <g
+  id="g18">
+  </g>
+  <g
+  id="g20">
+  </g>
+  <g
+  id="g22">
+  </g>
+  <g
+  id="g24">
+  </g>
+  <g
+  id="g26">
+  </g>
+  <g
+  id="g28">
+  </g>
+  <g
+  id="g30">
+  </g>
+  <g
+  id="g32">
+  </g>
+  <path
+  style="fill:#000000;fill-opacity:1;stroke-width:38.318;stroke-linecap:round;stroke:#000000;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+  d="m 176.25727,198.8633 c -23.68772,-23.64674 -24.49906,-24.41991 -26.7503,-25.49175 -4.55216,-2.16733 -9.11388,-2.17055 -13.60334,-0.01 -2.22046,1.06878 -3.10891,1.90403 -20.87257,19.62262 L 96.477662,211.49087 67.898364,125.92225 C 52.17975,78.859514 39.258366,40.178943 39.184177,39.965428 39.077696,39.658977 210.191,96.551715 210.7197,96.998548 c 0.0763,0.06445 -7.87234,8.148712 -17.66356,17.965012 -11.29533,11.32428 -18.11231,18.38875 -18.65061,19.32772 -2.62177,4.57321 -2.71438,10.25944 -0.24786,15.21817 0.59716,1.20053 6.23919,7.02408 25.242,26.05407 l 24.47294,24.50796 -11.59335,11.5891 -11.59335,11.58911 z"
+  id="path1252" /></svg>`;
+
+    this.nomouse = `<svg
+  version="1.1"
+  id="Capa_1"
+  x="0px"
+  y="0px"
+  viewBox="0 0 260.366 260.366"
+  style="enable-background:new 0 0 260.366 260.366;"
+  xml:space="preserve"
+  sodipodi:docname="noarrow.svg"
+  inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:svg="http://www.w3.org/2000/svg"><defs
+  id="defs37" /><sodipodi:namedview
+  id="namedview35"
+  pagecolor="#ffffff"
+  bordercolor="#666666"
+  borderopacity="1.0"
+  inkscape:pageshadow="2"
+  inkscape:pageopacity="0.0"
+  inkscape:pagecheckerboard="0"
+  showgrid="false"
+  inkscape:zoom="3.2339092"
+  inkscape:cx="148.11795"
+  inkscape:cy="169.91819"
+  inkscape:window-width="1920"
+  inkscape:window-height="1027"
+  inkscape:window-x="-8"
+  inkscape:window-y="-8"
+  inkscape:window-maximized="1"
+  inkscape:current-layer="Capa_1" />
+
+  <g
+  id="g4">
+  </g>
+  <g
+  id="g6">
+  </g>
+  <g
+  id="g8">
+  </g>
+  <g
+  id="g10">
+  </g>
+  <g
+  id="g12">
+  </g>
+  <g
+  id="g14">
+  </g>
+  <g
+  id="g16">
+  </g>
+  <g
+  id="g18">
+  </g>
+  <g
+  id="g20">
+  </g>
+  <g
+  id="g22">
+  </g>
+  <g
+  id="g24">
+  </g>
+  <g
+  id="g26">
+  </g>
+  <g
+  id="g28">
+  </g>
+  <g
+  id="g30">
+  </g>
+  <g
+  id="g32">
+  </g>
+  <rect
+  style="fill:#000000;stroke:#000000;stroke-width:46.339;stroke-linecap:round"
+  id="rect859"
+  width="0.74869555"
+  height="280.91412"
+  x="179.77588"
+  y="-127.59808"
+  rx="12.106069"
+  ry="12.080462"
+  transform="matrix(0.74419993,0.66795693,-0.68686231,0.72678756,0,0)" /><g
+  id="g1327"><path
+    d="M255.972,189.463l-47.347-47.348l41.082-41.082c3.675-3.675,5.186-8.989,3.993-14.047c-1.191-5.059-4.917-9.14-9.846-10.786  L19.754,1.316c-5.393-1.804-11.341-0.401-15.36,3.62c-4.021,4.021-5.422,9.968-3.62,15.36l74.885,224.101  c1.646,4.929,5.728,8.654,10.786,9.846c5.053,1.193,10.371-0.317,14.047-3.993l42.165-42.165l47.348,47.347  c2.929,2.929,6.768,4.394,10.606,4.394s7.678-1.465,10.606-4.394l44.755-44.755C261.83,204.819,261.83,195.321,255.972,189.463z   M200.611,223.612l-47.348-47.347c-2.929-2.929-6.768-4.394-10.606-4.394s-7.678,1.465-10.606,4.394l-35.624,35.624L38.752,39.294  l172.595,57.674l-34.541,34.541c-5.858,5.857-5.858,15.355,0,21.213l47.347,47.348L200.611,223.612z"
+    id="path2"
+    style="fill:#000000;fill-opacity:1" /><path
+    style="fill:#000000;stroke:#000000;stroke-width:47.3953;stroke-linecap:round"
+    d="M 175.54224,197.81395 C 141.49161,163.76332 143.2267,163.93691 115.08233,191.76514 L 96.477662,210.16082 68.362417,125.87737 C 52.899031,79.521474 40.41104,41.430054 40.611324,41.22977 40.811607,41.029486 78.915195,53.517478 125.28596,68.980863 l 84.31049,28.115246 -17.78399,17.934951 c -19.09866,19.26078 -21.49193,23.16051 -19.17388,31.24308 0.79101,2.75809 8.75682,11.60498 25.8883,28.75178 l 24.74573,24.76783 -11.46147,11.41381 -11.46147,11.41382 z"
+    id="path1058" /></g></svg>`;
+
+    this.nolabel = `<svg
+  version="1.1"
+  id="Capa_1"
+  x="0px"
+  y="0px"
+  viewBox="0 0 37.628 37.628"
+  style="enable-background:new 0 0 37.628 37.628;"
+  xml:space="preserve"
+  sodipodi:docname="nolabel.svg"
+  inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:svg="http://www.w3.org/2000/svg"><defs
+  id="defs39" /><sodipodi:namedview
+  id="namedview37"
+  pagecolor="#ffffff"
+  bordercolor="#666666"
+  borderopacity="1.0"
+  inkscape:pageshadow="2"
+  inkscape:pageopacity="0.0"
+  inkscape:pagecheckerboard="0"
+  showgrid="false"
+  inkscape:zoom="11.188477"
+  inkscape:cx="7.1502135"
+  inkscape:cy="14.523871"
+  inkscape:window-x="-8"
+  inkscape:window-y="-8"
+  inkscape:window-maximized="1"
+  inkscape:current-layer="Capa_1" />
+  <g
+  id="g4">
+  <path
+  d="M36.895,23.758L25.092,35.562c-0.488,0.487-1.128,0.731-1.77,0.731c-0.211,0-0.419-0.037-0.625-0.089   c0.418-0.107,0.815-0.315,1.145-0.644l11.803-11.804c0.979-0.977,0.979-2.56,0-3.534L17.488,2.067   c-0.333-0.333-0.752-0.546-1.199-0.651l0.243-0.043c0.807-0.142,1.629,0.116,2.206,0.694l18.156,18.156   C37.872,21.199,37.872,22.782,36.895,23.758z M34.228,23.758L22.425,35.562c-0.488,0.487-1.128,0.731-1.77,0.731   c-0.64,0-1.279-0.244-1.768-0.731L0.732,17.405c-0.578-0.578-0.837-1.401-0.694-2.206L1.822,5.181   c0.184-1.031,0.992-1.839,2.023-2.023l10.019-1.784c0.807-0.142,1.629,0.116,2.206,0.694l18.156,18.156   C35.206,21.199,35.206,22.782,34.228,23.758z M9.454,7.193c-0.985-1-2.595-1.012-3.595-0.027s-1.011,2.595-0.026,3.595   c0.985,0.999,2.594,1.012,3.594,0.026C10.426,9.802,10.438,8.192,9.454,7.193z"
+  id="path2" />
+  </g>
+  <g
+  id="g6">
+  </g>
+  <g
+  id="g8">
+  </g>
+  <g
+  id="g10">
+  </g>
+  <g
+  id="g12">
+  </g>
+  <g
+  id="g14">
+  </g>
+  <g
+  id="g16">
+  </g>
+  <g
+  id="g18">
+  </g>
+  <g
+  id="g20">
+  </g>
+  <g
+  id="g22">
+  </g>
+  <g
+  id="g24">
+  </g>
+  <g
+  id="g26">
+  </g>
+  <g
+  id="g28">
+  </g>
+  <g
+  id="g30">
+  </g>
+  <g
+  id="g32">
+  </g>
+  <g
+  id="g34">
+  </g>
+  <rect
+  style="fill:#000000;stroke:none;stroke-width:106.948;stroke-linecap:round"
+  id="rect1062"
+  width="6.4875011"
+  height="46.886227"
+  x="23.606146"
+  y="-23.715155"
+  rx="3.1189909"
+  ry="3.2421327"
+  transform="matrix(0.68940354,0.7243775,-0.72076393,0.69318061,0,0)" /></svg>
+  `;
+
+    this.label = `<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+  <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    viewBox="0 0 37.628 37.628" style="enable-background:new 0 0 37.628 37.628;"
+    xml:space="preserve">
+  <g>
+    <path d="M36.895,23.758L25.092,35.562c-0.488,0.487-1.128,0.731-1.77,0.731c-0.211,0-0.419-0.037-0.625-0.089
+      c0.418-0.107,0.815-0.315,1.145-0.644l11.803-11.804c0.979-0.977,0.979-2.56,0-3.534L17.488,2.067
+      c-0.333-0.333-0.752-0.546-1.199-0.651l0.243-0.043c0.807-0.142,1.629,0.116,2.206,0.694l18.156,18.156
+      C37.872,21.199,37.872,22.782,36.895,23.758z M34.228,23.758L22.425,35.562c-0.488,0.487-1.128,0.731-1.77,0.731
+      c-0.64,0-1.279-0.244-1.768-0.731L0.732,17.405c-0.578-0.578-0.837-1.401-0.694-2.206L1.822,5.181
+      c0.184-1.031,0.992-1.839,2.023-2.023l10.019-1.784c0.807-0.142,1.629,0.116,2.206,0.694l18.156,18.156
+      C35.206,21.199,35.206,22.782,34.228,23.758z M9.454,7.193c-0.985-1-2.595-1.012-3.595-0.027s-1.011,2.595-0.026,3.595
+      c0.985,0.999,2.594,1.012,3.594,0.026C10.426,9.802,10.438,8.192,9.454,7.193z"/>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  <g>
+  </g>
+  </svg>`;
+
+    this.surface = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+  viewBox="0 0 512.011 512.011" style="enable-background:new 0 0 512.011 512.011;" xml:space="preserve">
+<g>
+ <g>
+   <g>
+     <path d="M9.881,188.672l234.667,149.333c3.499,2.219,7.488,3.328,11.456,3.328c3.989,0,7.957-1.109,11.456-3.328l234.667-149.333
+       c6.144-3.925,9.877-10.709,9.877-18.005c0-7.296-3.733-14.08-9.877-17.984L267.459,3.328c-6.997-4.437-15.915-4.437-22.912,0
+       L9.881,152.683c-6.144,3.904-9.877,10.688-9.877,17.984C0.003,177.963,3.737,184.747,9.881,188.672z"/>
+     <path d="M502.13,323.339l-66.069-42.048l-145.685,92.715c-10.347,6.549-22.208,10.005-34.368,10.005s-24.021-3.456-34.304-9.984
+       L75.954,281.291L9.885,323.339c-6.144,3.925-9.877,10.709-9.877,18.005c0,7.296,3.733,14.08,9.877,17.984l234.667,149.355
+       c3.499,2.219,7.467,3.328,11.456,3.328c3.968,0,7.957-1.109,11.456-3.328L502.13,359.328c6.144-3.904,9.877-10.688,9.877-17.984
+       C512.008,334.048,508.274,327.264,502.13,323.339z"/>
+   </g>
+ </g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+</svg>
+`;
+
+    this.molecule = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+viewBox="0 0 512.002 512.002" style="enable-background:new 0 0 512.002 512.002;" xml:space="preserve">
+<g>
+<g>
+ <path d="M361.461,225.296c-11.33-8.988-20.694-20.332-27.358-33.296l-65.887,54.064c-13.889-11.727-30.673-20.423-49.582-24.736
+   c-25.298-5.773-51.19-3.108-74.431,7.392l-8.563-12.027c-9.292,11.086-21.341,19.775-35.083,25.021l8.225,11.553
+   c-15.352,15.449-26.146,34.892-31.11,56.652c-14.439,63.288,25.302,126.524,88.591,140.963c8.779,2.004,17.549,2.963,26.197,2.963
+   c53.687,0,102.329-37.047,114.765-91.554c6.672-29.25,1.752-58.479-11.697-82.894L361.461,225.296z M182.458,391.885
+   c-1.823,7.991-8.926,13.408-16.789,13.408c-1.27,0-2.56-0.142-3.85-0.437c-32.367-7.385-52.691-39.723-45.306-72.089
+   c2.117-9.281,11.358-15.09,20.638-12.971c9.281,2.117,15.088,11.358,12.971,20.638c-1.528,6.701-0.356,13.597,3.301,19.416
+   c3.657,5.82,9.363,9.867,16.063,11.396C178.768,373.364,184.575,382.605,182.458,391.885z"/>
+</g>
+</g>
+<g>
+<g>
+ <path d="M443.878,60.382c-22.81-5.201-46.283-1.212-66.094,11.237c-19.81,12.451-33.586,31.87-38.789,54.68
+   c-10.744,47.09,18.826,94.14,65.917,104.884v0.001c6.533,1.49,13.057,2.203,19.492,2.203c39.947,0,76.139-27.565,85.393-68.122
+   C520.538,118.178,490.968,71.127,443.878,60.382z"/>
+</g>
+</g>
+<g>
+<g>
+ <path d="M129.651,124.586c-9.977-15.877-25.542-26.918-43.824-31.088c-37.742-8.611-75.449,15.09-84.06,52.83
+   s15.088,75.449,52.828,84.059c5.236,1.195,10.466,1.767,15.622,1.767c32.016,0,61.022-22.092,68.438-54.597
+   C142.827,159.274,139.63,140.463,129.651,124.586z"/>
+</g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+</svg>`;
+
+    this.change = `<svg
+  version="1.1"
+  id="Layer_1"
+  x="0px"
+  y="0px"
+  viewBox="0 0 512 512"
+  style="enable-background:new 0 0 512 512;"
+  xml:space="preserve"
+  sodipodi:docname="change.svg"
+  inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:svg="http://www.w3.org/2000/svg"><defs
+  id="defs47" /><sodipodi:namedview
+  id="namedview45"
+  pagecolor="#ffffff"
+  bordercolor="#666666"
+  borderopacity="1.0"
+  inkscape:pageshadow="2"
+  inkscape:pageopacity="0.0"
+  inkscape:pagecheckerboard="0"
+  showgrid="false"
+  inkscape:zoom="1"
+  inkscape:cx="226"
+  inkscape:cy="256.5"
+  inkscape:window-width="1920"
+  inkscape:window-height="1027"
+  inkscape:window-x="-8"
+  inkscape:window-y="-8"
+  inkscape:window-maximized="1"
+  inkscape:current-layer="Layer_1" />
+
+
+<g
+  id="g14">
+</g>
+<g
+  id="g16">
+</g>
+<g
+  id="g18">
+</g>
+<g
+  id="g20">
+</g>
+<g
+  id="g22">
+</g>
+<g
+  id="g24">
+</g>
+<g
+  id="g26">
+</g>
+<g
+  id="g28">
+</g>
+<g
+  id="g30">
+</g>
+<g
+  id="g32">
+</g>
+<g
+  id="g34">
+</g>
+<g
+  id="g36">
+</g>
+<g
+  id="g38">
+</g>
+<g
+  id="g40">
+</g>
+<g
+  id="g42">
+</g>
+<g
+  id="g1800"
+  transform="translate(-0.1537225,-4.3038075)"><path
+    style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:22.416;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+    d="m 102.46172,128.30302 76.00859,-76.010515 0.15658,38.005766 0.1566,38.005769 h 153.53462 153.53462 v 38.00475 38.00475 H 256.15293 26.453131 Z"
+    id="path1171" /><path
+    style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:22.416;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+    d="m 409.84573,392.3046 -76.00859,76.01051 -0.15658,-38.00576 -0.1566,-38.00577 H 179.98934 26.454715 V 354.29883 316.29408 H 256.15452 485.85431 Z"
+    id="path1796" /></g></svg>`;
+
+  };
+
+  return Icons;
+})();
+/**
+ * This is a colection of contructor to make different input element
+ * @function $3Dmol.UI#Form
+ */
+$3Dmol.UI.Form = (function () {
+    /**
+     * Create Color input
+     * @function $3Dmol.UI#Form.Color
+     * @param {Object} outerControl Reference object to store the value
+     */
+    Form.Color = function (outerControl) {
+        var redDot = $('<div></div>');
+        redDot.height(10);
+        redDot.width(10);
+        redDot.css('border-radius', '50%');
+        redDot.css('background', 'red');
+        redDot.css('margin-right', '3px');
+
+        var blueDot = redDot.clone();
+        blueDot.css('background', 'blue');
+
+        var greenDot = redDot.clone();
+        greenDot.css('background', 'green');
+
+        var control = this.control = {
+            R: {
+                value: 0,
+                min: 0,
+                max: 255,
+                label: redDot
+            },
+            G: {
+                value: 0,
+                min: 0,
+                max: 255,
+                label: greenDot
+            },
+            B: {
+                value: 0,
+                min: 0,
+                max: 255,
+                label: blueDot
+            },
+        };
+
+        var surroundingBox = this.ui = $('<div></div>')
+        var boundingBox = $('<div></div>');
+
+        surroundingBox.append(boundingBox);
+
+        var spectrumControl = {
+            key: 'Spectrum',
+            value: null
+        }
+
+        var spectrum = new Form.Checkbox(spectrumControl);
+
+        boundingBox.append(spectrum.ui);
+
+        spectrum.ui.css({
+            'margin-left': '2px'
+        })
+
+
+        var RValue = new Form.Slider(control.R);
+        var GValue = new Form.Slider(control.G);
+        var BValue = new Form.Slider(control.B);
+
+        var sliders = $('<div></div>');
+        sliders.append(RValue.ui, GValue.ui, BValue.ui);
+
+        var color = $('<div></div>');
+
+        boundingBox.append(sliders);
+        boundingBox.append(color);
+
+
+        // CSS
+
+        RValue.slide.css('color', 'red');
+
+        // GValue.ui.css('display', 'block');
+        GValue.slide.css('color', 'green');
+
+        // BValue.ui.css('display', 'block');
+        BValue.slide.css('color', 'blue');
+
+        color.height(15);
+        // color.width(50);
+        color.css('margin-top', '6px');
+        color.css('margin-bottom', '6px');
+        color.css('border', '1px solid grey');
+        color.css('border-radius', '500px');
+
+        this.update = function (control) {};
+        var self = this;
+        // Functionality
+        function updatePreview(c) {
+            var c = `rgb(${control.R.value}, ${control.G.value}, ${control.B.value})`;
+            color.css('background', c);
+            outerControl.value = c;
+            self.update(control);
+        }
+
+        RValue.update = GValue.update = BValue.update = updatePreview;
+        updatePreview();
+
+        spectrum.update = function (v) {
+            sliders.toggle();
+
+            if (v.value) {
+                color.css({
+                    'background': 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)'
+                });
+                outerControl.value = 'spectrum';
+            } else {
+                updatePreview();
+            }
+        }
+
+        this.getValue = function () {
+            return outerControl;
+        }
+
+        this.validate = function () {
+            return true;
+        }
+
+        this.setValue = function (colorValue) {
+
+            if (colorValue == 'spectrum') {
+                spectrum.setValue(true);
+                spectrum.update(spectrumControl);
+                sliders.hide();
+
+                outerControl.value = 'spectrum';
+            }
+        }
+
+        spectrum.ui.hide();
+
+        this.enableSpectrum = function () {
+            spectrum.ui.show();
+        }
+    }
+
+    /**
+     * Create ListInput input
+     * @function $3Dmol.UI#Form.ListInput
+     * @param {Object} control Reference object to store the value
+     * @param {Array} listElements list of the elements through which options are generated
+     */
+    Form.ListInput = function (control, listElements) {
+        // var label = $('<div></div>');
+        // label.text(control.key);
+
+        var surroundingBox = this.ui = $('<div></div>');
+        var boundingBox = $('<div></div>');
+        var itemList = listElements;
+        // surroundingBox.append(label);
+        surroundingBox.append(boundingBox);
+
+        var select = $('<select></select>');
+        select.css($3Dmol.defaultCSS.ListInput.select);
+
+        boundingBox.append(select);
+
+        var showAlertBox = this.showAlertBox = true;
+        var failMessage = $('<div></div>');
+        failMessage.text('Please select some value');
+        failMessage.css({
+            'color': 'crimson',
+            'font-family': 'Arial',
+            'font-weight': 'bold',
+            'font-size': '10px'
+        });
+        failMessage.hide();
+        boundingBox.append(failMessage);
+
+        this.update = function (control) {}
+
+        select.on('click', {
+            parent: this
+        }, (event) => {
+            control.value = select.children('option:selected').val();
+            event.data.parent.update(control);
+        });
+
+        this.getValue = () => {
+            return control;
+        }
+
+        // this.preventAlertBox = function(){
+        //     show
+        // }
+
+        this.validate = function () {
+            if (control.value == 'select' || control.value == null) {
+                (this.showAlertBox) ? failMessage.show(): null;
+                select.css({
+                    'box-shadow': '0px 0px 2px red'
+                });
+                return false;
+            } else {
+                failMessage.hide();
+                boundingBox.css({
+                    'box-shadow': 'none'
+                });
+                return true;
+            }
+        }
+
+        this.setValue = function (val) {
+            if (listElements.indexOf(val) != -1) {
+                select.empty();
+                var defaultOption = $('<option></option>');
+                defaultOption.text('select');
+
+                itemList.forEach((item) => {
+                    var option = $('<option></option>');
+                    option.text(item);
+                    option.attr('value', item);
+                    select.append(option);
+
+                    if (val == item) {
+                        option.prop('selected', true);
+                    }
+                });
+
+                control.value = select.children('option:selected').val();
+            } else {
+                console.error('UI::Form::ListInput:incorrect value', val);
+            }
+        }
+
+        this.updateList = function (newList) {
+            select.empty();
+
+            var defaultOption = $('<option></option>');
+            defaultOption.text('select');
+            defaultOption.attr('value', 'select');
+
+            select.append(defaultOption);
+
+            itemList = newList;
+            itemList.forEach((item) => {
+                var option = $('<option></option>');
+                option.text(item);
+                option.attr('value', item);
+                select.append(option);
+            });
+        }
+
+        this.updateList(itemList);
+    }
+
+    /**
+     * Create text, numeric or range Input
+     * @function $3Dmol.UI#Form.Input
+     * @param {Object} control Reference object to store the value
+     */
+    Form.Input = function (control) {
+        var surroundingBox = this.ui = $('<div></div>');
+        var boundingBox = $('<div></div>');
+        // surroundingBox.append(label);
+        surroundingBox.append(boundingBox);
+
+        var validationType = this.validationType = 'text';
+
+        surroundingBox.css({
+            'width': '100%',
+            'box-sizing': 'border-box'
+        })
+
+        var input = this.domElement = $('<input type="text">');
+        boundingBox.append(input);
+
+        var alertBox = $('<div></div>');
+        alertBox.css({
+            'border': '1px solid darkred',
+            'border-radius': '3px',
+            'font-family': 'Arial',
+            'font-size': '10px',
+            'font-weight': 'bold',
+            'margin': '2px',
+            'margin-left': '4px',
+            'padding': '2px',
+            'color': 'darkred',
+            'background': 'lightcoral'
+        });
+
+        var alertMessage = {
+            'invalid-input': 'Invalid input please check the value entered',
+        }
+
+        boundingBox.append(alertBox);
+        alertBox.hide();
+
+        this.setWidth = function (width) {
+            input.width(width - 6);
+        }
+
+        this.setWidth(75);
+
+        input.css({
+            // 'margin-left': '4px'
+        });
+
+        this.update = function (control) {
+
+        }
+
+        input.on('change', {
+            parent: this,
+            control: control
+        }, (event) => {
+            inputString = input.val();
+
+            if (inputString[inputString.length - 1] == ',') {
+                inputString = inputString.slice(0, -1);
+            }
+
+            if (validationType == 'range') {
+                control.value = inputString.split(',');
+            } else {
+                control.value = inputString;
+            }
+
+            // calling update function 
+            event.data.parent.update(control);
+        });
+
+        var selectedText = null;
+
+        input.on('select', (e) => {
+            selectedText = input.val().substring(e.target.selectionStart, e.target.selectionEnd);
+        });
+
+
+        this.getValue = () => {
+            return control;
+        }
+
+        var error = this.error = function (msg) {
+            alertBox.show();
+            alertBox.text(msg)
+        }
+
+        this.setValue = function (val) {
+
+            if (validationType == 'range') {
+                var text = val.join(',');
+                input.val(text);
+            } else {
+                input.val(val);
+            }
+
+            control.value = val;
+        }
+
+
+
+        function checkInputFloat() {
+            var inputString = input.val();
+
+            var dots = inputString.match(/\./g) || [];
+            var checkString = inputString.replaceAll(/\./g, '').replaceAll(/[0-9]/g, '');
+
+            if (dots.length > 1) {
+                return false
+            };
+
+            if (checkString != '') return false;
+
+            if (isNaN(parseFloat(inputString))) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        function checkInputNumber() {
+            var inputString = input.val();
+
+            var checkString = inputString.replaceAll(/[0-9]/g, '');
+
+            if (checkString != '') return false;
+
+            if (isNaN(parseInt(inputString))) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        // Parse Input Range Functions
+
+        // Checks only number, comma and hyphen present
+        function checkRangeTokens(inputString) {
+            var finalString = inputString.replaceAll(',', '').replaceAll('-', '').replaceAll(/[0-9]/g, '').replaceAll(' ', '');;
+
+            if (finalString == '')
+                return true;
+            else
+                return false;
+        }
+
+        function checkList(inputString, submit = false) {
+            inputString = inputString.replaceAll(' ', '');
+
+            if (inputString[inputString.length - 1] == ',') {
+                inputString = inputString.slice(0, -1);
+            }
+
+
+            var rangeList = inputString.split(',');
+
+            // If dublicate comma return false;
+            if (/,,/g.exec(inputString)) return false;
+
+            // If first element not a number return false;
+            if (isNaN(parseInt(rangeList[0]))) return false;
+
+            var validRangeList = rangeList.map((rangeInput) => {
+                return checkRangeInput(rangeInput);
+            });
+
+            return validRangeList.find((e) => {
+                return e == false
+            }) == undefined ? true : false;
+        }
+
+        function checkRangeInput(inputString, submit = false) {
+            var rangeInputs = inputString.split('-');
+            if (rangeInputs.length > 2) {
+                return false;
+            } else {
+                if (rangeInputs.length == 0) {
+                    return true;
+                } else if (rangeInputs.length == 1) {
+                    if (isNaN(parseInt(rangeInputs[0])))
+                        return false;
+                    else
+                        return true;
+                } else if (rangeInputs.length == 2) {
+                    if (isNaN(parseInt(rangeInputs[0])) || isNaN(parseInt(rangeInputs[1])))
+                        return false;
+                    else
+                        return true;
+                } else
+                    return false;
+            }
+        }
+
+        var checkInput = this.checkInput = function () {
+            var inputString = input.val();
+
+            if (validationType == 'number') {
+                if (checkInputNumber()) {
+                    alertBox.hide();
+                    return true;
+                } else {
+                    error(alertMessage['invalid-input']);
+                    return false;
+                }
+            } else if (validationType == 'float') {
+                if (checkInputFloat()) {
+                    alertBox.hide();
+                    return true;
+                } else {
+                    error(alertMessage['invalid-input']);
+                    return false;
+                }
+            } else if (validationType == 'range') {
+                if (checkRangeTokens(inputString)) {
+                    if (checkList(inputString)) {
+                        alertBox.hide();
+                        return true;
+                    } else {
+                        error(alertMessage['invalid-input']);
+                        return false;
+                    }
+                } else {
+                    error(alertMessage['invalid-input']);
+                    return false;
+                }
+
+            } else {
+                return true;
+            }
+        }
+
+        this.validateOnlyNumber = function (floatType = false) {
+            if (floatType) {
+                validationType = 'float';
+            } else {
+                validationType = 'number';
+            }
+
+            input.on('keydown keyup paste cut', function (event) {
+                checkInput();
+            });
+        }
+
+
+        this.validateInputRange = function () {
+            validationType = 'range';
+
+            input.on('keydown keyup paste cut', () => {
+                checkInput();
+            });
+
+        }
+
+        this.isEmpty = function () {
+            if (control.value == "") {
+                return true;
+            }
+        }
+
+        this.validate = function () {
+            if ((control.active == true && control.value != null && control.value != "" && checkInput()) || (control.active == false)) {
+                input.css('box-shadow', 'none');
+                return true
+            } else {
+                input.css('box-shadow', '0px 0px 2px red');
+                return false;
+            }
+        }
+
+        // CSS 
+
+        input.css($3Dmol.defaultCSS.Input.input);
+        boundingBox.css($3Dmol.defaultCSS.Input.boundingBox);
+
+    }
+
+    /**
+     * Create Checkbox input for boolean values
+     * @function $3Dmol.UI#Form.Checkbox
+     * @param {Object} control Reference object to store the value
+     */
+    Form.Checkbox = function (control) {
+        var label = $('<div></div>');
+        label.text(control.key);
+        label.css($3Dmol.defaultCSS.TextDefault);
+
+        var surroundingBox = this.ui = $('<div></div>');
+        var boundingBox = $('<div></div>');
+        surroundingBox.append(boundingBox);
+        surroundingBox.append(label);
+
+        var checkbox = $('<input type="checkbox" />');
+        boundingBox.append(checkbox);
+
+        this.click = () => {};
+
+        this.update = function (control) {
+
+        }
+
+        this.getValue = () => {
+            return control;
+        }
+
+        checkbox.on('click', {
+            parent: this
+        }, (event) => {
+            control.value = checkbox.prop('checked');
+            event.data.parent.update(control);
+        });
+
+        // CSS
+        label.css('display', 'inline-block');
+        boundingBox.css('display', 'inline-block')
+
+        this.validate = function () {
+            return true;
+        }
+
+        this.setValue = function (val) {
+            checkbox.prop('checked', val);
+            this.update(control);
+            control.value = val;
+        }
+    }
+
+    /**
+     * Create input for values between two numbers
+     * @function $3Dmol.UI#Form.Slider
+     * @param {Object} control Reference object to store the value
+     */
+    Form.Slider = function (control, style = {}) {
+        var surroundingBox = this.ui = $('<div></div>');
+
+        var boundingBox = $('<div></div>');
+        surroundingBox.append(boundingBox);
+
+        boundingBox.css('display', 'flex');
+        var slide = this.slide = $('<input type="range">');
+        slide.css('width', '100%');
+
+        var min = control.min || 0;
+        var max = control.max || 100;
+        var step = control.step || 1;
+        var defaultValue = control.default || min;
+        var labelContent = control.label || '';
+
+        var label = $('<div></div>');
+        label.append(labelContent);
+        boundingBox.append(label);
+
+        slide.attr('min', min);
+        slide.attr('max', max);
+        slide.attr('step', step);
+        slide.attr('value', defaultValue);
+        control.value = defaultValue;
+        boundingBox.append(slide);
+
+        var setValue = false;
+
+        this.update = function (control) {
+
+        };
+
+        this.getValue = () => {
+            return control;
+        }
+
+        slide.on('mousedown', () => {
+            setValue = true;
+        });
+
+        slide.on('mousemove', {
+            parent: this
+        }, (event) => {
+            if (setValue) {
+                control.value = slide.val();
+                event.data.parent.update(control);
+            }
+        });
+
+        slide.on('mouseup', () => {
+            setValue = false;
+        });
+
+        // CSS
+        boundingBox.css('align-items', 'center');
+        boundingBox.height('21px');
+        // boundingBox.css('border-radius', '2px');
+        // label.css('line-height', '21px');
+        slide.css('padding', '0px');
+        slide.css('margin', '0px');
+
+        this.validate = function () {
+            return true;
+        }
+
+        this.setValue = function (val) {
+            slider.val(val);
+            control.value = slider.val();
+        }
+
+
+    }
+
+    /**
+     * Create empty element used for property that whose input cannot be taken
+     * @function $3Dmol.UI#Form.EmptyElement
+     * @param {Object} control Reference object to store the value
+     */
+    Form.EmptyElement = function (control) {
+        this.ui = $('<div></div>');
+
+        var update = () => {};
+
+        this.onUpdate = (callback) => {
+            update = callback;
+        }
+
+        this.getValue = () => {
+            return control;
+        }
+
+        this.validate = function () {
+            return true;
+        }
+    }
+
+    // mainControl param will be used to take in specName
+    // in the form of key 
+    // type will be 'form'
+    // active will be used to activate deactivate form if more than one form
+    /**
+     * Creates Form input that takes input from different input element 
+     * 
+     * @function $3Dmol.UI#Form
+     * @param {validSelectionSpec|validStyleSpec|validAtomSpec} specs the defination of spec is used as an input to generate the form
+     * @param {Object} mainControl Reference of variable to store the value from the form
+     */
+    function Form(specs, mainControl) {
+        specs = specs || {};
+        var boundingBox = this.ui = $('<div></div>');
+
+        var heading = $('<div></div>');
+        heading.text(mainControl.key);
+
+        // Styling heading 
+        heading.css({
+            'border-bottom': '1px solid black',
+            'font-family': 'Arial',
+            'font-size': '14px',
+            'font-weight': 'bold',
+            'padding-top': '2px',
+            'padding-bottom': '4px'
+        });
+
+        boundingBox.append(heading);
+        boundingBox.addClass('form');
+
+        var inputs = this.inputs = [];
+        // body.append(boundingBox);
+
+        var keys = Object.keys(specs);
+        keys.forEach((key) => {
+            if (specs[key].gui) {
+                var prop = new Property(key, specs[key].type);
+                inputs.push(prop);
+                boundingBox.append(prop.ui);
+            }
+
+        });
+        var self = this;
+
+        this.update = function () {}
+
+        var update = (control) => {
+
+        };
+
+
+        inputs.forEach((input) => {
+            input.update = update;
+        })
+
+        this.getValue = function () {
+            mainControl.value = {};
+
+            inputs.forEach((input) => {
+                var inputValue = input.getValue();
+
+                if (inputValue.active) {
+                    mainControl.value[inputValue.key] = inputValue.value;
+                }
+            });
+
+            return mainControl;
+        }
+
+        var updateValues = function (inputControl) {
+            mainControl.value[inputControl.key] = control.value;
+            update(mainControl);
+        }
+
+        this.validate = function () {
+            var validations = inputs.map((i) => {
+
+                if (i.active.getValue().value) {
+                    return i.placeholder.validate();
+                } else {
+                    return true;
+                }
+            });
+
+
+            if (validations.find(e => e == false) == undefined)
+                return true;
+            else {
+                return false;
+            }
+
+        }
+
+        this.setValue = function (val) {
+            var keys = Object.keys(val);
+            for (var i = 0; i < keys.length; i++) {
+                var input = inputs.find((e) => {
+                    if (e.control.key == keys[i])
+                        return e;
+                });
+
+
+
+                input.placeholder.setValue(val[keys[i]]);
+                input.active.setValue(true);
+                input.placeholder.ui.show();
+                input.control.active = true;
+            }
+
+            // mainControl.value = val;
+            this.update(mainControl);
+            var v = this.getValue();
+
+        }
+
+        this.getInputs = function () {
+            return inputs;
+        }
+
+        function Property(key, type) {
+            var control = this.control = {
+                value: null,
+                type: type,
+                key: key,
+                active: false
+            };
+            var boundingBox = this.ui = $('<div></div>');
+            this.placeholder = {
+                ui: $('<div></div>')
+            }; // default value for ui element 
+            this.active = new Form.Checkbox({
+                value: false,
+                key: key
+            });
+
+
+            if (specs[key].type == 'string' || specs[key].type == 'element') {
+                this.placeholder = new Form.Input(control);
+                this.placeholder.ui.attr('type', 'text');
+            } else if (specs[key].type == 'number') {
+
+                var slider = false;
+
+                if (specs[key].min != undefined && specs[key].max != undefined && specs[key].default != undefined) {
+                    slider = true;
+                }
+
+                if (slider) {
+                    // if( specs[key].min && spec[key].max){
+                    control.min = specs[key].min;
+                    control.max = specs[key].max;
+                    control.default = specs[key].default;
+                    control.step = specs[key].step || ((control.max - control.max) / 1000);
+                    this.placeholder = new Form.Slider(control);
+                } else {
+                    this.placeholder = new Form.Input(control);
+                    this.placeholder.ui.attr('type', 'text');
+                    this.placeholder.validateOnlyNumber(specs[key].floatType);
+                }
+            } else if (specs[key].type == 'array_range') {
+                this.placeholder = new Form.Input(control);
+                this.placeholder.ui.attr('type', 'text');
+                this.placeholder.validateInputRange();
+            } else if (specs[key].type == 'color') {
+                this.placeholder = new Form.Color(control);
+                if (specs[key].spectrum) {
+                    this.placeholder.enableSpectrum();
+                }
+
+            } else if (specs[key].type == 'boolean') {
+                this.placeholder = new Form.Checkbox(control);
+
+            } else if (specs[key].type == 'properties') {
+                this.placeholder = new Form.Input(control);
+                this.placeholder.ui.attr('type', 'text');
+
+            } else if (specs[key].type == 'colorscheme') {
+                this.placeholder = new Form.ListInput(control, Object.keys($3Dmol.builtinColorSchemes));
+                this.placeholder.ui.attr('type', 'text');
+
+            } else if (specs[key].type == undefined) {
+                if (specs[key].validItems) {
+                    this.placeholder = new Form.ListInput(control, specs[key].validItems);
+                }
+
+            } else if (specs[key].type == 'form') {
+                this.placeholder = new Form(specs[key].validItems, control);
+                this.placeholder.ui.append($('<div></div>').css($3Dmol.defaultCSS.LinkBreak));
+            } else {
+                this.placeholder = new Form.EmptyElement(control);
+                // return new Form.EmptyElement(control);
+            };
+
+            this.getValue = function () {
+
+                if (this.placeholder.getValue)
+                    return this.placeholder.getValue();
+                else
+                    return null;
+            }
+
+
+            // Adding active control for the property
+            var placeholder = this.placeholder;
+
+            if (type != 'boolean') {
+                placeholder.ui.hide();
+                boundingBox.append(this.active.ui);
+                this.active.update = function (c) {
+                    (c.value) ? placeholder.ui.show(): placeholder.ui.hide();
+                    control.active = c.value;
+                }
+            } else {
+                this.placeholder.update = function (c) {
+                    control.active = c.value;
+                }
+            }
+
+            boundingBox.append(this.placeholder.ui);
+
+            if (this.placeholder.onUpdate)
+                this.placeholder.onUpdate(updateValues);
+        }
+
+
+    }
+
+
+
+    return Form;
+})();
+$3Dmol.labelStyles = {
+  purple : {
+    backgroundColor: 0x800080, 
+    backgroundOpacity: 0.8
+  },
+
+  milk : {
+    font : 'Arial',
+    fontSize: 12,
+    fontColor: $3Dmol.htmlColors['black'],
+    borderThickness: 1,
+    borderColor: $3Dmol.htmlColors['azure'],
+    backgroundColor: $3Dmol.htmlColors['aliceblue'],
+    backgroundOpacity: 0.9
+  },
+
+  blue : {
+    font : 'Arial',
+    fontSize: 12,
+    fontColor: $3Dmol.htmlColors['aliceblue'],
+    borderThickness: 1,
+    borderColor: $3Dmol.htmlColors['darkviolet'],
+    backgroundColor: $3Dmol.htmlColors['darkblue'],
+    backgroundOpacity: 0.9
+  },
+
+  chocolate : {
+    font : 'Arial',
+    fontSize: 12,
+    fontColor: $3Dmol.htmlColors['aliceblue'],
+    borderThickness: 1,
+    borderColor: $3Dmol.htmlColors['brown'],
+    backgroundColor: $3Dmol.htmlColors['chocolate'],
+    backgroundOpacity: 0.9
+  },
+
+  lime : {
+    font : 'Arial',
+    fontSize: 12,
+    fontColor: $3Dmol.htmlColors['black'],
+    borderThickness: 1,
+    borderColor: $3Dmol.htmlColors['lightgreen'],
+    backgroundColor: $3Dmol.htmlColors['lime'],
+    backgroundOpacity: 0.9
+  },
+
+  rose : {
+    font : 'Arial',
+    fontSize: 12,
+    fontColor: $3Dmol.htmlColors['black'],
+    borderThickness: 1,
+    borderColor: $3Dmol.htmlColors['mintcream'],
+    backgroundColor: $3Dmol.htmlColors['mistyrose'],
+    backgroundOpacity: 0.9
+  },
+
+  yellow : {
+
+    font : 'Arial',
+    fontSize: 12,
+    fontColor: $3Dmol.htmlColors['black'],
+    borderThickness: 1,
+    borderColor: $3Dmol.htmlColors['orange'],
+    backgroundColor: $3Dmol.htmlColors['yellow'],
+    backgroundOpacity: 0.9
+  },
+
+};
+
+$3Dmol.longPressDuration = 1500;
+
+$3Dmol.defaultCSS = {
+  ListInput : {
+    select : {
+      'width' : 'auto',
+      'border' : 'none',
+      'margin' : '0px',
+      'font-family' : 'Arial',
+      'padding' : '0px',
+      'height' : '20px',
+      'border-radius' : '4px',
+      'box-sizing' : 'border-box'
+    }
+  },
+  Input : {
+    input : {
+      'margin-bottom' : '0px',
+      'padding' : '0px',
+      'border-radius' : '4px',
+      'font-family' : 'Arial',
+      'width' : '96%'
+    },
+
+    boundingBox : {
+      'margin-left' : '4px',
+      'margin-right' : '',
+    }
+  },
+  Checkbox : {},
+  Slider : {},
+  Color : {},
+  TextDefault : {
+    'font-family' : 'Arial',
+    'margin-left' : '4px'
+  },
+
+  LinkBreak : {
+    'height' : '3px',
+    'border-bottom' : '1px solid #687193'
+  }
+
+}
