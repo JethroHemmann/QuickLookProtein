@@ -19,12 +19,14 @@
 		4B20116126D2692200B77CEF /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B20116026D2692200B77CEF /* Settings.swift */; };
 		4B20116226D2692200B77CEF /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B20116026D2692200B77CEF /* Settings.swift */; };
 		4B20116F26D2D43B00B77CEF /* 3Dmol_viewer.html in Resources */ = {isa = PBXBuildFile; fileRef = 4B0FDFA826C9A45B00C94DDE /* 3Dmol_viewer.html */; };
-		4B450AC026D2D506007F0A39 /* 3Dmol.js in Resources */ = {isa = PBXBuildFile; fileRef = 4B450ABF26D2D506007F0A39 /* 3Dmol.js */; };
-		4B450AC126D2D506007F0A39 /* 3Dmol.js in Resources */ = {isa = PBXBuildFile; fileRef = 4B450ABF26D2D506007F0A39 /* 3Dmol.js */; };
 		4B450AC326D2D6D1007F0A39 /* SharedFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B450AC226D2D6D1007F0A39 /* SharedFunctions.swift */; };
 		4B450AC426D2D6D1007F0A39 /* SharedFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B450AC226D2D6D1007F0A39 /* SharedFunctions.swift */; };
-		4B6BF9BF26E514B900FD7A6A /* 6S6Y_1heterotetramer.pdb in Resources */ = {isa = PBXBuildFile; fileRef = 4B6BF9BE26E514B900FD7A6A /* 6S6Y_1heterotetramer.pdb */; };
 		4B99E5C526E4FD7200B44AD9 /* VersionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B99E5C426E4FD7200B44AD9 /* VersionCheck.swift */; };
+		4BE18E02281F38DA00034BE4 /* PQQ.sdf in Resources */ = {isa = PBXBuildFile; fileRef = 4BE18E01281F38D900034BE4 /* PQQ.sdf */; };
+		4BE18E04281F3B4900034BE4 /* 1565673.cif in Resources */ = {isa = PBXBuildFile; fileRef = 4BE18E03281F3B4900034BE4 /* 1565673.cif */; };
+		4BE18E06281F3D0200034BE4 /* 6oc6.pdb in Resources */ = {isa = PBXBuildFile; fileRef = 4BE18E05281F3D0200034BE4 /* 6oc6.pdb */; };
+		4BED22A32821CD6D003F66A0 /* 3Dmol.js in Resources */ = {isa = PBXBuildFile; fileRef = 4BED22A22821CD6D003F66A0 /* 3Dmol.js */; };
+		4BED22A42821CD6D003F66A0 /* 3Dmol.js in Resources */ = {isa = PBXBuildFile; fileRef = 4BED22A22821CD6D003F66A0 /* 3Dmol.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,10 +69,12 @@
 		4B0FDF9D26C9A38000C94DDE /* QLExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QLExtension.entitlements; sourceTree = "<group>"; };
 		4B0FDFA826C9A45B00C94DDE /* 3Dmol_viewer.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = 3Dmol_viewer.html; sourceTree = "<group>"; };
 		4B20116026D2692200B77CEF /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
-		4B450ABF26D2D506007F0A39 /* 3Dmol.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = 3Dmol.js; sourceTree = "<group>"; };
 		4B450AC226D2D6D1007F0A39 /* SharedFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedFunctions.swift; sourceTree = "<group>"; };
-		4B6BF9BE26E514B900FD7A6A /* 6S6Y_1heterotetramer.pdb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 6S6Y_1heterotetramer.pdb; sourceTree = "<group>"; };
 		4B99E5C426E4FD7200B44AD9 /* VersionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionCheck.swift; sourceTree = "<group>"; };
+		4BE18E01281F38D900034BE4 /* PQQ.sdf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PQQ.sdf; sourceTree = "<group>"; };
+		4BE18E03281F3B4900034BE4 /* 1565673.cif */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 1565673.cif; sourceTree = "<group>"; };
+		4BE18E05281F3D0200034BE4 /* 6oc6.pdb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 6oc6.pdb; sourceTree = "<group>"; };
+		4BED22A22821CD6D003F66A0 /* 3Dmol.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = 3Dmol.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,7 +99,9 @@
 		4B0888B626D64B54009492C5 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
-				4B6BF9BE26E514B900FD7A6A /* 6S6Y_1heterotetramer.pdb */,
+				4BE18E05281F3D0200034BE4 /* 6oc6.pdb */,
+				4BE18E01281F38D900034BE4 /* PQQ.sdf */,
+				4BE18E03281F3B4900034BE4 /* 1565673.cif */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -165,7 +171,7 @@
 		4B0FDFA726C9A45400C94DDE /* Assets */ = {
 			isa = PBXGroup;
 			children = (
-				4B450ABF26D2D506007F0A39 /* 3Dmol.js */,
+				4BED22A22821CD6D003F66A0 /* 3Dmol.js */,
 				4B0FDFA826C9A45B00C94DDE /* 3Dmol_viewer.html */,
 			);
 			path = Assets;
@@ -227,7 +233,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1250;
-				LastUpgradeCheck = 1250;
+				LastUpgradeCheck = 1320;
 				TargetAttributes = {
 					4B0FDF7A26C9A31F00C94DDE = {
 						CreatedOnToolsVersion = 12.5.1;
@@ -261,10 +267,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4BE18E02281F38DA00034BE4 /* PQQ.sdf in Resources */,
 				4B0FDF8626C9A32100C94DDE /* Preview Assets.xcassets in Resources */,
+				4BED22A32821CD6D003F66A0 /* 3Dmol.js in Resources */,
+				4BE18E06281F3D0200034BE4 /* 6oc6.pdb in Resources */,
+				4BE18E04281F3B4900034BE4 /* 1565673.cif in Resources */,
 				4B20116F26D2D43B00B77CEF /* 3Dmol_viewer.html in Resources */,
-				4B6BF9BF26E514B900FD7A6A /* 6S6Y_1heterotetramer.pdb in Resources */,
-				4B450AC026D2D506007F0A39 /* 3Dmol.js in Resources */,
 				4B0FDF8326C9A32100C94DDE /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -274,7 +282,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B0FDFA926C9A45B00C94DDE /* 3Dmol_viewer.html in Resources */,
-				4B450AC126D2D506007F0A39 /* 3Dmol.js in Resources */,
+				4BED22A42821CD6D003F66A0 /* 3Dmol.js in Resources */,
 				4B0FDF9B26C9A38000C94DDE /* PreviewViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -448,6 +456,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = QuickLookProtein/QuickLookProtein.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"QuickLookProtein/Preview Content\"";
@@ -474,6 +483,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = QuickLookProtein/QuickLookProtein.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"QuickLookProtein/Preview Content\"";
