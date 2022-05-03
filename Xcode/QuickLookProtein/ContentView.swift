@@ -40,9 +40,9 @@ struct ContentView: View {
         
         GeometryReader { geometry in
             VStack {
-                HStack {
+                HStack(alignment: .firstTextBaseline) {
                     VStack { // settings VStack
-                        Text("Settings").font(.title).padding()
+                        Text("Settings").font(.title).padding(.bottom)
                         Text("Atom display styles (for each file type)").font(.headline)
                         
                         Form {
@@ -82,7 +82,7 @@ struct ContentView: View {
                     } // end settings VStack
                     
                     VStack {
-                        Text("About QuickLookProtein").font(.title).padding()
+                        Text("About").font(.title).padding(.bottom)
                         Text("Developed  2021-2022 by Jethro Hemmann.")
                         Link("https://github.com/JethroHemmann/QuickLookProtein", destination: URL(string: "https://github.com/JethroHemmann/QuickLookProtein")!)
                         
@@ -108,7 +108,7 @@ struct ContentView: View {
                             }
                         }
                         
-                        Text("Credits 3Dmol.js").font(.title2).padding()
+                        Text("Credits 3Dmol.js").font(.title2).padding(.top)
                         Text("The rendering of the 3D model is performed using the 3Dmol.js library developed by Nicholas Rego and David Koes.")
                             .fixedSize(horizontal: false, vertical: true)
                         Link("https://3dmol.csb.pitt.edu", destination: URL(string: "https://3dmol.csb.pitt.edu")!)
@@ -119,7 +119,7 @@ struct ContentView: View {
                 Divider()
                 
                 HStack {
-                    // add 3dmol preview
+                    // add 3dmol previews
                     VStack {
                         WebView(html: htmlPDB, baseUrl: baseUrl)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -127,7 +127,7 @@ struct ContentView: View {
                         Text("PDB")
                         Group {
                             Text("XoxF from ") + Text("M. extorquens").italic() + Text(" (PDB ID: 6OC6)")
-                        }.font(.caption)
+                        }.font(.caption).padding(.bottom)
                     }
                     
                     VStack {
@@ -135,7 +135,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .ignoresSafeArea()
                         Text("CIF")
-                        Text("Bioinspired nonheme iron complex (COG ID: 1565673)").font(.caption)
+                        Text("Bioinspired nonheme iron complex (COG ID: 1565673)").font(.caption).padding(.bottom)
                     }
                     
                     VStack {
@@ -143,7 +143,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .ignoresSafeArea()
                         Text("SDF")
-                        Text("Pyrroloquinoline quinone (PubChem CID: 1024)").font(.caption)
+                        Text("Pyrroloquinoline quinone (PubChem CID: 1024)").font(.caption).padding(.bottom)
                     }
                 }
             }
