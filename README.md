@@ -46,11 +46,11 @@ mdls -name kMDItemContentType filename.ext
 
 ### Settings
 
-The main app allows the customization of the rendering of the 3D structure. Currently, the following settings can be changed (default values in bold):
+The main app allows the customization of the rendering of the 3D structure. Currently, the following settings can be changed:
 
-- Atom display style (**cartoon**, line, stick, sphere)
-- Rotation speed (no rotation, slow, **medium**, fast)
-- Background color (any color, or **transparent**)
+- Atom display style for each file type (cartoon, line, stick, sphere)
+- Rotation speed (no rotation, slow, medium, fast)
+- Background color (any color, or transparent)
 
 Note that the *cartoon* style only works for proteins.
 
@@ -58,7 +58,7 @@ In future releases and depending on user feedback, I might implement additional 
 
 ## Implementation details
 
-The code is written using Swift 5 in Xcode 12.5.
+The code is written using Swift 5 in Xcode 13.
 
 The Quick Look extension displays a Webkit view that uses some simple HTML and the [3Dmol.js](https://3dmol.csb.pitt.edu) library to render the 3D structure.
 
