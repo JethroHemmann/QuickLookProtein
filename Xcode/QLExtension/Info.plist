@@ -34,6 +34,7 @@
 				<string>net.sourceforge.openbabel.mdl</string>
 				<string>dyn.ah62d4rv4ge81a3dc</string>
 				<string>com.cif</string>
+				<string>com.crystalmaker.crystalmaker.cif</string>
 			</array>
 			<key>QLSupportsSearchableItems</key>
 			<false/>
