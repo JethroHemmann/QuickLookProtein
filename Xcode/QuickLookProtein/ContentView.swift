@@ -10,21 +10,7 @@ import WebKit
 
 struct ContentView: View {
     
-    // Get/store settings
-    @AppStorage("atomStyleCIF", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var atomStyleCIF: Settings.AtomStyle = .stick
-    
-    @AppStorage("atomStylePDB", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var atomStylePDB: Settings.AtomStyle = .cartoon
-    
-    @AppStorage("atomStyleSDF", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var atomStyleSDF: Settings.AtomStyle = .stick
-    
-    @AppStorage("rotationSpeed", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var rotationSpeed: Settings.RotationSpeed = .medium
-    
-    @AppStorage("bgColor", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var bgColor: Color = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0)
+    @StateObject private var userSettings = SettingsStorage()
     
     var body: some View {
         let htmlPath = Bundle.main.path(forResource: "3Dmol_viewer", ofType: "html")
@@ -32,9 +18,9 @@ struct ContentView: View {
         let cifPath = Bundle.main.path(forResource: "1565673", ofType: "cif")
         let sdfPath = Bundle.main.path(forResource: "PQQ", ofType: "sdf")
         
-        let htmlPDB = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: pdbPath!, dataFormat: "pdb", atomStyle: atomStylePDB, rotationSpeed: rotationSpeed, bgColor: bgColor)
-        let htmlCIF = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: cifPath!, dataFormat: "cif", atomStyle: atomStyleCIF, rotationSpeed: rotationSpeed, bgColor: bgColor)
-        let htmlSDF = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: sdfPath!, dataFormat: "sdf", atomStyle: atomStyleSDF, rotationSpeed: rotationSpeed, bgColor: bgColor)
+        let htmlPDB = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: pdbPath!, dataFormat: "pdb", atomStyle: userSettings.atomStylePDB, rotationSpeed: userSettings.rotationSpeed, bgColor: userSettings.bgColor)
+        let htmlCIF = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: cifPath!, dataFormat: "cif", atomStyle: userSettings.atomStyleCIF, rotationSpeed: userSettings.rotationSpeed, bgColor: userSettings.bgColor)
+        let htmlSDF = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: sdfPath!, dataFormat: "sdf", atomStyle: userSettings.atomStyleSDF, rotationSpeed: userSettings.rotationSpeed, bgColor: userSettings.bgColor)
         
         let baseUrl = URL(fileURLWithPath: htmlPath!)
         
@@ -46,17 +32,17 @@ struct ContentView: View {
                         Text("Atom display styles (for each file type)").font(.headline)
                         
                         Form {
-                            Picker("PDB:", selection: $atomStylePDB) {
+                            Picker("PDB:", selection: $userSettings.atomStylePDB) {
                                 ForEach(Settings.AtomStyle.allCases) { style in
                                     Text(style.rawValue)
                                 }
                             }
-                            Picker("CIF:", selection: $atomStyleCIF) {
+                            Picker("CIF:", selection: $userSettings.atomStyleCIF) {
                                 ForEach(Settings.AtomStyle.allCases) { style in
                                     Text(style.rawValue)
                                 }
                             }
-                            Picker("SDF:", selection: $atomStyleSDF) {
+                            Picker("SDF:", selection: $userSettings.atomStyleSDF) {
                                 ForEach(Settings.AtomStyle.allCases) { style in
                                     Text(style.rawValue)
                                 }
@@ -66,14 +52,14 @@ struct ContentView: View {
                         Text("General display settings").font(.headline)
                         
                         Form {
-                            Picker("Rotation speed:", selection: $rotationSpeed) {
+                            Picker("Rotation speed:", selection: $userSettings.rotationSpeed) {
                                 ForEach(Settings.RotationSpeed.allCases) { speed in
                                     Text(String(speed.rawValue))
                                 }
                             }
                             HStack {
-                                ColorPicker("Background color:", selection: $bgColor, supportsOpacity: true)
-                                    .help("#" + convertColorToRGB(color: bgColor).rgbHex + ", alpha: " + convertColorToRGB(color: bgColor).alpha)
+                                ColorPicker("Background color:", selection: $userSettings.bgColor, supportsOpacity: true)
+                                    .help("#" + convertColorToRGB(color: userSettings.bgColor).rgbHex + ", alpha: " + convertColorToRGB(color: userSettings.bgColor).alpha)
                                 Button(action: resetColor) {
                                     Text("Reset color to transparent")
                                 }
@@ -151,7 +137,7 @@ struct ContentView: View {
     }
     
     func resetColor() {
-        bgColor = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0)
+        userSettings.bgColor = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0)
     }
 }
 

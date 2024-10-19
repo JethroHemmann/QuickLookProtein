@@ -23,7 +23,8 @@ I hope this app is useful to you! It is my first Mac OS/Swift app, so I am happy
 
 1. After downloading the release, unpack the ZIP file. 
 2. Move the `QuickLookProtein.app` to the `Applications` folder. 
-3. Open `QuickLookProtein.app`. The Quick Look extension should automatically be installed and activated once the main app has been started for the first time. You can check that the extension is activated in `System Preferences` -> `Extensions` -> `Quick Look`. 
+3. Open `QuickLookProtein.app`. If you get a warning that the app could not be verified, follow the steps described [here](https://support.apple.com/en-us/102445) in the section *If you want to open an app that hasn’t been notarized or is from an unidentified developer*
+5. The Quick Look extension should automatically be installed and activated once the main app has been started for the first time. You can check that the extension is activated in `System Preferences` -> `Extensions` -> `Quick Look`. 
 
 
 ![Screenshot of System Preferences -> Extensions -> Quick Look](Screenshots/System_Preferences_Extensions.png "System Preferences -> Extensions -> Quick Look")

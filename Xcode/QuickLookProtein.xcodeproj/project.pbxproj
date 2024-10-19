@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,7 +14,7 @@
 		4B0FDF9526C9A38000C94DDE /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B0FDF9426C9A38000C94DDE /* Quartz.framework */; };
 		4B0FDF9826C9A38000C94DDE /* PreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B0FDF9726C9A38000C94DDE /* PreviewViewController.swift */; };
 		4B0FDF9B26C9A38000C94DDE /* PreviewViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4B0FDF9926C9A38000C94DDE /* PreviewViewController.xib */; };
-		4B0FDFA026C9A38000C94DDE /* QuickLookProtein Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4B0FDF9226C9A38000C94DDE /* QuickLookProtein Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4B0FDFA026C9A38000C94DDE /* QuickLookProtein Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4B0FDF9226C9A38000C94DDE /* QuickLookProtein Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4B0FDFA926C9A45B00C94DDE /* 3Dmol_viewer.html in Resources */ = {isa = PBXBuildFile; fileRef = 4B0FDFA826C9A45B00C94DDE /* 3Dmol_viewer.html */; };
 		4B20116126D2692200B77CEF /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B20116026D2692200B77CEF /* Settings.swift */; };
 		4B20116226D2692200B77CEF /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B20116026D2692200B77CEF /* Settings.swift */; };
@@ -40,15 +40,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		4B0FDFA426C9A38000C94DDE /* Embed App Extensions */ = {
+		4B0FDFA426C9A38000C94DDE /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4B0FDFA026C9A38000C94DDE /* QuickLookProtein Extension.appex in Embed App Extensions */,
+				4B0FDFA026C9A38000C94DDE /* QuickLookProtein Extension.appex in Embed Foundation Extensions */,
 			);
-			name = "Embed App Extensions";
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -197,7 +197,7 @@
 				4B0FDF7726C9A31F00C94DDE /* Sources */,
 				4B0FDF7826C9A31F00C94DDE /* Frameworks */,
 				4B0FDF7926C9A31F00C94DDE /* Resources */,
-				4B0FDFA426C9A38000C94DDE /* Embed App Extensions */,
+				4B0FDFA426C9A38000C94DDE /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -232,8 +232,9 @@
 		4B0FDF7326C9A31F00C94DDE /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1250;
-				LastUpgradeCheck = 1320;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					4B0FDF7A26C9A31F00C94DDE = {
 						CreatedOnToolsVersion = 12.5.1;
@@ -368,9 +369,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -429,9 +432,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -452,13 +457,13 @@
 		4B0FDF8C26C9A32100C94DDE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = QuickLookProtein/QuickLookProtein.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"QuickLookProtein/Preview Content\"";
 				DEVELOPMENT_TEAM = W3SKSV7VPT;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -469,7 +474,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jethrohemmann.QuickLookProtein;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -479,13 +484,13 @@
 		4B0FDF8D26C9A32100C94DDE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = QuickLookProtein/QuickLookProtein.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"QuickLookProtein/Preview Content\"";
 				DEVELOPMENT_TEAM = W3SKSV7VPT;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -496,7 +501,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jethrohemmann.QuickLookProtein;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -509,6 +514,7 @@
 				CODE_SIGN_ENTITLEMENTS = QLExtension/QLExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = W3SKSV7VPT;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = QLExtension/Info.plist;
@@ -517,7 +523,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jethrohemmann.QuickLookProtein.QLExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -531,6 +537,7 @@
 				CODE_SIGN_ENTITLEMENTS = QLExtension/QLExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = W3SKSV7VPT;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = QLExtension/Info.plist;
@@ -539,7 +546,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jethrohemmann.QuickLookProtein.QLExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
