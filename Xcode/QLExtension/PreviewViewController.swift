@@ -14,22 +14,8 @@ class PreviewViewController: NSViewController, QLPreviewingController, WKNavigat
     
     var webView: WKWebView?
     
-    // Get settings
-    @AppStorage("atomStyleCIF", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var atomStyleCIF: Settings.AtomStyle = .stick
+    @StateObject private var userSettings = SettingsStorage()
     
-    @AppStorage("atomStylePDB", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var atomStylePDB: Settings.AtomStyle = .cartoon
-    
-    @AppStorage("atomStyleSDF", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var atomStyleSDF: Settings.AtomStyle = .stick
-    
-    @AppStorage("rotationSpeed", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var rotationSpeed: Settings.RotationSpeed = .medium
-    
-    @AppStorage("bgColor", store: UserDefaults(suiteName: "W3SKSV7VPT.group.com.jethrohemmann.QuickLookProtein"))
-    private var bgColor: Color = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0)
-
     override var nibName: NSNib.Name? {
         return NSNib.Name("PreviewViewController")
     }
@@ -44,7 +30,7 @@ class PreviewViewController: NSViewController, QLPreviewingController, WKNavigat
         webView = WKWebView(frame: view.bounds, configuration: webConfiguration)
         webView.autoresizingMask = [.height, .width]
         webView.setValue(false, forKeyPath: "drawsBackground")
-
+        
         
         webView.navigationDelegate = self
         webView.uiDelegate = self
@@ -64,7 +50,7 @@ class PreviewViewController: NSViewController, QLPreviewingController, WKNavigat
      handler(nil)
      }
      */
-        
+    
     
     func preparePreviewOfFile(at url: URL, completionHandler handler: @escaping (Error?) -> Void) {
         
@@ -74,25 +60,25 @@ class PreviewViewController: NSViewController, QLPreviewingController, WKNavigat
         
         // Call the completion handler so Quick Look knows that the preview is fully loaded.
         // Quick Look will display a loading spinner while the completion handler is not called.
-                
+        
         let htmlPath = Bundle.main.path(forResource: "3Dmol_viewer", ofType: "html")
         let fileExtension = url.pathExtension.lowercased()
         var atomStyle: Settings.AtomStyle
         
         if fileExtension == "pdb" {
-            atomStyle = atomStylePDB
+            atomStyle = userSettings.atomStylePDB
         }
         else if fileExtension == "cif" {
-            atomStyle = atomStyleCIF
+            atomStyle = userSettings.atomStyleCIF
         }
         else if fileExtension == "sdf" {
-            atomStyle = atomStyleSDF
+            atomStyle = userSettings.atomStyleSDF
         }
         else {
-            atomStyle = atomStylePDB // use PDB style as default
+            atomStyle = userSettings.atomStylePDB // use PDB style as default
         }
         
-        let html = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: url.path, dataFormat: fileExtension, atomStyle: atomStyle, rotationSpeed: rotationSpeed, bgColor: bgColor)
+        let html = prepare3DmolHTML(htmlPath: htmlPath!, pdbPath: url.path, dataFormat: fileExtension, atomStyle: atomStyle, rotationSpeed: userSettings.rotationSpeed, bgColor: userSettings.bgColor)
         
         let baseUrl = URL(fileURLWithPath: htmlPath!)
         self.webView?.loadHTMLString(html, baseURL: baseUrl)
